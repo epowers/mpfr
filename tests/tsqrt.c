@@ -1,6 +1,6 @@
 /* Test file for mpfr_sqrt.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -304,7 +304,7 @@ check_inexact (mp_prec_t p)
   mpfr_init2 (y, p);
   mpfr_init2 (z, 2*p);
   mpfr_random (x);
-  rnd = RND_RAND();
+  rnd = (mp_rnd_t) RND_RAND();
   inexact = mpfr_sqrt (y, x, rnd);
   if (mpfr_mul (z, y, y, rnd)) /* exact since prec(z) = 2*prec(y) */
     {

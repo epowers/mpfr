@@ -1,6 +1,6 @@
 /* mpfr_tan -- tangent of a floating-point number
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -44,6 +44,9 @@ mpfr_tan (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
 	}
     }
 
+  mpfr_save_emin_emax ();
+
+  /* Compute initial precision */
   precy = MPFR_PREC(y);
   m = precy + __gmpfr_ceil_log2 ((double) precy)
     + ABS (MPFR_GET_EXP (x)) + 13;
@@ -53,10 +56,13 @@ mpfr_tan (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
 
   for (;;)
     {
+      /* The only way to get an overflow is to get ~ Pi/2
+         But the result will be ~ 2^Prec(y). */
       mpfr_sin_cos (s, c, x, GMP_RNDN); /* err <= 1/2 ulp on s and c */
       mpfr_div (c, s, c, GMP_RNDN);     /* err <= 2 ulps */
-      if (MPFR_IS_INF(x) || mpfr_can_round (c, m - 1, GMP_RNDN, GMP_RNDZ,
-					    precy + (rnd_mode == GMP_RNDN)))
+      MPFR_ASSERTD (!MPFR_IS_SINGULAR (c));
+      if (MPFR_LIKELY (mpfr_can_round (c, m - 1, GMP_RNDN, GMP_RNDZ,
+                                       precy + (rnd_mode == GMP_RNDN))))
 	break;
       m += BITS_PER_MP_LIMB;
       mpfr_set_prec (s, m);
@@ -68,5 +74,6 @@ mpfr_tan (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
   mpfr_clear (s);
   mpfr_clear (c);
 
-  return inexact;
+  mpfr_restore_emin_emax ();
+  return mpfr_check_range (y, inexact, rnd_mode);
 }

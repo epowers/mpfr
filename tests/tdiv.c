@@ -1,6 +1,6 @@
 /* Test file for mpfr_div.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -211,11 +211,11 @@ check_convergence (void)
       for (j = 0;j < GMP_RND_MAX; j++)
         {
           mpfr_set_ui (y, 1, GMP_RNDN);
-          mpfr_div (y, x, y, j);
+          mpfr_div (y, x, y, (mp_rnd_t) j);
           if (mpfr_cmp_ui (y, 1))
             {
               printf ("mpfr_div failed for x=1.0, y=1.0, prec=%d rnd=%s\n",
-                      i, mpfr_print_rnd_mode(j));
+                      i, mpfr_print_rnd_mode ((mp_rnd_t) j));
               printf ("got "); mpfr_print_binary(y); puts ("");
               exit (1);
             }
@@ -428,7 +428,7 @@ check_inexact (void)
 	      mpfr_set_prec (y, py);
 	      mpfr_set_prec (z, py + pu);
 		{
-                  rnd = RND_RAND ();
+                  rnd = (mp_rnd_t) RND_RAND ();
 		  inexact = mpfr_div (y, x, u, rnd);
 		  if (mpfr_mul (z, y, u, rnd))
 		    {
@@ -544,17 +544,17 @@ check_nan (void)
 
   /* check overflow */
   emax = mpfr_get_emax ();
-  mpfr_set_emax (1);
+  set_emax (1);
   mpfr_set_ui (a, 1, GMP_RNDZ);
   mpfr_set_ui (d, 1, GMP_RNDZ);
   mpfr_div_2exp (d, d, 1, GMP_RNDZ);
   mpfr_div (q, a, d, GMP_RNDU); /* 1 / 0.5 = 2 -> overflow */
   MPFR_ASSERTN (mpfr_inf_p (q) && mpfr_sgn (q) > 0);
-  mpfr_set_emax (emax);
+  set_emax (emax);
 
   /* check underflow */
   emin = mpfr_get_emin ();
-  mpfr_set_emin (-1);
+  set_emin (-1);
   mpfr_set_ui (a, 1, GMP_RNDZ);
   mpfr_div_2exp (a, a, 2, GMP_RNDZ);
   mpfr_set_ui (d, 2, GMP_RNDZ);
@@ -562,7 +562,7 @@ check_nan (void)
   MPFR_ASSERTN (mpfr_cmp_ui (q, 0) == 0 && MPFR_IS_POS (q));
   mpfr_div (q, a, d, GMP_RNDN); /* 0.5*2^(-2) -> underflow */
   MPFR_ASSERTN (mpfr_cmp_ui (q, 0) == 0 && MPFR_IS_POS (q));
-  mpfr_set_emin (emin);
+  set_emin (emin);
 
   mpfr_clear (a);
   mpfr_clear (d);

@@ -1,6 +1,6 @@
 /* Test file for mpfr_acos.
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 Contributed by Mathieu Dutour.
 
 This file is part of the MPFR Library.
@@ -75,8 +75,8 @@ special_overflow (void)
 {
   mpfr_t x, y;
 
-  mpfr_set_emin (-125);
-  mpfr_set_emax (128);
+  set_emin (-125);
+  set_emax (128);
   mpfr_init2 (x, 24);
   mpfr_init2 (y, 48);
   mpfr_set_str_binary (x, "0.101100100000000000110100E0");
@@ -90,15 +90,15 @@ special_overflow (void)
     }
   mpfr_clear (y);
   mpfr_clear (x);
-  mpfr_set_emin (MPFR_EMIN_MIN);
-  mpfr_set_emax (MPFR_EMAX_MAX);
+  set_emin (MPFR_EMIN_MIN);
+  set_emax (MPFR_EMAX_MAX);
 }
 
 int
 main (void)
 {
   mpfr_t x, y;
-  mp_rnd_t r;
+  int r;
 
   tests_start_mpfr ();
 
@@ -145,13 +145,13 @@ main (void)
   for (r = 0; r < GMP_RND_MAX; r++)
     {
       mpfr_set_ui (x, 0, GMP_RNDN); /* exact */
-      mpfr_acos (y, x, r);
-      mpfr_const_pi (x, r);
+      mpfr_acos (y, x, (mp_rnd_t) r);
+      mpfr_const_pi (x, (mp_rnd_t) r);
       mpfr_div_2exp (x, x, 1, GMP_RNDN); /* exact */
       if (mpfr_cmp (x, y))
         {
           printf ("Error: acos(0) != Pi/2 for rnd=%s\n",
-                  mpfr_print_rnd_mode (r));
+                  mpfr_print_rnd_mode ((mp_rnd_t) r));
           exit (1);
         }
     }
@@ -160,12 +160,12 @@ main (void)
   for (r = 0; r < GMP_RND_MAX; r++)
     {
       mpfr_set_si (x, -1, GMP_RNDN); /* exact */
-      mpfr_acos (y, x, r);
-      mpfr_const_pi (x, r);
+      mpfr_acos (y, x, (mp_rnd_t) r);
+      mpfr_const_pi (x, (mp_rnd_t) r);
       if (mpfr_cmp (x, y))
         {
           printf ("Error: acos(1) != Pi for rnd=%s\n",
-                  mpfr_print_rnd_mode (r));
+                  mpfr_print_rnd_mode ((mp_rnd_t) r));
           exit (1);
         }
     }

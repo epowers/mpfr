@@ -1,6 +1,6 @@
 /* Test file for mpfr_log.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -159,14 +159,14 @@ special (void)
   mpfr_init2 (y, 53);
 
   /* Check special case: An overflow in const_pi could occurs! */
-  mpfr_set_emin (-125);
-  mpfr_set_emax (128);
+  set_emin (-125);
+  set_emax (128);
   mpfr_set_prec (y, 24*2);
   mpfr_set_prec (x, 24);
   mpfr_set_str_binary (x, "0.111110101010101011110101E0");
   mpfr_log (y, x, GMP_RNDN);
-  mpfr_set_emin (MPFR_EMIN_MIN);
-  mpfr_set_emax (MPFR_EMAX_MAX);
+  set_emin (MPFR_EMIN_MIN);
+  set_emax (MPFR_EMAX_MAX);
 
   mpfr_set_prec (y, 53);
   mpfr_set_prec (x, 53);
@@ -204,7 +204,7 @@ main (int argc, char *argv[])
 
   if (argc==4)
     {   /* tlog x prec rnd */
-      check3 (atof(argv[1]), atoi(argv[2]), atoi(argv[3]));
+      check3 (atof(argv[1]), atoi(argv[2]), (mp_rnd_t) atoi(argv[3]));
       goto done;
     }
 

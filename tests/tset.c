@@ -1,6 +1,6 @@
 /* Test file for mpfr_set.
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 
 This file is part of the MPFR Library.
 
@@ -46,7 +46,7 @@ main (void)
 {
   mp_prec_t p, q;
   mpfr_t x, y, z, u;
-  mp_rnd_t rnd;
+  int rnd;
   int inexact, cmp;
   mp_exp_t emax;
 
@@ -80,13 +80,13 @@ main (void)
   MPFR_ASSERTN(mpfr_cmp_ui (y, 0) == 0 && MPFR_IS_NEG(y));
 
   emax = mpfr_get_emax ();
-  mpfr_set_emax (0);
+  set_emax (0);
   mpfr_set_prec (x, 3);
   mpfr_set_str_binary (x, "0.111");
   mpfr_set_prec (y, 2);
   mpfr_set (y, x, GMP_RNDU);
   MPFR_ASSERTN(mpfr_inf_p (y) && mpfr_sgn (y) > 0);
-  mpfr_set_emax (emax);
+  set_emax (emax);
 
   mpfr_set_prec (y, 11);
   mpfr_set_str_binary (y, "0.11111111100E-8");
@@ -110,7 +110,7 @@ main (void)
           mpfr_set_prec (y, q);
           for (rnd = 0; rnd < GMP_RND_MAX; rnd++)
             {
-              inexact = mpfr_set (y, x, rnd);
+              inexact = mpfr_set (y, x, (mp_rnd_t) rnd);
               cmp = mpfr_cmp (y, x);
               if (((inexact == 0) && (cmp != 0)) ||
                   ((inexact > 0) && (cmp <= 0)) ||

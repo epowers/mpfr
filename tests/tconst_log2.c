@@ -1,6 +1,6 @@
 /* Test file for mpfr_const_log2.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -43,7 +43,7 @@ check (mp_prec_t p0, mp_prec_t p1)
       mpfr_set_prec (x, p0);
       mpfr_set_prec (y, p0);
         {
-          rnd = RND_RAND ();
+          rnd = (mp_rnd_t) RND_RAND ();
           mpfr_const_log2 (x, rnd);
           mpfr_set (y, z, rnd);
           if (mpfr_cmp (x, y) && mpfr_can_round (z, mpfr_get_prec(z), GMP_RNDN,
@@ -135,7 +135,7 @@ main (int argc, char *argv[])
   tests_start_mpfr ();
 
   p = (argc>1) ? atoi(argv[1]) : 53;
-  rnd = (argc>2) ? atoi(argv[2]) : GMP_RNDZ;
+  rnd = (argc>2) ? (mp_rnd_t) atoi(argv[2]) : GMP_RNDZ;
 
   mpfr_init (x);
 

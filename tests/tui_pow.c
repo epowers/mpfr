@@ -1,6 +1,6 @@
 /* Test file for mpfr_ui_pow and mpfr_ui_pow_ui.
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 Adapted from tarctan.c.
 
 This file is part of the MPFR Library.
@@ -221,7 +221,7 @@ main (int argc, char *argv[])
           int nt;
           nt = randlimb () & INT_MAX;
 	  mpfr_random (x);
-	  rnd = RND_RAND ();
+	  rnd = (mp_rnd_t) RND_RAND ();
           check1 (x, prec, nt, rnd);
 	}
     }
