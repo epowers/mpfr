@@ -293,13 +293,13 @@ extern mpfr_t __mpfr_const_pi;
 extern mp_prec_t __gmpfr_const_pi_prec;
 
 #ifdef HAVE_STRCASECMP
-int strcasecmp _PROTO ((const char *, const char *));
+int strcasecmp _PROTO ((const char *, const char *)) __GMP_NOTHROW;
 #else
 int mpfr_strcasecmp _PROTO ((const char *, const char *));
 #endif
 
 #ifdef HAVE_STRNCASECMP
-int strncasecmp _PROTO ((const char *, const char *, size_t));
+int strncasecmp _PROTO ((const char *, const char *, size_t)) __GMP_NOTHROW;
 #else
 int mpfr_strncasecmp _PROTO ((const char *, const char *, size_t));
 #endif

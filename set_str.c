@@ -129,7 +129,7 @@ mpfr_set_str (mpfr_t x, const char *str, int base, mp_rnd_t rnd)
      FIXME: we could use str directly here if mpn_set_str would deal
      with real characters. */
   size_str1 = strlen (str);
-  str1 = (*__gmp_allocate_func) (size_str1 * sizeof (char));
+  str1 = (char *) (*__gmp_allocate_func) (size_str1 * sizeof (char));
   /* the str1 pointer should not be modified */
 
   /* checks if the input string is valid, and converts characters into
