@@ -1,6 +1,6 @@
 /* auxiliary functions for MPFR tests.
 
-Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -68,3 +68,5 @@ double Ulp _PROTO ((double));
 int Isnan _PROTO ((double));
 void d_trace _PROTO ((const char *, double));
 void ld_trace _PROTO ((const char *, long double));
+
+#define mpfr_set_str1(x,s) mpfr_set_str(x,s,10,GMP_RNDN)
