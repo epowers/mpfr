@@ -1,3 +1,10 @@
+2005-02-21  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* ui_sub.c: Ported mpfr_ui_sub patch to 2.1 branch:
+	Fixed a bug for u == 0 and x == +0 introduced in ui_sub.c 1.23,
+	when 0 was taken into account as a special case: the sign of the
+	result 0 was incorrect. -> Consider the case u == 0 first.
+
 2005-02-16  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* set.c: Added a comment. (2.1 branch)
