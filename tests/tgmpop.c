@@ -21,6 +21,10 @@ MA 02111-1307, USA. */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "gmp.h"
+#include "gmp-impl.h"
+#include "mpfr.h"
+#include "mpfr-impl.h"
 #include "mpfr-test.h"
 
 
@@ -98,7 +102,7 @@ test_genericz (mp_prec_t p0, mp_prec_t p1, unsigned int N,
         {
           mpfr_urandomb (arg1, RANDS);
 	  mpz_urandomb (arg2, RANDS, 1024);
-          rnd = RND_RAND ();
+          rnd = randlimb () % 4;
           mpfr_set_prec (dst_big, 2*prec);
           compare = func(dst_big, arg1, arg2, rnd);
           if (mpfr_can_round (dst_big, 2*prec, rnd, rnd, prec))
@@ -175,7 +179,7 @@ test_genericq (mp_prec_t p0, mp_prec_t p1, unsigned int N,
         {
           mpfr_urandomb (arg1, RANDS);
           mpq_set_ui (arg2, randlimb (), randlimb() );
-          rnd = RND_RAND ();
+          rnd = randlimb () % 4;
           mpfr_set_prec (dst_big, prec+10);
           compare = func(dst_big, arg1, arg2, rnd);
           if (mpfr_can_round (dst_big, prec+10, rnd, rnd, prec))
