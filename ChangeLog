@@ -1,3 +1,8 @@
+2004-02-20  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr-test.h, tests/tgmpop.c, gmp_op.c:
+	Ported bug fix / test of gmp_op.c (0.5+3/2 freezes) to the 2.0 branch.
+
 2004-02-18  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* config.guess, config.sub:
