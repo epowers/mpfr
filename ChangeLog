@@ -1,3 +1,33 @@
+2004-02-06  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* factorial.c, gamma.c, tests/tfactorial.c, tests/tgamma.c:
+	Ported bug fixes / tests of mpfr_fac_ui and mpfr_gamma to
+	the 2.0 branch.
+
+	* hypot.c, tests/thypot.c:
+	Ported bug fixes / tests of mpfr_hypot to the 2.0 branch.
+
+	* agm.c, tests/tagm.c:
+	Ported bug fixes / tests of mpfr_agm to the 2.0 branch.
+
+	* get_str.c, tests/tget_str.c:
+	Ported bug fixes / tests of mpfr_get_str to the 2.0 branch.
+
+	* frac.c, tests/tfrac.c, tests/tzeta.c, zeta.c:
+	Ported bug fixes / tests of mpfr_frac and mpfr_zeta to the 2.0 branch.
+
+	* from_Torbjorn, gammaPiAGMformula.c, mpfi.c, mpfi.h:
+	(2.0 branch) Removed unused files.
+
+	* NEWS:
+	Added changes from version 2.0.1 to version 2.0.2 and updated MPFR URL
+	(2.0 branch).
+
+	* README.dev: Added (2.0 branch): "3) Update the NEWS file.".
+
+	* VERSION, mpfr.texi:
+	Updated the branch for the future version 2.0.3 (bug-fix release).
+
 2003-11-19  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* tests/tui_pow.c, pow.c:

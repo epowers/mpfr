@@ -20,6 +20,10 @@ MA 02111-1307, USA.
 
 ##############################################################################
 
+Changes from version 2.0.2 to version 2.0.3:
+- bug fixes (mpfr_agm, mpfr_fac_ui, mpfr_frac, mpfr_gamma, mpfr_get_str,
+  mpfr_hypot, mpfr_zeta)
+
 Changes from version 2.0.1 to version 2.0.2:
 - many bug fixes and other improvements.
 - new functions mpfr_prec_round (replaces mpfr_round_prec), mpfr_get_exp,
