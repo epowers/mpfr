@@ -27,6 +27,7 @@ MA 02111-1307, USA. */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <float.h>
 
 #if TIME_WITH_SYS_TIME
@@ -61,7 +62,7 @@ tests_end_mpfr (void)
   tests_memory_end ();
 }
 
-void
+static void
 tests_rand_start (void)
 {
   gmp_randstate_ptr  rands;
@@ -105,7 +106,7 @@ tests_rand_start (void)
     }
 }
 
-void
+static void
 tests_rand_end (void)
 {
   RANDS_CLEAR ();
@@ -116,7 +117,7 @@ void
 mpfr_test_init ()
 {
   double c, d, eps;
-#ifdef __mips
+#if HAVE_FPC_CSR
   /* to get denormalized numbers on IRIX64 */
   union fpc_csr exp;
 
@@ -286,4 +287,43 @@ ld_trace (const char *name, long double ld)
       printf ("%02X", (int) u.b[i]);
     }
   printf ("] %.20Lg\n", ld);
+}
+
+/* Open a file in the src directory - can't use fopen directly */
+FILE *src_fopen (const char *filename, const char *mode)
+{
+  const char *srcdir = getenv ("srcdir");
+  char *buffer;
+  FILE *f;
+
+  if (srcdir == NULL)
+    return fopen (filename, mode);
+  buffer = malloc (strlen (filename) + strlen (srcdir) + 1);
+  if (buffer == NULL)
+    {
+      printf ("src_fopen: failed to alloc memory)\n");
+      exit (1);
+    }
+  sprintf (buffer, "%s/%s", srcdir, filename);
+  f = fopen (buffer, mode);
+  free (buffer);
+  return f;
+}
+
+void set_emin (mp_exp_t exponent)
+{
+  if (mpfr_set_emin (exponent))
+    {
+      printf ("set_emin: setting emin to %ld failed\n", (long int) exponent);
+      exit (1);
+    }
+}
+
+void set_emax (mp_exp_t exponent)
+{
+  if (mpfr_set_emax (exponent))
+    {
+      printf ("set_emax: setting emax to %ld failed\n", (long int) exponent);
+      exit (1);
+    }
 }
