@@ -1,4 +1,17 @@
+2004-02-18  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.texi: Updated the 2.0 branch.
+
+	* minmax.c: Updated copyright line (2.0 branch).
+
+	* mpfr.texi: Updated the 2.0 branch (up to rev. 1.200 / 2004-01-07).
+
+	* set_f.c, tests/tset_f.c:
+	Ported bug fix / test of mpfr_set_f to the 2.0 branch.
+
 2004-02-17  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* NEWS, ChangeLog: Update (2.0 branch).
 
 	* mpf2mpfr.h: Added 2004 in Copyright line (2.0 branch).
 
