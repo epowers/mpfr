@@ -1,4 +1,43 @@
+2005-01-21  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* strtofr.c, sum.c:
+	Fixed bug with TMP_MARK (doesn't occur with alloca) (2.1 branch).
+	[strtofr.c:1.10, sum.c:1.5]
+
+	* tests/tests.c, tests/trint.c:
+	Forgot to include some headers conditionally in tests (2.1 branch).
+	[tests/tests.c:1.36, tests/trint.c:1.21]
+
+	* sum.c: Fixed bug in cases n <= 1 (2.1 branch). [sum.c:1.8-1.9]
+
+	* sub1.c:
+	Fixed a huge performance problem in corner cases (2.1 branch).
+	[sub1.c:1.33-1.35]
+
+	* mpfr.h: Fixed a clash with ncurses preventing from compiling programs
+	including term.h then mpfr.h (2.1 branch).
+
+	* mpfr-longlong.h:
+	Updated longlong.h from GMP 4.1.4 (problem with opteron) (2.1 branch).
+	[mpfr-longlong.h:1.2]
+
+	* get_str.c, mpn_exp.c:
+	Bugs fixed in get_str, in particular for huge exponents (2.1 branch).
+	[get_str.c:1.83, mpn_exp.c:1.6]
+
+	* configure.in: Better way to detect the GMP library (2.1 branch).
+
+2004-11-18  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.texi:
+	Fix (2.1 branch): GMP -> MPFR Copying Conditions (noted by Patrick).
+
+	* mpfr.texi:
+	In HTML, suppress the non-existing link to GMP (2.1 branch).
+
 2004-11-03  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* ChangeLog: Update (2.1 branch).
 
 	* mpfr.texi: Updated month: October -> November (2.1 branch).
 
