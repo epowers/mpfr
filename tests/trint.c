@@ -57,33 +57,37 @@ main (void)
                   (unsigned int) s);
           exit (1);
         }
-      for (p=2; p<100; p++)
+      for (p = 2; p < 100; p++)
         {
+          int trint;
           mpfr_set_prec (y, p);
-          for (r=0; r<4; r++)
-            {
-              if (r == GMP_RNDN)
-                inexact = mpfr_round (y, x);
-              else if (r == GMP_RNDZ)
-                inexact = mpfr_trunc (y, x);
-              else if (r == GMP_RNDU)
-                inexact = mpfr_ceil (y, x);
-              else /* r = GMP_RNDD */
-                inexact = mpfr_floor (y, x);
-              if (mpfr_sub (t, y, x, GMP_RNDN))
-                {
-                  printf ("Error: subtraction should be exact\n");
-                  exit (1);
-                }
-              sign_t = mpfr_cmp_ui (t, 0);
-              if (((inexact == 0) && (sign_t != 0)) ||
-                  ((inexact < 0) && (sign_t >= 0)) ||
-                  ((inexact > 0) && (sign_t <= 0)))
-                {
-                  printf ("Wrong inexact flag\n");
-                  exit (1);
-                }
-            }
+          for (r = 0; r < 4; r++)
+            for (trint = 0; trint < 2; trint++)
+              {
+                if (trint)
+                  inexact = mpfr_rint (y, x, r);
+                else if (r == GMP_RNDN)
+                  inexact = mpfr_round (y, x);
+                else if (r == GMP_RNDZ)
+                  inexact = mpfr_trunc (y, x);
+                else if (r == GMP_RNDU)
+                  inexact = mpfr_ceil (y, x);
+                else /* r = GMP_RNDD */
+                  inexact = mpfr_floor (y, x);
+                if (mpfr_sub (t, y, x, GMP_RNDN))
+                  {
+                    printf ("Error: subtraction should be exact\n");
+                    exit (1);
+                  }
+                sign_t = mpfr_cmp_ui (t, 0);
+                if (((inexact == 0) && (sign_t != 0)) ||
+                    ((inexact < 0) && (sign_t >= 0)) ||
+                    ((inexact > 0) && (sign_t <= 0)))
+                  {
+                    printf ("Wrong inexact flag\n");
+                    exit (1);
+                  }
+              }
         }
     }
   mpfr_clear (x);
