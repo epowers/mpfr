@@ -1,5 +1,8 @@
 2004-02-20  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
+	* NEWS, neg.c, tests/tset.c:
+	Ported bug fix / test of mpfr_neg to the 2.0 branch.
+
 	* mpfr-test.h, tests/tgmpop.c, gmp_op.c:
 	Ported bug fix / test of gmp_op.c (0.5+3/2 freezes) to the 2.0 branch.
 
