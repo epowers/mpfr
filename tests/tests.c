@@ -1,6 +1,6 @@
 /* Miscellaneous support for test programs.
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -302,7 +302,7 @@ FILE *src_fopen (const char *filename, const char *mode)
 
   if (srcdir == NULL)
     return fopen (filename, mode);
-  buffer = malloc (strlen (filename) + strlen (srcdir) + 1);
+  buffer = (char*) malloc (strlen (filename) + strlen (srcdir) + 1);
   if (buffer == NULL)
     {
       printf ("src_fopen: failed to alloc memory)\n");

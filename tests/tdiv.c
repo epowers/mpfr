@@ -1,6 +1,6 @@
 /* Test file for mpfr_div.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -211,11 +211,11 @@ check_convergence (void)
       for (j = 0;j < GMP_RND_MAX; j++)
         {
           mpfr_set_ui (y, 1, GMP_RNDN);
-          mpfr_div (y, x, y, j);
+          mpfr_div (y, x, y, (mp_rnd_t) j);
           if (mpfr_cmp_ui (y, 1))
             {
               printf ("mpfr_div failed for x=1.0, y=1.0, prec=%d rnd=%s\n",
-                      i, mpfr_print_rnd_mode(j));
+                      i, mpfr_print_rnd_mode ((mp_rnd_t) j));
               printf ("got "); mpfr_print_binary(y); puts ("");
               exit (1);
             }
@@ -428,7 +428,7 @@ check_inexact (void)
 	      mpfr_set_prec (y, py);
 	      mpfr_set_prec (z, py + pu);
 		{
-                  rnd = RND_RAND ();
+                  rnd = (mp_rnd_t) RND_RAND ();
 		  inexact = mpfr_div (y, x, u, rnd);
 		  if (mpfr_mul (z, y, u, rnd))
 		    {

@@ -1,6 +1,6 @@
 /* Test file for mpfr_set_ld and mpfr_get_ld.
 
-Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -57,13 +57,13 @@ Isnan_ld (long double d)
 static void
 check_set_get (long double d, mpfr_t x)
 {
-  mp_rnd_t r;
+  int r;
   long double e;
   int inex;
 
   for (r = 0; r < GMP_RND_MAX; r++)
     {
-      inex = mpfr_set_ld (x, d, r);
+      inex = mpfr_set_ld (x, d, (mp_rnd_t) r);
       if (inex != 0)
         {
           printf ("Error: mpfr_set_ld should be exact\n");
@@ -72,7 +72,7 @@ check_set_get (long double d, mpfr_t x)
           mpfr_dump (x);
           exit (1);
         }
-      e = mpfr_get_ld (x, r);
+      e = mpfr_get_ld (x, (mp_rnd_t) r);
       if (e != d && !(Isnan_ld(e) && Isnan_ld(d)))
         {
           printf ("Error: mpfr_get_ld o mpfr_set_ld <> Id\n");

@@ -1,6 +1,6 @@
 /* Test file for mpfr_exp.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -142,7 +142,7 @@ compare_exp2_exp3 (int n)
       mpfr_set_prec (y, prec);
       mpfr_set_prec (z, prec);
       mpfr_random (x);
-      rnd = RND_RAND() ;
+      rnd = (mp_rnd_t) RND_RAND();
       mpfr_exp_2 (y, x, rnd);
       mpfr_exp_3 (z, x, rnd);
       if (mpfr_cmp (y,z))

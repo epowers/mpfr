@@ -1,6 +1,6 @@
 /* Test file for mpfr_set_si and mpfr_set_ui.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -72,7 +72,7 @@ main (int argc, char *argv[])
   long k, z, d, N;
   unsigned long zl, dl;
   int inex;
-  mp_rnd_t r;
+  int r;
   mp_exp_t emax;
 
   tests_start_mpfr ();
@@ -167,23 +167,23 @@ main (int argc, char *argv[])
       exit (1);
     }
 
-  for(r = 0 ; r < GMP_RND_MAX ; r++)
+  for (r = 0 ; r < GMP_RND_MAX ; r++)
     {
-      mpfr_set_si (x, -1, r);
-      mpfr_set_ui (x, 0, r);
+      mpfr_set_si (x, -1, (mp_rnd_t) r);
+      mpfr_set_ui (x, 0, (mp_rnd_t) r);
       if (MPFR_IS_NEG (x) )
 	{
 	  printf ("mpfr_set_ui (x, 0) gives -0 for %s\n", 
-		  mpfr_print_rnd_mode(r));
+		  mpfr_print_rnd_mode ((mp_rnd_t) r));
 	  exit (1);
 	}
 
-      mpfr_set_si (x, -1, r);
-      mpfr_set_si (x, 0, r);
-      if (MPFR_IS_NEG (x) )
+      mpfr_set_si (x, -1, (mp_rnd_t) r);
+      mpfr_set_si (x, 0, (mp_rnd_t) r);
+      if (MPFR_IS_NEG (x))
 	{
 	  printf ("mpfr_set_si (x, 0) gives -0 for %s\n",
-		  mpfr_print_rnd_mode(r) );
+		  mpfr_print_rnd_mode ((mp_rnd_t) r));
 	  exit (1);
 	}
     }
