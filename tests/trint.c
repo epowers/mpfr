@@ -1,4 +1,4 @@
-/* Test file for mpfr_trunc, mpfr_floor, mpfr_ceil, mpfr_round.
+/* Test file for mpfr_rint, mpfr_trunc, mpfr_floor, mpfr_ceil, mpfr_round.
 
 Copyright 2002, 2003 Free Software Foundation.
 
@@ -24,6 +24,56 @@ MA 02111-1307, USA. */
 #include "gmp.h"
 #include "mpfr.h"
 #include "mpfr-test.h"
+
+#if __STDC_VERSION__ >= 199901L
+
+static void
+test_fct (double (*f)(double), int (*g)(), char *s, mp_rnd_t r)
+{
+  double d, y;
+  mpfr_t dd, yy;
+
+  mpfr_init2 (dd, 53);
+  mpfr_init2 (yy, 53);
+  for (d = -5.0; d <= 5.0; d += 0.25)
+    {
+      mpfr_set_d (dd, d, r);
+      y = (*f)(d);
+      if (g == &mpfr_rint)
+        mpfr_rint (yy, dd, r);
+      else
+        (*g)(yy, dd);
+      mpfr_set_d (dd, y, r);
+      if (mpfr_cmp (yy, dd))
+        {
+          printf ("test_against_libc: incorrect result for %s, rnd = %s,"
+                  " d = %g\ngot ", s, mpfr_print_rnd_mode (r), d);
+          mpfr_out_str (stdout, 10, 0, yy, GMP_RNDN);
+          printf (" instead of %g\n", y);
+          exit (1);
+        }
+    }
+  mpfr_clear (dd);
+  mpfr_clear (yy);
+}
+
+#define TEST_FCT(F) test_fct (&F, &mpfr_##F, #F, r)
+
+static void
+test_against_libc (void)
+{
+  int r = 0;
+
+  TEST_FCT (round);
+  TEST_FCT (trunc);
+  TEST_FCT (floor);
+  TEST_FCT (ceil);
+  for (r = 0; r < 4; r++)
+    if (mpfr_set_machine_rnd_mode (r) == 0)
+      TEST_FCT (rint);
+}
+
+#endif
 
 int
 main (void)
@@ -94,6 +144,10 @@ main (void)
   mpfr_clear (y);
   mpz_clear (z);
   mpfr_clear (t);
+
+#if __STDC_VERSION__ >= 199901L
+  test_against_libc ();
+#endif
 
   tests_end_mpfr ();
   return 0;
