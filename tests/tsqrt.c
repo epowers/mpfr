@@ -1,6 +1,6 @@
 /* Test file for mpfr_sqrt.
 
-Copyright 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -150,11 +150,12 @@ check_float (void)
 static void
 special (void)
 {
-  mpfr_t x, z;
+  mpfr_t x, y, z;
   int inexact;
   mp_prec_t p;
 
   mpfr_init (x);
+  mpfr_init (y);
   mpfr_init (z);
 
   mpfr_set_prec (x, 27);
@@ -222,7 +223,85 @@ special (void)
       exit (1);
     }
 
+  mpfr_set_prec (x, 33);
+  mpfr_set_str_binary (x, "0.111011011011110001100111111001000e-10");
+  mpfr_set_prec (z, 157);
+  inexact = mpfr_sqrt (z, x, GMP_RNDN);
+  mpfr_set_prec (x, 157);
+  mpfr_set_str_binary (x, "0.11110110101100101111001011100011100011100001101010111011010000100111011000111110100001001011110011111100101110010110010110011001011011010110010000011001101E-5");
+  if (mpfr_cmp (x, z))
+    {
+      printf ("Error: square root (1)\n");
+      exit (1);
+    }
+  if (inexact <= 0)
+    {
+      printf ("Error: wrong inexact flag (1)\n");
+      exit (1);
+    }
+
+  /* case prec(result) << prec(input) */
+  mpfr_set_prec (z, 2);
+  for (p = 2; p < 1000; p++)
+    {
+      mpfr_set_prec (x, p);
+      mpfr_set_ui (x, 1, GMP_RNDN);
+      mpfr_nextabove (x);
+      /* 1.0 < x <= 1.5 thus 1 < sqrt(x) <= 1.23 */
+      inexact = mpfr_sqrt (z, x, GMP_RNDN);
+      MPFR_ASSERTN(inexact < 0 && mpfr_cmp_ui (z, 1) == 0);
+      inexact = mpfr_sqrt (z, x, GMP_RNDZ);
+      MPFR_ASSERTN(inexact < 0 && mpfr_cmp_ui (z, 1) == 0);
+      inexact = mpfr_sqrt (z, x, GMP_RNDU);
+      MPFR_ASSERTN(inexact > 0 && mpfr_cmp_ui_2exp (z, 3, -1) == 0);
+      inexact = mpfr_sqrt (z, x, GMP_RNDD);
+      MPFR_ASSERTN(inexact < 0 && mpfr_cmp_ui (z, 1) == 0);
+    }
+
+  /* corner case rw = 0 in rounding to nearest */
+  mpfr_set_prec (z, mp_bits_per_limb - 1);
+  mpfr_set_prec (y, mp_bits_per_limb - 1);
+  mpfr_set_ui (y, 1, GMP_RNDN);
+  mpfr_mul_2exp (y, y, mp_bits_per_limb - 1, GMP_RNDN);
+  mpfr_nextabove (y);
+  for (p = 2 * mp_bits_per_limb - 1; p <= 1000; p++)
+    {
+      mpfr_set_prec (x, p);
+      mpfr_set_ui (x, 1, GMP_RNDN);
+      mpfr_set_exp (x, mp_bits_per_limb);
+      mpfr_add_ui (x, x, 1, GMP_RNDN);
+      /* now x = 2^(mp_bits_per_limb - 1) + 1 (mp_bits_per_limb bits) */
+      MPFR_ASSERTN(mpfr_mul (x, x, x, GMP_RNDN) == 0); /* exact */
+      inexact = mpfr_sqrt (z, x, GMP_RNDN);
+      /* even rule: z should be 2^(mp_bits_per_limb - 1) */
+      MPFR_ASSERTN(inexact < 0 &&
+                   mpfr_cmp_ui_2exp (z, 1, mp_bits_per_limb - 1) == 0);
+      mpfr_nextbelow (x);
+      /* now x is just below [2^(mp_bits_per_limb - 1) + 1]^2 */
+      inexact = mpfr_sqrt (z, x, GMP_RNDN);
+      MPFR_ASSERTN(inexact < 0 &&
+                   mpfr_cmp_ui_2exp (z, 1, mp_bits_per_limb - 1) == 0);
+      mpfr_nextabove (x);
+      mpfr_nextabove (x);
+      /* now x is just above [2^(mp_bits_per_limb - 1) + 1]^2 */
+      inexact = mpfr_sqrt (z, x, GMP_RNDN);
+      if (mpfr_cmp (z, y))
+        {
+          printf ("Error for sqrt(x) in rounding to nearest\n");
+          printf ("x="); mpfr_print_binary (x); putchar('\n');
+          printf ("Expected "); mpfr_print_binary (y); putchar('\n');
+          printf ("Got      "); mpfr_print_binary (z); putchar('\n');
+          exit (1);
+        }
+      if (inexact <= 0)
+        {
+          printf ("Wrong inexact flag in corner case for p = %lu\n", (unsigned long) p);
+          exit (1);
+        }
+    }
+
   mpfr_clear (x);
+  mpfr_clear (y);
   mpfr_clear (z);
 }
 
