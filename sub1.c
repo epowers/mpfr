@@ -127,7 +127,7 @@ mpfr_sub1 (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
 	     which means we get a wrong rounded result if x==1, 
 	     i.e. inexact= MPFR_EVEN_INEX */
 	  if (MPFR_UNLIKELY (inexact == MPFR_EVEN_INEX*MPFR_INT_SIGN (a))) {
-	    mpfr_nexttoward (a, c);
+	    (MPFR_IS_POS (a) ? mpfr_nextbelow : mpfr_nextabove) (a);
 	    inexact = -MPFR_INT_SIGN (a);
 	  }
 	  return inexact;
