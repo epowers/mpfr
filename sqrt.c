@@ -1,6 +1,6 @@
 /* mpfr_sqrt -- square root of a floating-point number
 
-Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -264,7 +264,7 @@ mpfr_sqrt (mpfr_ptr r, mpfr_srcptr u, mp_rnd_t rnd_mode)
         /* Is a shift necessary here? Isn't the result 1.0000...? */
         mpn_rshift (rp, rp, rrsize, 1);
         rp[rrsize-1] |= MPFR_LIMB_HIGHBIT;
-        MPFR_SET_EXP (r, MPFR_GET_EXP (r) + 1);
+        MPFR_SET_EXP (r, MPFR_EXP (r) + 1);
       }
 
  fin:
