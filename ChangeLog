@@ -1,3 +1,38 @@
+2004-02-17  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpf2mpfr.h: Added 2004 in Copyright line (2.0 branch).
+
+	* set_f.c, tests/tset_f.c:
+	Ported bug fixes / tests of mpfr_set_f to the 2.0 branch.
+
+	* acinclude.m4: Try so support GMP as a Shared Library (2.0 branch).
+
+	* gmp_op.c, tests/tgmpop.c:
+	Ported bug fixes / tests of gmp_op.c to the 2.0 branch.
+
+2004-02-16  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpf2mpfr.h: Ported the mpf_dump fix to the 2.0 branch.
+
+	* tests/texp.c, exp.c:
+	Ported bug fixes / tests of mpfr_exp to the 2.0 branch.
+
+2004-02-11  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* gmp_op.c, tests/Makefile.am, tests/tgmpop.c:
+	Ported bug fixes / tests of gmp_op.c to the 2.0 branch.
+
+	* sub1.c, tests/tsub.c:
+	Ported bug fixes / tests of mpfr_sub1 to the 2.0 branch.
+
+2004-02-10  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* sqrt.c: Bug fix.
+
+2004-02-09  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* ChangeLog, NEWS: Update (2.0 branch).
+
 2004-02-06  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* factorial.c, gamma.c, tests/tfactorial.c, tests/tgamma.c:
