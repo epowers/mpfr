@@ -3,7 +3,7 @@
 @setfilename mpfr.info
 @documentencoding ISO-8859-1
 @set VERSION 2.0.2
-@set UPDATED-MONTH October 2003
+@set UPDATED-MONTH November 2003
 @settitle MPFR @value{VERSION}
 @synindex tp fn
 @iftex
