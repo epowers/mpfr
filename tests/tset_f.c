@@ -1,6 +1,6 @@
 /* Test file for mpfr_set_f.
 
-Copyright 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -23,7 +23,9 @@ MA 02111-1307, USA. */
 #include <stdlib.h>
 #include <time.h>
 #include "gmp.h"
+#include "gmp-impl.h"
 #include "mpfr.h"
+#include "mpfr-impl.h"
 #include "mpfr-test.h"
 
 int
@@ -32,11 +34,12 @@ main (void)
   mpfr_t x, u;
   mpf_t y, z;
   unsigned long k, pr;
+  int r, inexact;
 
   tests_start_mpfr ();
 
-  mpf_init(y);
-  mpf_init(z);
+  mpf_init (y);
+  mpf_init (z);
 
   mpf_set_d (y, 0.0);
 
@@ -45,44 +48,78 @@ main (void)
   mpfr_set_prec (x, 100);
   mpfr_set_f (x, y, GMP_RNDN);
 
-  mpf_random2(y, 10, 0);
-  mpfr_set_f(x, y, randlimb () & 3);
+  mpf_random2 (y, 10, 0);
+  mpfr_set_f (x, y, randlimb () & 3);
 
   /* bug found by Jean-Pierre Merlet */
-  mpfr_set_prec(x, 256);
-  mpf_set_prec(y, 256);
-  mpfr_init2(u, 256);
-  mpfr_set_str(u,
+  mpfr_set_prec (x, 256);
+  mpf_set_prec (y, 256);
+  mpfr_init2 (u, 256);
+  mpfr_set_str (u,
      "7.f10872b020c49ba5e353f7ced916872b020c49ba5e353f7ced916872b020c498@2",
      16, GMP_RNDN);
-  mpf_set_str(y, "2033.033", 10);
-  mpfr_set_f(x, y, GMP_RNDN);
-  if (mpfr_cmp(x, u))
+  mpf_set_str (y, "2033.033", 10);
+  mpfr_set_f (x, y, GMP_RNDN);
+  if (mpfr_cmp (x, u))
     {
       printf ("mpfr_set_f failed for y=2033.033\n");
       exit (1);
     }
-  mpf_set_str(y, "-2033.033", 10);
-  mpfr_set_f(x, y, GMP_RNDN);
-  mpfr_neg(u, u, GMP_RNDN);
-  if (mpfr_cmp(x, u))
+  mpf_set_str (y, "-2033.033", 10);
+  mpfr_set_f (x, y, GMP_RNDN);
+  mpfr_neg (u, u, GMP_RNDN);
+  if (mpfr_cmp (x, u))
     {
       printf ("mpfr_set_f failed for y=-2033.033\n");
       exit (1);
     }
 
-  mpfr_clear(u);
-  mpfr_clear(x);
+  mpf_set_prec (y, 300);
+  mpf_set_str (y, "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111", -2);
+  mpf_mul_2exp (y, y, 600);
+  mpfr_set_prec (x, 300);
+  mpfr_set_f (x, y, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_cmp_ui_2exp (x, 1, 901) == 0);
+
+  mpfr_clear (u);
 
   for (k = 1; k <= 100000; k++)
     {
       pr = 2 + (randlimb () & 255);
       mpf_set_prec (z, pr);
       mpf_random2 (z, z->_mp_prec, 0);
-      mpfr_init2 (x, pr);
+      mpfr_set_prec (x, pr);
       mpfr_set_f (x, z, 0);
-      mpfr_clear (x);
     }
+
+  /* Check for +0 */
+  mpfr_set_prec (x, 53);
+  mpf_set_prec (y, 53);
+  mpf_set_ui (y, 0);
+  for(r = 0 ; r < 4 ; r++)
+    {
+      inexact = mpfr_set_f(x, y, r);
+      if (MPFR_NOTZERO(x) || MPFR_SIGN(x) < 0 || inexact)
+	{
+	  printf("mpfr_set_f(x,0) failed for %s\n",
+		 mpfr_print_rnd_mode(r));
+	  exit(1);
+	}
+    }
+
+  /* coverage test */
+  mpf_set_prec (y, 2);
+  mpfr_set_prec (x, 3 * mp_bits_per_limb);
+  mpf_set_ui (y, 1);
+  for (r = 0; r < mp_bits_per_limb; r++)
+    {
+      mpfr_random (x); /* to fill low limbs with random data */
+      inexact = mpfr_set_f (x, y, GMP_RNDN);
+      MPFR_ASSERTN(inexact == 0 && mpfr_cmp_ui_2exp (x, 1, r) == 0);
+      mpf_mul_2exp (y, y, 1);
+    }
+
+  mpfr_clear (x);
   mpf_clear (y);
   mpf_clear (z);
 
