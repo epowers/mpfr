@@ -36,8 +36,22 @@ test1 (void)
 
   mpfr_init2 (x, 32);
   mpfr_init2 (y, 65);
+
   mpfr_set_str_binary (x, "-0.101110001001011011011e-9");
   mpfr_ui_pow (y, 7, x, GMP_RNDN);
+
+  mpfr_set_prec (x, 40);
+  mpfr_set_str_binary (x, "-0.1100101100101111011001010010110011110110E-1");
+  mpfr_set_prec (y, 74);
+  mpfr_ui_pow (y, 8, x, GMP_RNDN);
+  mpfr_set_prec (x, 74);
+  mpfr_set_str_binary (x, "0.11100000010100111101000011111011011010011000011000101011010011010101000011E-1");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error for input of 40 bits, output of 74 bits\n");
+      exit (1);
+    }
+
   mpfr_clear (x);
   mpfr_clear (y);
 }
@@ -131,7 +145,7 @@ main (int argc, char *argv[])
     }
 
   MPFR_CHANGE_SIGN(x);
-  mpfr_ui_pow (y, n,x, GMP_RNDN);
+  mpfr_ui_pow (y, n, x, GMP_RNDN);
   if(!MPFR_IS_ZERO(y))
     {
       printf ("evaluation of function in -INF does not return 0");
@@ -139,7 +153,7 @@ main (int argc, char *argv[])
     }
 
   MPFR_SET_NAN(x);
-  mpfr_ui_pow (y, n,x, GMP_RNDN);
+  mpfr_ui_pow (y, n, x, GMP_RNDN);
   if(!MPFR_IS_NAN(y))
     {
       printf ("evaluation of function in NAN does not return NAN");
@@ -164,6 +178,34 @@ main (int argc, char *argv[])
   /* check exact power */
   mpfr_set_str_binary (t, "0.110000E5");
   mpfr_ui_pow (z, 3, t, GMP_RNDN);
+
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 2);
+  mpfr_set_d (x, -0.5, GMP_RNDZ);
+  mpfr_ui_pow (y, 4, x, GMP_RNDD);
+  if (mpfr_get_d1 (y) != 0.5)
+    {
+      fprintf (stderr, "Error for 4^(-0.5), prec=2, GMP_RNDD\n");
+      fprintf (stderr, "expected 0.5, got ");
+      mpfr_out_str (stderr, 2, 0, y, GMP_RNDN);
+      fprintf (stderr, "\n");
+      exit (1);
+    }
+
+  /* problem found by Kevin on spe175.testdrive.compaq.com
+     (03 Sep 2003) */
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 2);
+  mpfr_set_d (x, 0.5, GMP_RNDN);
+  mpfr_ui_pow (y, 398441521, x, GMP_RNDN);
+  if (mpfr_get_d1 (y) != 16384.0)
+    {
+      fprintf (stderr, "Error for 398441521^(0.5), prec=2, GMP_RNDN\n");
+      fprintf (stderr, "expected 1.0e14, got ");
+      mpfr_out_str (stderr, 2, 0, y, GMP_RNDN);
+      fprintf (stderr, "\n");
+      exit (1);
+    }
 
   mpfr_clear (z);
   mpfr_clear (t);
