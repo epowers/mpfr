@@ -176,7 +176,7 @@ int main()
 }
 ], AC_MSG_RESULT(yes), 
    [AC_MSG_RESULT(no)
-    AC_MSG_ERROR(['gmp.h' and 'libgmp' have different versions! you have to properly reinstall GMP.])],
+    AC_MSG_ERROR(['gmp.h' and 'libgmp' have different versions, or (on some platforms) libgmp couldn't be found! You have to properly reinstall GMP.])],
     AC_MSG_RESULT([can't test])
 )
 
