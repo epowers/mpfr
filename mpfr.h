@@ -253,14 +253,8 @@ int mpfr_cmpabs _PROTO ((mpfr_srcptr, mpfr_srcptr));
 int mpfr_nan_p _PROTO((mpfr_srcptr));
 int mpfr_inf_p _PROTO((mpfr_srcptr));
 int mpfr_number_p _PROTO((mpfr_srcptr));
-int mpfr_acos _PROTO ((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
-int mpfr_asin _PROTO ((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
-int mpfr_atan _PROTO ((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 int mpfr_erf _PROTO ((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 
-int mpfr_sinh _PROTO((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
-int mpfr_tanh _PROTO((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
-int mpfr_factorial _PROTO ((mpfr_ptr, unsigned long int, mp_rnd_t));
 int mpfr_ui_pow _PROTO ((mpfr_ptr, unsigned long int, mpfr_srcptr, mp_rnd_t));
 
 int mpfr_atanh _PROTO((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
@@ -270,6 +264,7 @@ int mpfr_asinh _PROTO((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 int mpfr_cosh _PROTO((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 int mpfr_sinh _PROTO((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 int mpfr_tanh _PROTO((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
+int mpfr_acos _PROTO ((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 int mpfr_asin _PROTO ((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 int mpfr_atan _PROTO ((mpfr_ptr, mpfr_srcptr, mp_rnd_t));
 int mpfr_fac_ui _PROTO ((mpfr_ptr, unsigned long int, mp_rnd_t));
