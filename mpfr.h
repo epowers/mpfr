@@ -22,6 +22,15 @@ MA 02111-1307, USA. */
 #ifndef __MPFR_H
 #define __MPFR_H
 
+/* Define MPFR version number */
+#define MPFR_VERSION_MAJOR 2
+#define MPFR_VERSION_MINOR 0
+#define MPFR_VERSION_PATCHLEVEL 4
+
+/* Macros dealing with MPFR VERSION */
+#define MPFR_VERSION_NUM(a,b,c) (((a) << 16L) | ((b) << 8) | (c))
+#define MPFR_VERSION MPFR_VERSION_NUM(MPFR_VERSION_MAJOR,MPFR_VERSION_MINOR,MPFR_VERSION_PATCHLEVEL)
+
 /* check if stdio.h is included */
 #if defined (FILE)                                              \
   || defined (H_STDIO)                                          \
@@ -129,6 +138,8 @@ extern "C" {
 extern unsigned int __gmpfr_flags;
 extern mp_exp_t __gmpfr_emin;
 extern mp_exp_t __gmpfr_emax;
+
+__gmp_const char * mpfr_version _PROTO ((void));
 mp_exp_t mpfr_get_emin _PROTO ((void));
 int mpfr_set_emin _PROTO ((mp_exp_t));
 mp_exp_t mpfr_get_emax _PROTO ((void));
