@@ -1,3 +1,23 @@
+2005-02-16  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* set.c: Added a comment. (2.1 branch)
+
+	* sub1.c:
+	Ported another fix to the 2.1 branch (bug introduced in 1.31.2.1).
+
+2005-02-15  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* tan.c: Ported tan fix to 2.1 branch.
+
+2005-02-14  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* sum.c: Ported latest bug fix to 2.1 branch.
+
+2005-02-02  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* tests/tui_sub.c, sub1.c: Ported 1.36 patch to the 2.1 branch:
+	Fix bug of sub1 if dest=src2 and src1 >> src2
+
 2005-01-28  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* rint.c, tests/trint.c:
