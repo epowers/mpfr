@@ -1,5 +1,8 @@
 2004-02-18  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
+	* config.guess, config.sub:
+	Update from the autotools-dev Debian package (2004-01-05).
+
 	* mpfr.texi: Updated the 2.0 branch.
 
 	* minmax.c: Updated copyright line (2.0 branch).
