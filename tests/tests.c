@@ -61,7 +61,7 @@ tests_end_mpfr (void)
   tests_memory_end ();
 }
 
-void
+static void
 tests_rand_start (void)
 {
   gmp_randstate_ptr  rands;
@@ -105,7 +105,7 @@ tests_rand_start (void)
     }
 }
 
-void
+static void
 tests_rand_end (void)
 {
   RANDS_CLEAR ();
@@ -286,4 +286,25 @@ ld_trace (const char *name, long double ld)
       printf ("%02X", (int) u.b[i]);
     }
   printf ("] %.20Lg\n", ld);
+}
+
+/* Open a file in the src directory - can't use fopen directly */
+FILE *src_fopen (const char *filename, const char *mode)
+{
+  const char *srcdir = getenv ("srcdir");
+  char *buffer;
+  FILE *f;
+
+  if (srcdir == NULL) 
+    return fopen (filename, mode);
+  buffer = malloc (strlen (filename) + strlen (srcdir) + 1);
+  if (buffer == NULL)
+    {
+      printf ("src_fopen: failed to alloc memory)\n");
+      exit (1);
+    }
+  sprintf (buffer, "%s/%s", srcdir, filename);
+  f = fopen (buffer, mode);
+  free (buffer);
+  return f;
 }
