@@ -87,6 +87,32 @@ check_set_get (long double d, mpfr_t x)
     }
 }
 
+static void
+test_small (void)
+{
+  mpfr_t x, y;
+  long double d;
+
+  mpfr_init2 (x, 64);
+  mpfr_init2 (y, 64);
+
+  mpfr_set_str (x, "0.1010010100111100110000001110101101000111010110000001111101110011E-16381", 2, GMP_RNDN);
+  mpfr_get_ld (x, GMP_RNDN);  /* infinite loop? */
+  mpfr_set_ld (y, d, GMP_RNDN);
+  mpfr_sub (y, x, y, GMP_RNDN);
+  mpfr_abs (y, y, GMP_RNDN);
+  if (mpfr_cmp_str (y, "1E-16434", 2, GMP_RNDN) > 0)
+    {
+      printf ("Error with ");
+      mpfr_out_str (NULL, 16, 0, x, GMP_RNDN);
+      printf ("\n");
+      exit (1);
+    }
+
+  mpfr_clear (x);
+  mpfr_clear (y);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -182,6 +208,8 @@ main (int argc, char *argv[])
   set_emax (emax);
 
   mpfr_clear (x);
+
+  test_small ();
 
   tests_end_mpfr ();
 
