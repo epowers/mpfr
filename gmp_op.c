@@ -108,15 +108,39 @@ mpfr_div_q (mpfr_ptr y, mpfr_srcptr x, mpq_srcptr z, mp_rnd_t rnd_mode)
 int
 mpfr_add_q (mpfr_ptr y, mpfr_srcptr x, mpq_srcptr z, mp_rnd_t rnd_mode)
 {
-  mpfr_t t,q;
+  mpfr_t    t,q;
   mp_prec_t p = MPFR_PREC(y)+10;
+  mp_exp_t  err;
   int res;
+
+  if (MPFR_IS_NAN(x))
+    {
+      MPFR_SET_NAN(y);
+      MPFR_RET_NAN;
+    }
+  else if (MPFR_IS_INF(x))
+    {
+      MPFR_CLEAR_NAN (y);
+      MPFR_SET_INF (y);
+      MPFR_SET_SAME_SIGN (y, x);
+      MPFR_RET (0);
+    }
+  else if (MPFR_IS_ZERO(x))
+    {
+      return mpfr_set_q (y, z, rnd_mode);
+    }
+
   mpfr_inits2(p, t, q, NULL);
   do {
-    mpfr_set_q(q, z, GMP_RNDN);  /* Error <= 1/2ulp */
-    mpfr_add(t, x, q, GMP_RNDN); /* Error <= 1 ulp  */
-    res = mpfr_can_round(t, p-1, GMP_RNDN, GMP_RNDZ, 
-			 MPFR_PREC(y) + (rnd_mode == GMP_RNDN) );
+    mpfr_set_q(q, z, GMP_RNDN);  /* Error <= 1/2 ulp(q) */
+    mpfr_add(t, x, q, GMP_RNDN); /* Error <= 1/2 ulp(t) */
+    /* Error / ulp(t)      <= 1/2 + 1/2 * 2^(EXP(q)-EXP(t))
+       If EXP(q)-EXP(t)>0, <= 2^(EXP(q)-EXP(t)-1)*(1+2^-(EXP(q)-EXP(t)))
+                           <= 2^(EXP(q)-EXP(t))
+       If EXP(q)-EXP(t)<0, <= 2^0 */
+    err = (mp_exp_t) p - 1 - MAX(MPFR_GET_EXP(q)-MPFR_GET_EXP(t), 0);
+    res = mpfr_can_round (t, err, GMP_RNDN, GMP_RNDZ, 
+			  MPFR_PREC(y) + (rnd_mode == GMP_RNDN) );
     if (!res)
       {
 	p += BITS_PER_MP_LIMB;
@@ -135,11 +159,41 @@ mpfr_sub_q (mpfr_ptr y, mpfr_srcptr x, mpq_srcptr z,mp_rnd_t rnd_mode)
   mpfr_t t,q;
   mp_prec_t p = MPFR_PREC(y)+10;
   int res;
+  mp_exp_t err;
+
+  if (MPFR_IS_NAN(x))
+    {
+      MPFR_SET_NAN (y);
+      MPFR_RET_NAN;
+    }
+  else if (MPFR_IS_INF(x))
+    {
+      MPFR_CLEAR_NAN (y);
+      MPFR_SET_INF (y);
+      MPFR_SET_SAME_SIGN (y, x);
+      MPFR_RET (0);
+    }
+  else if (MPFR_IS_ZERO(x))
+    {
+      if (rnd_mode == GMP_RNDU)
+        rnd_mode = GMP_RNDD;
+      else if (rnd_mode == GMP_RNDD)
+        rnd_mode = GMP_RNDU;
+      res =  mpfr_set_q (y, z, rnd_mode);
+      MPFR_CHANGE_SIGN (y);
+      return -res;
+    }
+
   mpfr_inits2(p, t, q, NULL);
   do {
-    mpfr_set_q(q, z, GMP_RNDN);  /* Error <= 1/2ulp */
-    mpfr_sub(t, x, q, GMP_RNDN); /* Error <= 1 ulp  */
-    res = mpfr_can_round(t, p-1, GMP_RNDN, GMP_RNDZ,
+    mpfr_set_q(q, z, GMP_RNDN);  /* Error <= 1/2 ulp(q) */
+    mpfr_sub(t, x, q, GMP_RNDN); /* Error <= 1/2 ulp(t) */
+    /* Error / ulp(t)      <= 1/2 + 1/2 * 2^(EXP(q)-EXP(t))
+       If EXP(q)-EXP(t)>0, <= 2^(EXP(q)-EXP(t)-1)*(1+2^-(EXP(q)-EXP(t)))
+                           <= 2^(EXP(q)-EXP(t))
+			   If EXP(q)-EXP(t)<0, <= 2^0 */
+    err = (mp_exp_t) p - 1 - MAX(MPFR_GET_EXP(q)-MPFR_GET_EXP(t), 0);
+    res = mpfr_can_round(t, err, GMP_RNDN, GMP_RNDZ,
                          MPFR_PREC(y) + (rnd_mode == GMP_RNDN) );
     if (!res)
       {
