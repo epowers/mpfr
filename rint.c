@@ -1,6 +1,6 @@
 /* mpfr_rint -- Round to an integer.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -205,8 +205,6 @@ mpfr_rint (mpfr_ptr r, mpfr_srcptr u, mpfr_rnd_t rnd_mode)
           uj = un - ui;  /* lowest limb of the integer part in u */
           rj = rn - ui;  /* lowest limb of the integer part in r */
 
-          MPN_ZERO(rp, rj);
-
           if (rp != up)
             MPN_COPY(rp + rj, up + uj, ui);
 
@@ -270,6 +268,8 @@ mpfr_rint (mpfr_ptr r, mpfr_srcptr u, mpfr_rnd_t rnd_mode)
                    (sh == 0 && (MPFR_ASSERTN (uj >= 1),
                                 up[uj - 1] & MPFR_LIMB_HIGHBIT) != 0));
             }
+
+          MPN_ZERO (rp-rj, rj);
         }
 
       if (sh != 0)
