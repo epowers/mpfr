@@ -1,6 +1,6 @@
 /* mpfr_exp -- exponential of a floating-point number
 
-Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation.
 Contributed by the Spaces project.
 
 This file is part of the MPFR Library.
@@ -78,14 +78,19 @@ mpfr_exp (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
   /* result is 0 when exp(x) < 1/2*2^(__gmpfr_emin), i.e.
      x < (__gmpfr_emin-1) * LOG2 */
   if (d < ((double) __gmpfr_emin - 1.0) * LOG2)
-    return mpfr_set_underflow (y, rnd_mode, 1);
+    {
+      /* warning: mpfr_set_underflow rounds away for RNDN */
+      if (rnd_mode == GMP_RNDN && d < ((double) __gmpfr_emin - 2.0) * LOG2)
+        rnd_mode = GMP_RNDZ;
+      return mpfr_set_underflow (y, rnd_mode, 1);
+    }
 
   /* if x < 2^(-precy), then exp(x) i.e. gives 1 +/- 1 ulp(1) */
   if (expx < -precy)
     {
       int signx = MPFR_SIGN(x);
 
-      if (signx < 0 && (rnd_mode == GMP_RNDD || rnd_mode == GMP_RNDZ))
+      if (signx < 0 && rnd_mode == GMP_RNDD)
         {
           MPFR_CLEAR_FLAGS(y);
           MPFR_SET_POS(y);
