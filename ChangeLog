@@ -1,4 +1,16 @@
+2004-11-03  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.texi: Updated month: October -> November (2.1 branch).
+
+	* configure.in:
+	[2.1 branch] Modified an error message, since the code checking for
+	GMP library hadn't been modified in the branch.
+
 2004-10-27  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* acinclude.m4: Updated copyright line.
+
+	* BUGS: Added a bug and updated copyright line.
 
 	* mpfr-impl.h, set_d.c:
 	Removed the definitions of DBL_POS_INF/DBL_NEG_INF/DBL_NAN for
