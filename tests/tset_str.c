@@ -1,6 +1,6 @@
 /* Test file for mpfr_set_str.
 
-Copyright 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -62,7 +62,7 @@ main (int argc, char *argv[])
 
   bd = randlimb () & 8;
 
-  str2 = str = (*__gmp_allocate_func) (nc * sizeof(char));
+  str2 = str = (char *) (*__gmp_allocate_func) (nc * sizeof(char));
 
   if (bd)
 
@@ -388,7 +388,7 @@ main (int argc, char *argv[])
     mpfr_set_prec (x, mp_bits_per_limb); /* x and y have only one limb */
     mpfr_set_prec (y, mp_bits_per_limb);
 
-    str = (*__gmp_allocate_func) (N + 20);
+    str = (char *) (*__gmp_allocate_func) (N + 20);
 
     mpfr_set_ui (x, 1, GMP_RNDN); /* ensures that x is not NaN or Inf */
     for (; nb_digit < N; nb_digit *= 10)
