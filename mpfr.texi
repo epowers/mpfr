@@ -431,8 +431,8 @@ for such objects is @code{mpfr_t}. A floating-point number can have
 three special values: Not-a-Number (NaN) or plus or minus Infinity. NaN
 represents an uninitialized object, the result of an invalid operation
 (like 0 divided by 0), or a value that cannot be determined (like
-+Infinity minus +Infinity). Moreover, like in the IEEE 754-1985
-standard, zero is signed, i.e.@: there are both +0 and -0; the behavior
++Infinity minus +Infinity). Moreover, like in the IEEE 754-1985 standard,
+zero is signed, i.e.@: there are both +0 and @minus{}0; the behavior
 is the same as in the IEEE 754-1985 standard and it is generalized to
 the other functions supported by MPFR.
 
@@ -642,7 +642,7 @@ direction. In both cases, the precision of @var{x} is changed to @var{prec}.
 [This function is obsolete. Please use @code{mpfr_prec_round} instead.]
 @end deftypefun
 
-@deftypefun {char *} mpfr_print_rnd_mode (mp_rnd_t @var{rnd})
+@deftypefun {const char *} mpfr_print_rnd_mode (mp_rnd_t @var{rnd})
 Returns the input string (GMP_RNDD, GMP_RNDU, GMP_RNDN, GMP_RNDZ)
 corresponding to the rounding mode @var{rnd} or a null pointer if
 @var{rnd} is an invalid rounding mode.
@@ -827,6 +827,9 @@ These functions assign new values to already initialized floats
 @deftypefunx int mpfr_set_f (mpfr_t @var{rop}, mpf_t @var{op}, mp_rnd_t @var{rnd})
 Set the value of @var{rop} from @var{op}, rounded
 towards the given direction @var{rnd}.
+Note that the input 0 is converted to +0 by @code{mpfr_set_ui},
+@code{mpfr_set_si}, @code{mpfr_set_z}, @code{mpfr_set_q} and
+@code{mpfr_set_f}, regardless of the rounding mode.
 @end deftypefun
 
 @deftypefun int mpfr_set_str (mpfr_t @var{x}, const char *@var{s}, int @var{base}, mp_rnd_t @var{rnd})
@@ -1417,6 +1420,22 @@ Equivalent to @code{mpfr_nexttoward} where @var{y} is plus infinity.
 
 @deftypefun void mpfr_nextbelow (mpfr_t @var{x})
 Equivalent to @code{mpfr_nexttoward} where @var{y} is minus infinity.
+@end deftypefun
+
+@deftypefun int mpfr_min (mpfr_t @var{rop}, mpfr_t @var{op1}, mpfr_t @var{op2}, mp_rnd_t @var{rnd})
+Set @var{rop} to the minimum of @var{op1} and @var{op2}. If @var{op1}
+and @var{op2} are both NaN, then @var{rop} is set to NaN. If @var{op1}
+or @var{op2} is NaN, then @var{rop} is set to the numeric value. If
+@var{op1} and @var{op2} are zeros of different signs, then @var{rop}
+is set to @minus{}0.
+@end deftypefun
+
+@deftypefun int mpfr_max (mpfr_t @var{rop}, mpfr_t @var{op1}, mpfr_t @var{op2}, mp_rnd_t @var{rnd})
+Set @var{rop} to the maximum of @var{op1} and @var{op2}. If @var{op1}
+and @var{op2} are both NaN, then @var{rop} is set to NaN. If @var{op1}
+or @var{op2} is NaN, then @var{rop} is set to the numeric value. If
+@var{op1} and @var{op2} are zeros of different signs, then @var{rop}
+is set to +0.
 @end deftypefun
 
 @deftypefun int mpfr_urandomb (mpfr_t @var{rop}, gmp_randstate_t @var{state})
