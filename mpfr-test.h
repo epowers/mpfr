@@ -46,6 +46,10 @@ MA 02111-1307, USA. */
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define ABS(x) (((x)>0) ? (x) : -(x))
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
 void tests_memory_start _PROTO ((void));
 void tests_memory_end _PROTO ((void));
 
@@ -68,5 +72,9 @@ double Ulp _PROTO ((double));
 int Isnan _PROTO ((double));
 void d_trace _PROTO ((const char *, double));
 void ld_trace _PROTO ((const char *, long double));
+
+#if defined (__cplusplus)
+}
+#endif
 
 #define mpfr_set_str1(x,s) mpfr_set_str(x,s,10,GMP_RNDN)
