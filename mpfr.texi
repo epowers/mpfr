@@ -1465,6 +1465,10 @@ Negative random numbers are generated when @var{size} is negative.
 Put +0 in @var{rop} when size if zero.
 @end deftypefun
 
+@deftypefun {const char *} mpfr_version (void)
+Return the MPFR version, as a null-terminated string.
+@end deftypefun
+
 @c @deftypefun size_t mpfr_size (mpfr_t @var{op})
 @c Return the size of @var{op} measured in number of limbs.  If @var{op} is
 @c zero, the returned value will be zero.  (@xref{Nomenclature}, for an
