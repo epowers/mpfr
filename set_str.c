@@ -1,6 +1,6 @@
 /* mpfr_set_str -- set a floating-point number from a string
 
-Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -205,7 +205,7 @@ mpfr_set_str (mpfr_t x, const char *str, int base, mp_rnd_t rnd)
       n = (prec_x - 1) / BITS_PER_MP_LIMB + 1;
 
       /* initialize y to the value of 0.mant_s[0]...mant_s[pr-1] */
-      y = TMP_ALLOC ((2 * n + 1) * sizeof (mp_limb_t));
+      y = (mp_limb_t *) TMP_ALLOC ((2 * n + 1) * sizeof (mp_limb_t));
       y += n;
       /* remember that y - n is allocated for n limbs */
 
@@ -261,7 +261,7 @@ mpfr_set_str (mpfr_t x, const char *str, int base, mp_rnd_t rnd)
       /* case exp_s > pr */
       else if (exp_s > (mp_exp_t) pr)
 	{
-	  result = TMP_ALLOC ((2 * n + 1) * sizeof (mp_limb_t));
+	  result = (mp_limb_t *) TMP_ALLOC ((2 * n + 1) * sizeof (mp_limb_t));
 
 	  /* (z, exp_z) = base^(exp_s-pr), then result = y*z */
 	  /* z is allocated at y - n */
@@ -293,14 +293,14 @@ mpfr_set_str (mpfr_t x, const char *str, int base, mp_rnd_t rnd)
       /* cass exp_s < pr */
       else if (exp_s < (mp_exp_t) pr)
 	{
-	  result = TMP_ALLOC ((2 * n + 1) * sizeof (mp_limb_t));
+	  result = (mp_limb_t *) TMP_ALLOC ((2 * n + 1) * sizeof (mp_limb_t));
 
 	  /* set y to y * K^n */
 	  y = y - n;  /* we have allocated n limbs at y - n */
 	  MPN_ZERO (y, n);
 
 	  /* (z, exp_z) = base^(exp_s-pr) */
-	  z = TMP_ALLOC (n * sizeof (mp_limb_t));
+	  z = (mp_limb_t *) TMP_ALLOC (n * sizeof (mp_limb_t));
 	  err = mpn_exp (z, &exp_z, base, pr - exp_s, n);
 	  exact = (exact && (err == -1));
 
