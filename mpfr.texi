@@ -2,8 +2,8 @@
 @c %**start of header
 @setfilename mpfr.info
 @documentencoding ISO-8859-1
-@set VERSION 2.0.2
-@set UPDATED-MONTH November 2003
+@set VERSION 2.0.3
+@set UPDATED-MONTH February 2004
 @settitle MPFR @value{VERSION}
 @synindex tp fn
 @iftex
@@ -16,7 +16,7 @@ This manual documents how to install and use the Multiple Precision
 Floating-Point Reliable Library, version @value{VERSION}.
 
 Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-2003 Free Software Foundation, Inc.
+2003, 2004 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document under
 the terms of the GNU Free Documentation License, Version 1.1 or any later
