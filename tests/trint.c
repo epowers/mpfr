@@ -21,8 +21,11 @@ MA 02111-1307, USA. */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "gmp.h"
+#include "gmp-impl.h"
 #include "mpfr.h"
+#include "mpfr-impl.h"
 #include "mpfr-test.h"
 
 #if __STDC_VERSION__ >= 199901L
@@ -75,6 +78,17 @@ test_against_libc (void)
 
 #endif
 
+static void
+err (char *str, mp_size_t s, mpfr_t x, mp_prec_t p, mp_rnd_t r, int trint)
+{
+  printf ("Error: %s\ns = %u, p = %u, r = %s, trint = %d\nx = ", str,
+          (unsigned int) s, (unsigned int) p, mpfr_print_rnd_mode (r),
+          trint);
+  mpfr_print_binary (x);
+  printf ("\n");
+  exit (1);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -125,17 +139,30 @@ main (int argc, char *argv[])
                 else /* r = GMP_RNDD */
                   inexact = mpfr_floor (y, x);
                 if (mpfr_sub (t, y, x, GMP_RNDN))
-                  {
-                    printf ("Error: subtraction should be exact\n");
-                    exit (1);
-                  }
+                  err ("subtraction should be exact", s, x, p, r, trint);
                 sign_t = mpfr_cmp_ui (t, 0);
                 if (((inexact == 0) && (sign_t != 0)) ||
                     ((inexact < 0) && (sign_t >= 0)) ||
                     ((inexact > 0) && (sign_t <= 0)))
+                  err ("wrong inexact flag", s, x, p, r, trint);
+                if (((r == GMP_RNDD || (r == GMP_RNDZ && MPFR_SIGN (x) > 0))
+                     && inexact > 0) ||
+                    ((r == GMP_RNDU || (r == GMP_RNDZ && MPFR_SIGN (x) < 0))
+                     && inexact < 0))
+                  err ("wrong rounding direction", s, x, p, r, trint);
+                if (inexact < 0)
                   {
-                    printf ("Wrong inexact flag\n");
-                    exit (1);
+                    mpfr_add_ui (y, y, 1, GMP_RNDU);
+                    if (mpfr_cmp (y, x) <= 0)
+                      err ("integer between x and its rounded value",
+                           s, x, p, r, trint);
+                  }
+                if (inexact > 0)
+                  {
+                    mpfr_sub_ui (y, y, 1, GMP_RNDD);
+                    if (mpfr_cmp (y, x) >= 0)
+                      err ("integer between x and its rounded value",
+                           s, x, p, r, trint);
                   }
               }
         }
