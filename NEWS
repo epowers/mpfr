@@ -23,8 +23,8 @@ MA 02111-1307, USA.
 Changes from version 2.0.2 to version 2.0.3:
 - bug fixes (mpfr_add_q, mpfr_add_z, mpfr_agm, mpfr_div_q, mpfr_div_z,
   mpfr_exp, mpfr_fac_ui, mpfr_frac, mpfr_gamma, mpfr_get_str, mpfr_hypot,
-  mpfr_mul_q, mpfr_mul_z, mpfr_set_f, mpfr_sqrt, mpfr_sub1, mpfr_sub_q,
-  mpfr_sub_z, mpfr_zeta, mpf_dump from mpf2mpfr.h)
+  mpfr_mul_q, mpfr_mul_z, mpfr_neg, mpfr_set_f, mpfr_sqrt, mpfr_sub1,
+  mpfr_sub_q, mpfr_sub_z, mpfr_zeta, mpf_dump from mpf2mpfr.h)
 - support GMP as a shared library (not fully tested)
 
 Changes from version 2.0.1 to version 2.0.2:
