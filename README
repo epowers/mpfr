@@ -30,22 +30,25 @@ COPYING     - the GNU General Public License, version 2
 COPYING.LIB - the GNU Lesser General Public License, version 2.1
 ChangeLog   - the log of changes
 INSTALL     - how to install MPFR (see also mpfr.texi)
-Makefile*   - files for building the library
+Makefile.*  - files for building the library
 NEWS        - new features with respect to previous versions
 README      - this file
 TODO        - what remains to do (any help is welcome!)
 VERSION     - version of MPFR (next release version if taken from CVS)
 ac*.m4      - automatic configuration files
 *.c         - source files
-configure*  - configuration files
+config*     - configuration files
+depcomp     - compile a program generating dependencies as side-effects
 fdl.texi    - the GNU Free Documentation License
-install*    - installation files
+fits_s.h    - source file
+fits_u.h    - source file
+install-sh  - installation file
+log_b2.h    - header file for mpfr_get_str and mpfr_set_str
 missing     - auxiliary installation file
 mkinst*     - auxiliary installation file
 mpf2mpfr.h  - header file for compatibility with MPF
 mpfr.h      - external header file for MPFR
 mpfr-impl.h - internal header file for MPFR
-mpfr-math.h - another internal header file for MPFR
 mpfr-test.h - header file for test files
 mpfr.info   - info file for MPFR
 mpfr.texi   - texinfo documentation for MPFR
