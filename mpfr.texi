@@ -367,7 +367,7 @@ MPFR suffers from all bugs from the GNU MP library, plus many many more.
 Please report other problems to @samp{mpfr@@loria.fr}.
 @xref{Reporting Bugs}.
 Some bug fixes are available on the MPFR web page
-@url{http://www.loria.fr/projets/mpfr/} or @url{http://www.mpfr.org/}.
+@url{http://www.mpfr.org/}.
 
 
 @node Reporting Bugs, MPFR Basics, Installing MPFR, Top
@@ -376,8 +376,7 @@ Some bug fixes are available on the MPFR web page
 @cindex Reporting bugs
 
 If you think you have found a bug in the MPFR library, first have a look on the
-MPFR web page @url{http://www.mpfr.org/} or
-@url{http://www.loria.fr/projets/mpfr/}: perhaps this bug is already known,
+MPFR web page @url{http://www.mpfr.org/}: perhaps this bug is already known,
 in which case you may find there a workaround for it.
 Otherwise, please investigate
 and report it. We have made this library available to you, and it is not to ask
@@ -440,7 +439,7 @@ the other functions supported by MPFR.
 @cindex Precision
 @tindex @code{mp_prec_t}
 @noindent
-The @dfn{Precision} is the number of bits used to represent the mantissa
+The @dfn{precision} is the number of bits used to represent the mantissa
 of a floating-point number;
 the corresponding C data type is @code{mp_prec_t}.
 The precision can be any integer between @code{MPFR_PREC_MIN} and
@@ -622,6 +621,8 @@ the ternary value is usually positive, except when the result is exact, in
 which case it is zero. In the case of an infinite result, it is considered
 as inexact when it was obtained by overflow, and exact otherwise. A NaN
 result (Not-a-Number) always corresponds to an exact return value.
+The opposite of a returned ternary value is guaranteed to be representable
+in an @code{int}.
 
 @deftypefun void mpfr_set_default_rounding_mode (mp_rnd_t @var{rnd})
 Sets the default rounding mode to @var{rnd}.
@@ -1013,6 +1014,8 @@ direction @var{rnd}.
 @deftypefunx int mpfr_div_z (mpfr_t @var{rop}, mpfr_t @var{op1}, mpz_t @var{op2}, mp_rnd_t @var{rnd})
 @deftypefunx int mpfr_div_q (mpfr_t @var{rop}, mpfr_t @var{op1}, mpq_t @var{op2}, mp_rnd_t @var{rnd})
 Set @var{rop} to @math{@var{op1}/@var{op2}} rounded in the direction @var{rnd}.
+When a result is zero, its sign is the product of the signs of the operands
+(for types having no signed zero, it is considered positive).
 @end deftypefun
 
 @deftypefun int mpfr_sqrt (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
@@ -1036,7 +1039,7 @@ rounded in the direction @var{rnd}.
 Set @var{rop} to @m{@var{op1}^{op2}, @var{op1} raised to @var{op2}},
 rounded in the direction @var{rnd}.
 Special values are currently handled as described in the ISO C99 standard
-for the @code{pow} function:
+for the @code{pow} function (note this may change in future versions):
 @itemize @bullet
 @item @code{pow(@pom{}0, @var{y})} returns plus or minus infinity for @var{y} a negative odd integer.
 @item @code{pow(@pom{}0, @var{y})} returns plus infinity for @var{y} negative and not an odd integer.
@@ -1188,7 +1191,7 @@ compared), zero otherwise.
 @section Special Functions
 @cindex Special functions
 
-All those functions, except explicitely stated, return zero for an
+All those functions, except explicitly stated, return zero for an
 exact return value, a positive value for a return value larger than the 
 exact result, and a negative value otherwise.
 
@@ -1459,6 +1462,7 @@ This function is useful for
 testing functions and algorithms, since this kind of random numbers have
 proven to be more likely to trigger corner-case bugs.
 Negative random numbers are generated when @var{size} is negative.
+Put +0 in @var{rop} when size if zero.
 @end deftypefun
 
 @c @deftypefun size_t mpfr_size (mpfr_t @var{op})
@@ -1549,7 +1553,7 @@ number.
 @deftypefun int mpfr_set_exp (mpfr_t @var{x}, mp_exp_t @var{e})
 Set the exponent of @var{x} if @var{e} is in the current exponent range,
 and return 0 (even if @var{x} is not a non-zero ordinary number);
-otherwise, return 1.
+otherwise, return a non-zero value.
 @end deftypefun
 
 @deftypefun void mpfr_set_str_binary (mpfr_t @var{x}, const char *@var{s})
