@@ -1,6 +1,6 @@
 /* tzeta -- test file for the Riemann Zeta function
 
-Copyright 2003 Free Software Foundation.
+Copyright 2003, 2004 Free Software Foundation.
 Contributed by Jean-Luc Re'my and the Spaces project, INRIA Lorraine.
 
 This file is part of the MPFR Library.
@@ -35,8 +35,54 @@ test1 (void)
 
   mpfr_init2 (x, 32);
   mpfr_init2 (y, 42);
+
   mpfr_set_str_binary (x, "1.1111111101000111011010010010100e-1");
   mpfr_zeta (y, x, GMP_RNDN); /* shouldn't crash */
+
+  mpfr_set_prec (x, 40);
+  mpfr_set_prec (y, 50);
+  mpfr_set_str_binary (x, "1.001101001101000010011010110100110000101e-1");
+  mpfr_zeta (y, x, GMP_RNDU);
+  mpfr_set_prec (x, 50);
+  mpfr_set_str_binary (x, "-0.11111100011100111111101111100011110111001111111111E1");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error for input on 40 bits, output on 50 bits\n");
+      printf ("Expected "); mpfr_print_binary (x); puts ("");
+      printf ("Got      "); mpfr_print_binary (y); puts ("");
+      mpfr_set_str_binary (x, "1.001101001101000010011010110100110000101e-1");
+      mpfr_zeta (y, x, GMP_RNDU);
+      mpfr_print_binary (x); puts ("");
+      mpfr_print_binary (y); puts ("");
+      exit (1);
+    }
+
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 55);
+  mpfr_set_str_binary (x, "0.11e3");
+  mpfr_zeta (y, x, GMP_RNDN);
+  mpfr_set_prec (x, 55);
+  mpfr_set_str_binary (x, "0.1000001000111000010011000010011000000100100100100010010E1");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error in mpfr_zeta (1)\n");
+      printf ("Expected "); mpfr_print_binary (x); puts ("");
+      printf ("Got      "); mpfr_print_binary (y); puts ("");
+      exit (1);
+    }
+
+  mpfr_set_prec (x, 3);
+  mpfr_set_prec (y, 47);
+  mpfr_set_str_binary (x, "0.111e4");
+  mpfr_zeta (y, x, GMP_RNDN);
+  mpfr_set_prec (x, 47);
+  mpfr_set_str_binary (x, "1.0000000000000100000000111001001010111100101011");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error in mpfr_zeta (2)\n");
+      exit (1);
+    }
+
   mpfr_clear (x);
   mpfr_clear (y);
 }

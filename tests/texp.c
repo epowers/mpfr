@@ -1,6 +1,6 @@
 /* Test file for mpfr_exp.
 
-Copyright 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -66,47 +66,6 @@ check3 (double d, mp_rnd_t rnd, double e)
   mpfr_clear (x);
   mpfr_clear (y);
   return u;
-}
-
-/* computes n bits of exp(d) */
-static int
-check_large (double d, int n, mp_rnd_t rnd)
-{
-  mpfr_t x, y;
-
-  mpfr_init2 (x, n);
-  mpfr_init2 (y, n);
-  if (d == 0.0)
-    { /* try exp(Pi*sqrt(163)/3)-640320 */
-      mpfr_set_d (x, 163.0, rnd);
-      mpfr_sqrt (x, x, rnd);
-      mpfr_const_pi (y, rnd);
-      mpfr_mul (x, x, y, rnd);
-      mpfr_div_ui (x, x, 3, rnd);
-    }
-  else
-    mpfr_set_d (x, d, rnd);
-  mpfr_exp (y, x, rnd);
-  if (d == 0.0)
-    {
-      mpfr_set_d (x, 640320.0, rnd);
-      mpfr_sub (y, y, x, rnd);
-      printf ("exp(Pi*sqrt(163)/3)-640320=");
-    }
-  else
-    printf ("exp(%1.20e)=", d);
-  mpfr_out_str (stdout, 10, 0, y, rnd);
-  puts ("");
-  printf (" =");
-  mpfr_print_binary (y);
-  puts ("");
-  if (n == 53)
-    printf (" =%1.20e\n", mpfr_get_d1 (y));
-
-  mpfr_clear (x);
-  mpfr_clear (y);
-
-  return 0;
 }
 
 /* expx is the value of exp(X) rounded towards -infinity */
@@ -178,6 +137,17 @@ check_worst_cases (void)
       exit (1);
     }
 
+  mpfr_set_prec (x, 13001);
+  mpfr_set_prec (y, 13001);
+  mpfr_random (x);
+  mpfr_exp (y, x, GMP_RNDN);
+  mpfr_exp_2 (x, x, GMP_RNDN);
+  if (mpfr_cmp (x, y))
+    {
+      printf ("mpfr_exp_2 and mpfr_exp3 differ for prec=13001\n");
+      exit (1);
+    }
+
   mpfr_clear (x);
   mpfr_clear (y);
   return 0;
@@ -191,7 +161,7 @@ compare_exp2_exp3 (int n)
   mpfr_init (x);
   mpfr_init (y);
   mpfr_init (z);
-  for (prec=20; prec<=n; prec++)
+  for (prec = 20; prec <= n; prec++)
     {
       mpfr_set_prec (x, prec);
       mpfr_set_prec (y, prec);
@@ -227,15 +197,102 @@ static void
 check_special ()
 {
   mpfr_t x, y, z;
+  mp_exp_t emin, emax;
+
+  mpfr_init (x);
+  mpfr_init (y);
+  mpfr_init (z);
+
+  /* check exp(NaN) = NaN */
+  mpfr_set_nan (x);
+  mpfr_exp (y, x, GMP_RNDN);
+  if (!mpfr_nan_p (y))
+    {
+      printf ("Error for exp(NaN)\n");
+      exit (1);
+    }
+
+  /* check exp(+inf) = +inf */
+  mpfr_set_inf (x, 1);
+  mpfr_exp (y, x, GMP_RNDN);
+  if (!mpfr_inf_p (y) || mpfr_sgn (y) < 0)
+    {
+      printf ("Error for exp(+inf)\n");
+      exit (1);
+    }
+
+  /* check exp(-inf) = +0 */
+  mpfr_set_inf (x, -1);
+  mpfr_exp (y, x, GMP_RNDN);
+  if (mpfr_cmp_ui (y, 0) || mpfr_sgn (y) < 0)
+    {
+      printf ("Error for exp(-inf)\n");
+      exit (1);
+    }
+
+  /* check overflow */
+  emax = mpfr_get_emax ();
+  mpfr_set_emax (10);
+  mpfr_set_ui (x, 7, GMP_RNDN);
+  mpfr_exp (y, x, GMP_RNDN);
+  if (!mpfr_inf_p (y) || mpfr_sgn (y) < 0)
+    {
+      printf ("Error for exp(7) for emax=10\n");
+      exit (1);
+    }
+  mpfr_set_emax (emax);
+
+  /* check underflow */
+  emin = mpfr_get_emin ();
+  mpfr_set_emin (-10);
+  mpfr_set_si (x, -9, GMP_RNDN);
+  mpfr_exp (y, x, GMP_RNDN);
+  if (mpfr_cmp_ui (y, 0) || mpfr_sgn (y) < 0)
+    {
+      printf ("Error for exp(-9) for emin=-10\n");
+      printf ("Expected +0\n");
+      printf ("Got      "); mpfr_print_binary (y); puts ("");
+      exit (1);
+    }
+  mpfr_set_emin (emin);
+
+  /* check case EXP(x) < -precy */
+  mpfr_set_prec (y, 2);
+  mpfr_set_str_binary (x, "-0.1E-3");
+  mpfr_exp (y, x, GMP_RNDD);
+  if (mpfr_cmp_ui_2exp (y, 3, -2))
+    {
+      printf ("Error for exp(-1/16), prec=2, RNDD\n");
+      exit (1);
+    }
+  mpfr_exp (y, x, GMP_RNDZ);
+  if (mpfr_cmp_ui (y, 1))
+    {
+      printf ("Error for exp(-1/16), prec=2, RNDZ\n");
+      exit (1);
+    }
+  mpfr_set_str_binary (x, "0.1E-3");
+  mpfr_exp (y, x, GMP_RNDN);
+  if (mpfr_cmp_ui (y, 1))
+    {
+      printf ("Error for exp(1/16), prec=2, RNDN\n");
+      exit (1);
+    }
+  mpfr_exp (y, x, GMP_RNDU);
+  if (mpfr_cmp_ui_2exp (y, 3, -1))
+    {
+      printf ("Error for exp(1/16), prec=2, RNDU\n");
+      exit (1);
+    }
 
   /* bug reported by Franky Backeljauw, 28 Mar 2003 */
-  mpfr_init2 (x, 53);
-  mpfr_init2 (y, 53);
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
   mpfr_set_str_binary (x, "1.1101011000111101011110000111010010101001101001110111e28");
   mpfr_exp (y, x, GMP_RNDN);
 
   mpfr_set_prec (x, 153);
-  mpfr_init2 (z, 153);
+  mpfr_set_prec (z, 153);
   mpfr_set_str_binary (x, "1.1101011000111101011110000111010010101001101001110111e28");
   mpfr_exp (z, x, GMP_RNDN);
   mpfr_prec_round (z, 53, GMP_RNDN);
@@ -245,6 +302,12 @@ check_special ()
       printf ("Error in mpfr_exp for large argument\n");
       exit (1);
     }
+
+  /* corner cases in mpfr_exp3 */
+  mpfr_set_prec (x, 2);
+  mpfr_set_ui (x, 1, GMP_RNDN);
+  mpfr_set_prec (y, 2);
+  mpfr_exp3 (y, x, GMP_RNDN);
 
   mpfr_clear (x);
   mpfr_clear (y);
@@ -281,14 +344,7 @@ main (int argc, char *argv[])
   tests_start_mpfr ();
 
   check_inexact ();
-
   check_special ();
-
-  if (argc == 4)
-    {
-      check_large (atof(argv[1]), atoi(argv[2]), atoi(argv[3]));
-      exit (0);
-    }
 
   test_generic (2, 100, 100);
 

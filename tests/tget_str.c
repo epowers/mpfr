@@ -1,6 +1,6 @@
 /* Test file for mpfr_get_str.
 
-Copyright 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -184,6 +184,26 @@ check_small (void)
   if (strcmp (s, "b1cgfa4gha0h") || (e != 107))
     {
       printf ("Error in mpfr_get_str (4): s=%s e=%d\n", s, (int) e);
+      exit (1);
+    }
+  (*__gmp_free_func) (s, strlen (s) + 1);
+
+  mpfr_set_prec (x, 145);
+  mpfr_set_str_binary (x, "-0.1000110011000001011000010101101010110110101100101110100011111100011110011001001001010000100001000011000011000000010111011001000111101001110100110e6");
+  s = mpfr_get_str (NULL, &e, 4, 53, x, GMP_RNDU);
+  if (strcmp (s, "-20303001120111222312230232203330132121021100201003003") || (e != 3))
+    {
+      printf ("Error in mpfr_get_str (5): s=%s e=%d\n", s, (int) e);
+      exit (1);
+    }
+  (*__gmp_free_func) (s, strlen (s) + 1);
+
+  mpfr_set_prec (x, 45);
+  mpfr_set_str_binary (x, "-0.00100111010110010001011001110111010001010010010");
+  s = mpfr_get_str (NULL, &e, 32, 9, x, GMP_RNDN);
+  if (strcmp (s, "-4tchctq54") || (e != 0))
+    {
+      printf ("Error in mpfr_get_str (6): s=%s e=%d\n", s, (int) e);
       exit (1);
     }
   (*__gmp_free_func) (s, strlen (s) + 1);
@@ -444,6 +464,35 @@ check_special (int b, mp_prec_t p)
   mpfr_clear (x);
 }
 
+static void
+check_bug_base2k(void)
+{
+  /*
+   * -2.63b22b55697e800000000000@130
+   * +-0.1001100011101100100010101101010101011010010111111010000000000000000000000000+00000000000000000000001E522
+  */
+  mpfr_t xx,yy,zz;
+  char *s;
+  mp_exp_t e;
+
+  mpfr_init2(xx,107);
+  mpfr_init2(yy,79);
+  mpfr_init2(zz,99);
+
+  mpfr_set_str(xx, "-1.90e8c3e525d7c0000000000000@-18", 16, GMP_RNDN);
+  mpfr_set_str(yy, "-2.63b22b55697e8000000@130", 16, GMP_RNDN);
+  mpfr_add(zz, xx, yy, GMP_RNDD);
+  s = mpfr_get_str(NULL, &e, 16, 0, zz, GMP_RNDN);
+  if (strcmp(s, "-263b22b55697e8000000000008"))
+    {
+      printf(
+"Error for get_str base 16\nGot %s expected -263b22b55697e8000000000008\n", s);
+      exit(1);
+    }
+  (*__gmp_free_func) (s, strlen (s) + 1);
+  mpfr_clears(xx,yy,zz,NULL);
+}
+
 #define ITER 1000
 
 int
@@ -502,6 +551,7 @@ main (int argc, char *argv[])
   check3 (6.7274500420134077e-87, GMP_RNDU, "67275");
   check3 (6.7274500420134077e-87, GMP_RNDD, "67274");
 
+  check_bug_base2k();
   tests_end_mpfr ();
   return 0;
 }

@@ -1,6 +1,6 @@
 /* Test file for mpfr_frac.
 
-Copyright 2002, 2003 Free Software Foundation.
+Copyright 2002, 2003, 2004 Free Software Foundation.
 
 This file is part of the MPFR Library.
 
@@ -22,7 +22,9 @@ MA 02111-1307, USA. */
 #include <stdio.h>
 #include <stdlib.h>
 #include "gmp.h"
+#include "gmp-impl.h"
 #include "mpfr.h"
+#include "mpfr-impl.h"
 #include "mpfr-test.h"
 
 #define PIP 70
@@ -129,6 +131,38 @@ check1 (mpfr_ptr ip, mpfr_ptr fp)
     }
 }
 
+static void
+special (void)
+{
+  mpfr_t z, t;
+
+  mpfr_init2 (z, 6);
+  mpfr_init2 (t, 3);
+
+  mpfr_set_str_binary (z, "0.101101E3");
+  mpfr_frac (t, z, GMP_RNDN);
+  mpfr_set_str_binary (z, "0.101");
+  if (mpfr_cmp (t, z))
+    {
+      printf ("Error in frac(0.101101E3)\n");
+      exit (1);
+    }
+
+  mpfr_set_prec (z, 34);
+  mpfr_set_prec (t, 26);
+  mpfr_set_str_binary (z, "0.101101010000010011110011001101E9");
+  mpfr_frac (t, z, GMP_RNDN);
+  mpfr_set_str_binary (z, "0.000010011110011001101");
+  if (mpfr_cmp (t, z))
+    {
+      printf ("Error in frac(0.101101010000010011110011001101E9)\n");
+      exit (1);
+    }
+
+  mpfr_clear (z);
+  mpfr_clear (t);
+}
+
 int
 main (void)
 {
@@ -136,6 +170,8 @@ main (void)
   int ni, nf1, nf2;
 
   tests_start_mpfr ();
+
+  special ();
 
   mpfr_init2 (ip, PIP);
   mpfr_init2 (fp, PFP);
