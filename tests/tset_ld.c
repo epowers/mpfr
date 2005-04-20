@@ -97,7 +97,7 @@ test_small (void)
   mpfr_init2 (y, 64);
 
   mpfr_set_str (x, "0.1010010100111100110000001110101101000111010110000001111101110011E-16381", 2, GMP_RNDN);
-  mpfr_get_ld (x, GMP_RNDN);  /* infinite loop? */
+  d = mpfr_get_ld (x, GMP_RNDN);  /* infinite loop? */
   mpfr_set_ld (y, d, GMP_RNDN);
   mpfr_sub (y, x, y, GMP_RNDN);
   mpfr_abs (y, y, GMP_RNDN);
