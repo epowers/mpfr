@@ -101,11 +101,14 @@ test_small (void)
   mpfr_set_ld (y, d, GMP_RNDN);
   mpfr_sub (y, x, y, GMP_RNDN);
   mpfr_abs (y, y, GMP_RNDN);
-  if (mpfr_cmp_str (y, "1E-16434", 2, GMP_RNDN) > 0)
+  mpfr_clear_erangeflag ();
+  if (mpfr_cmp_str (y, "1E-16434", 2, GMP_RNDN) > 0 || mpfr_erangeflag_p ())
     {
-      printf ("Error with ");
+      printf ("Error with x = ");
       mpfr_out_str (NULL, 16, 0, x, GMP_RNDN);
-      printf ("\n");
+      printf ("\n|error| = ");
+      mpfr_out_str (NULL, 16, 0, y, GMP_RNDN);
+      printf (", d = %.20Lg\n", d);
       exit (1);
     }
 
