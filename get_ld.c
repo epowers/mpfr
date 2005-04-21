@@ -24,6 +24,8 @@ MA 02111-1307, USA. */
 
 #include "mpfr-impl.h"
 
+/* FIXME: rounding direction can be wrong if |x| < LDBL_MIN. */
+
 /* The MPFR number rounded to the size MPFR_LDBL_MANT_DIG of a long double
    will be scaled so that all its bits are representable in a double.
    Therefore the exponent of its LSB must be >= -1074, and the exponent

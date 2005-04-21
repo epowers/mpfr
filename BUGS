@@ -31,6 +31,8 @@ Known bugs:
 * The mpfr_set_ld function assumes that the long double type has an
   exponent of at most 15 bits.
 
+* In mpfr_get_ld, the rounding direction can be wrong if |x| < LDBL_MIN.
+
 * When MPFR is compiled with Visual C++ under MS Windows, some tests may
   fail, because of the way special IEEE-754 double values are tested.
 
