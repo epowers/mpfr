@@ -110,22 +110,23 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
               d = d / div9; /* exact */
               shift_exp += 512;
             }
-          mpfr_set_ui (u, 0, GMP_RNDZ);
         }
       else
         {
+          long double div9, div10;
+          div9 = (long double) (double)
+            7.4583407312002067432909653e-155; /* 2^(-2^9) */
+          div10 = div9  * div9;  /* 2^(-2^10) */
           /* since -DBL_MAX <= d <= DBL_MAX, the cast to double should not
              overflow here */
 	  inexact = mpfr_set_d (u, (double) d, GMP_RNDN);
 	  MPFR_ASSERTD(inexact == 0);
-	  if (MPFR_IS_ZERO (u) && (d != (long double) 0.0)) /* underflow */
+	  if (d != (long double) 0.0 &&
+              ABS(d) < div10) /* possible underflow */
 	    {
-	      long double div9, div10, div11, div12, div13;
-              /* After the divisions, any bit of d must be representable
-                 in a double. That's why we start at div9, not at div10. */
-              div9 = (long double) (double)
-                7.4583407312002067432909653e-155; /* 2^(-2^9) */
-	      div10 = div9  * div9;  /* 2^(-2^10) */
+	      long double div11, div12, div13;
+              /* After the divisions, any bit of d must be >= div10,
+                 hence the possible division by div9. */
 	      div11 = div10 * div10; /* 2^(-2^11) */
 	      div12 = div11 * div11; /* 2^(-2^12) */
 	      div13 = div12 * div12; /* 2^(-2^13) */
@@ -155,11 +156,14 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 		  shift_exp -= 512;
 		}
 	    }
+          else
+            {
+              mpfr_add (t, t, u, GMP_RNDN); /* exact */
+              if (!mpfr_number_p (t))
+                break;
+              d = d - (long double) mpfr_get_d1 (u); /* exact */
+            }
         }
-      mpfr_add (t, t, u, GMP_RNDN); /* exact */
-      if (!mpfr_number_p (t))
-        break;
-      d = d - (long double) mpfr_get_d1 (u); /* exact */
     }
   /* now t is exactly the input value d */
   inexact = mpfr_set (r, t, rnd_mode);
