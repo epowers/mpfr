@@ -122,10 +122,12 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
              overflow here */
 	  inexact = mpfr_set_d (u, (double) d, GMP_RNDN);
 	  MPFR_ASSERTD(inexact == 0);
-          if (d != (long double) 0.0 && ABS(d) < div10 && div11 != 0 &&
+          if (d != (long double) 0.0 &&
+              ABS(d) < div10 &&
+              div11 != (long double) 0.0 &&
               div11 / div10 == div10) /* possible underflow */
             {
-              long double div11, div12, div13;
+              long double div12, div13;
               /* After the divisions, any bit of d must be >= div10,
                  hence the possible division by div9. */
               div12 = div11 * div11; /* 2^(-2^12) */
