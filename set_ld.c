@@ -113,23 +113,23 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
         }
       else
         {
-          long double div9, div10;
-          div9 = (long double) (double)
-            7.4583407312002067432909653e-155; /* 2^(-2^9) */
+          long double div9, div10, div11;
+          div9 = (long double) (double) 7.4583407312002067432909653e-155;
+          /* div9 = 2^(-2^9) */
           div10 = div9  * div9;  /* 2^(-2^10) */
+          div11 = div10 * div10; /* 2^(-2^11) if extended precision */
           /* since -DBL_MAX <= d <= DBL_MAX, the cast to double should not
              overflow here */
 	  inexact = mpfr_set_d (u, (double) d, GMP_RNDN);
 	  MPFR_ASSERTD(inexact == 0);
-	  if (d != (long double) 0.0 &&
-              ABS(d) < div10) /* possible underflow */
-	    {
-	      long double div11, div12, div13;
+          if (d != (long double) 0.0 && ABS(d) < div10 && div11 != 0 &&
+              div11 / div10 == div10) /* possible underflow */
+            {
+              long double div11, div12, div13;
               /* After the divisions, any bit of d must be >= div10,
                  hence the possible division by div9. */
-	      div11 = div10 * div10; /* 2^(-2^11) */
-	      div12 = div11 * div11; /* 2^(-2^12) */
-	      div13 = div12 * div12; /* 2^(-2^13) */
+              div12 = div11 * div11; /* 2^(-2^12) */
+              div13 = div12 * div12; /* 2^(-2^13) */
 	      if (ABS(d) <= div13)
 		{
 		  d = d / div13; /* exact */
