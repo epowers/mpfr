@@ -23,7 +23,9 @@ MA 02111-1307, USA. */
 #include <stdlib.h>
 #include <float.h>
 #include <time.h>
+#if WITH_FPU_CONTROL
 #include <fpu_control.h>
+#endif
 
 #include "mpfr-test.h"
 
