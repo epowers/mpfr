@@ -1,7 +1,7 @@
 /* mpfr_set_ld -- convert a machine long double to
                   a multiple precision floating-point number
 
-Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -120,8 +120,12 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 	  MPFR_ASSERTD(inexact == 0);
 	  if (MPFR_IS_ZERO (u) && (d != (long double) 0.0)) /* underflow */
 	    {
-	      long double div10, div11, div12, div13;
-	      div10 = (long double) (double) 5.5626846462680034577255e-309; /* 2^(-2^10) */
+	      long double div9, div10, div11, div12, div13;
+              /* After the divisions, any bit of d must be representable
+                 in a double. That's why we start at div9, not at div10. */
+              div9 = (long double) (double)
+                7.4583407312002067432909653e-155; /* 2^(-2^9) */
+	      div10 = div9  * div9;  /* 2^(-2^10) */
 	      div11 = div10 * div10; /* 2^(-2^11) */
 	      div12 = div11 * div11; /* 2^(-2^12) */
 	      div13 = div12 * div12; /* 2^(-2^13) */
@@ -144,6 +148,11 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 		{
 		  d = d / div10; /* exact */
 		  shift_exp -= 1024;
+		}
+	      if (ABS(d) <= div9)
+		{
+		  d = d / div9;  /* exact */
+		  shift_exp -= 512;
 		}
 	    }
         }
