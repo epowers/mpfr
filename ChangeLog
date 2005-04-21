@@ -1,3 +1,74 @@
+2005-04-21  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* BUGS, get_ld.c:
+	In mpfr_get_ld, the rounding direction can be wrong if |x| < LDBL_MIN.
+	(2.1 branch)
+
+	* set_ld.c: Correction of latest patch. (2.1 branch)
+
+	* set_ld.c:
+	Fix for long double = double precision (e.g. PowerPC) and rounding
+	toward +inf. (2.1 branch)
+
+	* set_ld.c:
+	mpfr_set_ld should now work in any rounding mode. (2.1 branch)
+
+	* tests/tset_ld.c: Forgot a #if... (2.1 branch)
+
+	* tests/tset_ld.c:
+	Added the ability to change the control word when compiling tset_ld
+	with -DWITH_FPU_CONTROL=1 and executing tset_ld with an argument
+	(not used in the automatical tests yet). (2.1 branch)
+
+	* tests/tset_ld.c:
+	Fix for platforms where long double = double. (2.1 branch)
+
+	* set_ld.c: Fixed mpfr_set_ld for very small numbers. (2.1 branch)
+
+	* tests/tset_ld.c: More output in test_small. (2.1 branch)
+
+2005-04-20  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* tests/tset_ld.c:
+	Fixed bug in test_small (but this still shows a bug). (2.1 branch)
+
+	* tests/tset_ld.c: Improved the test_small test. (2.1 branch)
+
+2005-04-04  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* get_ld.c, tests/tset_ld.c: Avoid an infinite loop. [2.1 branch]
+
+2005-03-30  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* pow_ui.c, tests/tpow.c:
+	[2.1 branch] Ported two mpfr_pow_ui bug fixes from the trunk;
+	added a testcase found with random tests written for that.
+
+2005-03-21  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.h, mpfr.texi, version.c, VERSION:
+	Update for future version in 2.1 branch.
+
+2005-03-17  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* atanh.c, tests/tatanh.c:
+	Fixed a bug for mpfr_atanh(x) with 1 < |x| < 2 (found by Matt Reddick).
+	[2.1 branch]
+
+2005-03-09  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* add1sp.c, tests/tadd1sp.c:
+	Ported bug fix in case of reuse of variable (a,b,a) with
+	Exp(b) = Exp(a) + Prec(b) to the 2.1 branch.
+
+	* exp_2.c, tests/texp.c:
+	Bug due to wrong approximation to x / log(2). [2.1 branch]
+
+2005-02-23  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* ChangeLog, NEWS, VERSION, mpfr.h, mpfr.texi, version.c:
+	Update for MPFR 2.1.1.
+
 2005-02-21  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* ui_sub.c: Ported mpfr_ui_sub patch to 2.1 branch:
