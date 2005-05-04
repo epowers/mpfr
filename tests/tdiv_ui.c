@@ -219,6 +219,20 @@ main (int argc, char **argv)
     }
   mpfr_clear(x);
 
+  mpfr_init2 (x, 32);
+  mpfr_set_str (x, "1.0000000000000000000000000000111e-2", 2, GMP_RNDD);
+  mpfr_div_ui (x, x, 275604255, GMP_RNDN);
+  if (mpfr_cmp_str (x, "1.1111001010101110101010001101111e-31", 2, GMP_RNDD))
+    {
+      printf ("Error for x=1.0000000000000000000000000000111e-2,\n"
+              "u=275604255, prec=32, rnd_mode=GMP_RNDN\n"
+              "got      ");
+      mpfr_out_str (stdout, 2, 0, x, GMP_RNDD);
+      printf ("\nexpected 1.1111001010101110101010001101111e-31\n");
+      exit (1);
+    }
+  mpfr_clear(x);
+
   tests_end_mpfr ();
   return 0;
 }
