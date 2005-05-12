@@ -110,6 +110,7 @@ static void
 test_large_small (void)
 {
   mpfr_t x, y, z;
+  int inexact;
 
   mpfr_init2 (x, 3);
   mpfr_init2 (y, 2);
@@ -117,7 +118,29 @@ test_large_small (void)
 
   mpfr_set_ui_2exp (x, 1, mpfr_get_emax () / 2, GMP_RNDN);
   mpfr_set_ui_2exp (y, 1, -1, GMP_RNDN);
-  mpfr_hypot (z, x, y, GMP_RNDN);
+  inexact = mpfr_hypot (z, x, y, GMP_RNDN);
+  if (inexact >= 0 || mpfr_cmp (x, z))
+    {
+      printf ("Error 1 in test_large_small\n");
+      exit (1);
+    }
+
+  mpfr_mul_ui (x, x, 5, GMP_RNDN);
+  inexact = mpfr_hypot (z, x, y, GMP_RNDN);
+  if (mpfr_cmp (x, z) >= 0)
+    {
+      printf ("Error 2 in test_large_small\n");
+      printf ("x = ");
+      mpfr_out_str (stdout, 2, 0, x, GMP_RNDN);
+      printf ("\n");
+      printf ("y = ");
+      mpfr_out_str (stdout, 2, 0, y, GMP_RNDN);
+      printf ("\n");
+      printf ("z = ");
+      mpfr_out_str (stdout, 2, 0, z, GMP_RNDN);
+      printf (" (in precision 2)\n");
+      exit (1);
+    }
 
   mpfr_clear (x);
   mpfr_clear (y);
@@ -222,10 +245,7 @@ main (int argc, char *argv[])
   mpfr_clear (t);
 
   test_large ();
-
-#ifdef TEST_LARGE_SMALL
   test_large_small ();
-#endif
 
   tests_end_mpfr ();
   return 0;
