@@ -104,7 +104,10 @@ mpfr_hypot (mpfr_ptr z, mpfr_srcptr x , mpfr_srcptr y , mp_rnd_t rnd_mode)
           inexact = mpfr_abs (z, x, rnd_mode);
           if (inexact == -2)
             {
-              /* In case of tie in GMP_RNDN, one must round away from 0. */
+              /* In case of tie in GMP_RNDN, one must round away from 0.
+                 Note: One could do better, by using GMP_RNDNA or similar,
+                 but I want to keep the change minimal. Anyway this case
+                 should be quite rare in practice. */
               mpfr_add_one_ulp (z, rnd_mode);
               return 1;
             }
