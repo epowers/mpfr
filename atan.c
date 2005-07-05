@@ -1,6 +1,6 @@
 /* mpfr_atan -- arc-tangent of a floating-point number
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 
 This file is part of the MPFR Library, and was contributed by Mathieu Dutour.
 
@@ -107,7 +107,8 @@ mpfr_atan (mpfr_ptr arctangent, mpfr_srcptr x, mp_rnd_t rnd_mode)
       else /* x is necessarily 0 */
 	{
           MPFR_ASSERTD(MPFR_IS_ZERO(x));
-	  mpfr_set_ui (arctangent, 0, GMP_RNDN);
+          MPFR_SET_ZERO (arctangent);
+          MPFR_SET_SAME_SIGN (arctangent, x);
 	  return 0; /* exact result */
 	}
     }
