@@ -46,7 +46,7 @@ int
 mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 {
   mpfr_t t, u;
-  int inexact, shift_exp = 0, inexact2 = 0;
+  int inexact, shift_exp = 0;
 
   LONGDOUBLE_NAN_ACTION (d, goto nan);
 
@@ -67,8 +67,10 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 
   mpfr_init2 (t, MPFR_LDBL_MANT_DIG);
   mpfr_init2 (u, IEEE_DBL_MANT_DIG);
-  mpfr_set_ui (t, 0, GMP_RNDN);
   mpfr_save_emin_emax ();
+
+ convert:
+  mpfr_set_ui (t, 0, GMP_RNDN);
   while (d != (long double) 0.0)
     {
       if ((d > (long double) DBL_MAX) || ((-d) > (long double) DBL_MAX))
@@ -120,7 +122,7 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
           div11 = div10 * div10; /* 2^(-2^11) if extended precision */
           /* since -DBL_MAX <= d <= DBL_MAX, the cast to double should not
              overflow here */
-	  inexact = mpfr_set_d (u, (double) d, GMP_RNDN);
+	  inexact = mpfr_set_d (u, (double) d, GMP_RNDZ);
 	  MPFR_ASSERTD(inexact == 0);
           if (d != (long double) 0.0 &&
               ABS(d) < div10 &&
@@ -160,21 +162,44 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 	    }
           else
             {
-              mpfr_add (t, t, u, GMP_RNDN); /* exact */
-              if (!mpfr_number_p (t))
-                break;
+              if (mpfr_add (t, t, u, GMP_RNDZ) != 0)
+                {
+                  if (!mpfr_number_p (t))
+                    break;
+                  /* Inexact. This cannot happen unless the C implementation
+                     "lies" on the precision or when long doubles are
+                     implemented with FP expansions like under Mac OS X. */
+                  if (MPFR_PREC (t) != MPFR_PREC (r) + 1)
+                    {
+                      /* We assume that MPFR_PREC (r) < MPFR_PREC_MAX.
+                         The precision MPFR_PREC (r) + 1 allows us to
+                         deduce the rounding bit and the sticky bit. */
+                      mpfr_set_prec (t, MPFR_PREC (r) + 1);
+                      goto convert;
+                    }
+                  else
+                    {
+                      mp_limb_t *tp;
+                      int rb_mask;
+
+                      /* Since mpfr_add was inexact, the sticky bit is 1. */
+                      tp = MPFR_MANT (t);
+                      rb_mask = MPFR_LIMB_ONE <<
+                        (BITS_PER_MP_LIMB - 1 -
+                         (MPFR_PREC (r) & (BITS_PER_MP_LIMB - 1)));
+                      if (rnd_mode == GMP_RNDN)
+                        rnd_mode = (*tp & rb_mask) ^ MPFR_IS_NEG (t) ?
+                          GMP_RNDU : GMP_RNDD;
+                      *tp |= rb_mask;
+                      break;
+                    }
+                }
               d = d - (long double) mpfr_get_d1 (u); /* exact */
             }
         }
     }
-  /* now t is exactly the input value d */
-  inexact = mpfr_set (r, t, rnd_mode);
-  if (shift_exp > 0)
-    inexact2 = mpfr_mul_2exp (r, r, shift_exp, rnd_mode);
-  else if (shift_exp < 0)
-    inexact2 = mpfr_div_2exp (r, r, -shift_exp, rnd_mode);
-  if (inexact2) /* overflow */
-    inexact = inexact2;
+  /* Now t is exactly the input value d, possibly shifted. */
+  inexact = mpfr_mul_2si (r, t, shift_exp, rnd_mode);
   mpfr_clear (t);
   mpfr_clear (u);
   mpfr_restore_emin_emax ();
