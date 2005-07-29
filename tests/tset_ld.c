@@ -155,7 +155,7 @@ main (int argc, char *argv[])
   mpfr_test_init ();
   tests_machine_prec_long_double ();
 
-  mpfr_init2 (x, 113);
+  mpfr_init2 (x, MPFR_LDBL_MANT_DIG);
 
   /* check +0.0 and -0.0 */
   d = 0.0;
@@ -210,7 +210,7 @@ main (int argc, char *argv[])
 
   /* checks that 2^i, 2^i+1 and 2^i-1 are correctly converted */
   d = 1.0;
-  for (i = 1; i <= 113; i++)
+  for (i = 1; i < MPFR_LDBL_MANT_DIG; i++)
     {
       d = 2.0 * d; /* d = 2^i */
       check_set_get (d, x);
