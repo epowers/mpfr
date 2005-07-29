@@ -47,6 +47,7 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 {
   mpfr_t t, u;
   int inexact, shift_exp = 0;
+  long double x;
 
   LONGDOUBLE_NAN_ACTION (d, goto nan);
 
@@ -70,10 +71,11 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
   mpfr_save_emin_emax ();
 
  convert:
+  x = d;
   mpfr_set_ui (t, 0, GMP_RNDN);
-  while (d != (long double) 0.0)
+  while (x != (long double) 0.0)
     {
-      if ((d > (long double) DBL_MAX) || ((-d) > (long double) DBL_MAX))
+      if ((x > (long double) DBL_MAX) || ((-x) > (long double) DBL_MAX))
         {
           long double div9, div10, div11, div12, div13;
 
@@ -85,31 +87,31 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
           div11 = div10 * div10; /* 2^(2^11) */
           div12 = div11 * div11; /* 2^(2^12) */
           div13 = div12 * div12; /* 2^(2^13) */
-          if (ABS(d) >= div13)
+          if (ABS(x) >= div13)
             {
-              d = d / div13; /* exact */
+              x /= div13; /* exact */
               shift_exp += 8192;
             }
-          if (ABS(d) >= div12)
+          if (ABS(x) >= div12)
             {
-              d = d / div12; /* exact */
+              x /= div12; /* exact */
               shift_exp += 4096;
             }
-          if (ABS(d) >= div11)
+          if (ABS(x) >= div11)
             {
-              d = d / div11; /* exact */
+              x /= div11; /* exact */
               shift_exp += 2048;
             }
-          if (ABS(d) >= div10)
+          if (ABS(x) >= div10)
             {
-              d = d / div10; /* exact */
+              x /= div10; /* exact */
               shift_exp += 1024;
             }
-          /* warning: we may have DBL_MAX=2^1024*(1-2^(-53)) < d < 2^1024,
+          /* warning: we may have DBL_MAX=2^1024*(1-2^(-53)) < x < 2^1024,
              therefore we have one extra exponent reduction step */
-          if (ABS(d) >= div9)
+          if (ABS(x) >= div9)
             {
-              d = d / div9; /* exact */
+              x /= div9; /* exact */
               shift_exp += 512;
             }
         }
@@ -120,43 +122,43 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
           /* div9 = 2^(-2^9) */
           div10 = div9  * div9;  /* 2^(-2^10) */
           div11 = div10 * div10; /* 2^(-2^11) if extended precision */
-          /* since -DBL_MAX <= d <= DBL_MAX, the cast to double should not
+          /* since -DBL_MAX <= x <= DBL_MAX, the cast to double should not
              overflow here */
-	  inexact = mpfr_set_d (u, (double) d, GMP_RNDZ);
+	  inexact = mpfr_set_d (u, (double) x, GMP_RNDZ);
 	  MPFR_ASSERTD(inexact == 0);
-          if (d != (long double) 0.0 &&
-              ABS(d) < div10 &&
+          if (x != (long double) 0.0 &&
+              ABS(x) < div10 &&
               div11 != (long double) 0.0 &&
               div11 / div10 == div10) /* possible underflow */
             {
               long double div12, div13;
-              /* After the divisions, any bit of d must be >= div10,
+              /* After the divisions, any bit of x must be >= div10,
                  hence the possible division by div9. */
               div12 = div11 * div11; /* 2^(-2^12) */
               div13 = div12 * div12; /* 2^(-2^13) */
-	      if (ABS(d) <= div13)
+	      if (ABS(x) <= div13)
 		{
-		  d = d / div13; /* exact */
+		  x /= div13; /* exact */
 		  shift_exp -= 8192;
 		}
-	      if (ABS(d) <= div12)
+	      if (ABS(x) <= div12)
 		{
-		  d = d / div12; /* exact */
+		  x /= div12; /* exact */
 		  shift_exp -= 4096;
 		}
-	      if (ABS(d) <= div11)
+	      if (ABS(x) <= div11)
 		{
-		  d = d / div11; /* exact */
+		  x /= div11; /* exact */
 		  shift_exp -= 2048;
 		}
-	      if (ABS(d) <= div10)
+	      if (ABS(x) <= div10)
 		{
-		  d = d / div10; /* exact */
+		  x /= div10; /* exact */
 		  shift_exp -= 1024;
 		}
-	      if (ABS(d) <= div9)
+	      if (ABS(x) <= div9)
 		{
-		  d = d / div9;  /* exact */
+		  x /= div9;  /* exact */
 		  shift_exp -= 512;
 		}
 	    }
@@ -194,11 +196,10 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
                       break;
                     }
                 }
-              d = d - (long double) mpfr_get_d1 (u); /* exact */
+              x -= (long double) mpfr_get_d1 (u); /* exact */
             }
         }
     }
-  /* Now t is exactly the input value d, possibly shifted. */
   inexact = mpfr_mul_2si (r, t, shift_exp, rnd_mode);
   mpfr_clear (t);
   mpfr_clear (u);
