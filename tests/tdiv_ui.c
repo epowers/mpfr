@@ -1,6 +1,6 @@
 /* Test file for mpfr_div_ui.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 
 This file is part of the MPFR Library.
 
@@ -140,7 +140,7 @@ check_inexact (void)
   mp_prec_t px, py;
   int inexact, cmp;
   unsigned long int u;
-  mp_rnd_t rnd;
+  int rnd;
 
   mpfr_init (x);
   mpfr_init (y);
@@ -161,8 +161,8 @@ check_inexact (void)
           mpfr_set_prec (z, py + mp_bits_per_limb);
           for (rnd = 0; rnd < GMP_RND_MAX; rnd++)
             {
-              inexact = mpfr_div_ui (y, x, u, rnd);
-              if (mpfr_mul_ui (z, y, u, rnd))
+              inexact = mpfr_div_ui (y, x, u, (mp_rnd_t) rnd);
+              if (mpfr_mul_ui (z, y, u, (mp_rnd_t) rnd))
                 {
                   printf ("z <- y * u should be exact for u=%lu\n", u);
                   printf ("y="); mpfr_print_binary (y); puts ("");
@@ -175,7 +175,7 @@ check_inexact (void)
                   ((inexact < 0) && (cmp >= 0)))
                 {
                   printf ("Wrong inexact flag for u=%lu, rnd=%s\n", u,
-                          mpfr_print_rnd_mode(rnd));
+                          mpfr_print_rnd_mode ((mp_rnd_t) rnd));
                   printf ("x="); mpfr_print_binary (x); puts ("");
                   printf ("y="); mpfr_print_binary (y); puts ("");
                   exit (1);
@@ -215,6 +215,20 @@ main (int argc, char **argv)
   if (mpfr_cmp_str1 (x, "0.21972245773362189536"))
     {
       printf ("Error in mpfr_div_ui for x=ln(3), u=5\n");
+      exit (1);
+    }
+  mpfr_clear(x);
+
+  mpfr_init2 (x, 32);
+  mpfr_set_str (x, "1.0000000000000000000000000000111e-2", 2, GMP_RNDD);
+  mpfr_div_ui (x, x, 275604255, GMP_RNDN);
+  if (mpfr_cmp_str (x, "1.1111001010101110101010001101111e-31", 2, GMP_RNDD))
+    {
+      printf ("Error for x=1.0000000000000000000000000000111e-2,\n"
+              "u=275604255, prec=32, rnd_mode=GMP_RNDN\n"
+              "got      ");
+      mpfr_out_str (stdout, 2, 0, x, GMP_RNDD);
+      printf ("\nexpected 1.1111001010101110101010001101111e-31\n");
       exit (1);
     }
   mpfr_clear(x);

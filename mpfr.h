@@ -25,7 +25,7 @@ MA 02111-1307, USA. */
 /* Define MPFR version number */
 #define MPFR_VERSION_MAJOR 2
 #define MPFR_VERSION_MINOR 1
-#define MPFR_VERSION_PATCHLEVEL 0
+#define MPFR_VERSION_PATCHLEVEL 2
 
 /* Macros dealing with MPFR VERSION */
 #define MPFR_VERSION_NUM(a,b,c) (((a) << 16L) | ((b) << 8) | (c))
@@ -435,7 +435,7 @@ int mpfr_cmp_f _MPFR_PROTO ((mpfr_srcptr, mpf_srcptr));
 
 int mpfr_fma _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_srcptr, mpfr_srcptr,
                            mpfr_rnd_t));
-int mpfr_sum _MPFR_PROTO ((mpfr_ptr, mpfr_ptr __gmp_const tab[], unsigned long,
+int mpfr_sum _MPFR_PROTO ((mpfr_ptr, mpfr_ptr __gmp_const [], unsigned long,
 			   mpfr_rnd_t));
 
 void mpfr_init_cache _MPFR_PROTO ((mpfr_cache_t,int(*)(mpfr_ptr,mpfr_rnd_t)));
@@ -444,7 +444,7 @@ int  mpfr_cache _MPFR_PROTO ((mpfr_ptr, mpfr_cache_t, mpfr_rnd_t));
 void mpfr_free_cache _MPFR_PROTO ((void));
 
 int  mpfr_strtofr _MPFR_PROTO ((mpfr_ptr, __gmp_const char *, char **,
-				unsigned int, mpfr_rnd_t));
+				int, mpfr_rnd_t));
 
 #if defined (__cplusplus)
 }

@@ -1,7 +1,7 @@
 /* mpfr_exp_2 -- exponential of a floating-point number
                 using Brent's algorithms in O(n^(1/2)*M(n)) and O(n^(1/3)*M(n))
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -147,7 +147,7 @@ mpfr_exp_2 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
       mpfr_sub (r, x, r, GMP_RNDU);
       /* possible cancellation here: the error on r is at most
 	 3*2^(EXP(old_r)-EXP(new_r)) */
-      if (MPFR_IS_NEG (r))
+      while (MPFR_IS_NEG (r))
 	{ /* initial approximation n was too large */
 	  n--;
 	  mpfr_add (r, r, s, GMP_RNDU);

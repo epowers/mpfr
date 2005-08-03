@@ -1,7 +1,8 @@
 /* mpfr_pow_ui-- compute the power of a floating-point
                                   by a machine integer
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+ Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -61,6 +62,10 @@ mpfr_pow_ui (mpfr_ptr x, mpfr_srcptr y, unsigned long int n, mp_rnd_t rnd)
           MPFR_ASSERTD(MPFR_IS_ZERO(y));
           /* 0^n = 0 for any n */
 	  MPFR_SET_ZERO(x);
+          if (MPFR_IS_POS (y) || ((n & 1) == 0))
+            MPFR_SET_POS (x);
+          else
+            MPFR_SET_NEG (x);
 	  MPFR_RET(0);
 	}
     }
@@ -91,7 +96,7 @@ mpfr_pow_ui (mpfr_ptr x, mpfr_srcptr y, unsigned long int n, mp_rnd_t rnd)
         ;
       mpfr_set_prec (res, prec);
       inexact = mpfr_set (res, y, rnd1);
-      err = prec <= (mpfr_prec_t) i ? 0 : prec - (mpfr_prec_t) i;
+      err = prec <= (mpfr_prec_t) i ? 0 : prec - 1 - (mpfr_prec_t) i;
       MPFR_ASSERTD (i >= 1);
       /* now 2^(i-1) <= n < 2^i */
       for (i -= 2; i >= 0; i--)

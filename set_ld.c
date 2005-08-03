@@ -1,7 +1,7 @@
 /* mpfr_set_ld -- convert a machine long double to
                   a multiple precision floating-point number
 
-Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -46,7 +46,8 @@ int
 mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 {
   mpfr_t t, u;
-  int inexact, shift_exp = 0, inexact2 = 0;
+  int inexact, shift_exp = 0;
+  long double x;
 
   LONGDOUBLE_NAN_ACTION (d, goto nan);
 
@@ -67,11 +68,14 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
 
   mpfr_init2 (t, MPFR_LDBL_MANT_DIG);
   mpfr_init2 (u, IEEE_DBL_MANT_DIG);
-  mpfr_set_ui (t, 0, GMP_RNDN);
   mpfr_save_emin_emax ();
-  while (d != (long double) 0.0)
+
+ convert:
+  x = d;
+  mpfr_set_ui (t, 0, GMP_RNDN);
+  while (x != (long double) 0.0)
     {
-      if ((d > (long double) DBL_MAX) || ((-d) > (long double) DBL_MAX))
+      if ((x > (long double) DBL_MAX) || ((-x) > (long double) DBL_MAX))
         {
           long double div9, div10, div11, div12, div13;
 
@@ -83,83 +87,120 @@ mpfr_set_ld (mpfr_ptr r, long double d, mp_rnd_t rnd_mode)
           div11 = div10 * div10; /* 2^(2^11) */
           div12 = div11 * div11; /* 2^(2^12) */
           div13 = div12 * div12; /* 2^(2^13) */
-          if (ABS(d) >= div13)
+          if (ABS(x) >= div13)
             {
-              d = d / div13; /* exact */
+              x /= div13; /* exact */
               shift_exp += 8192;
             }
-          if (ABS(d) >= div12)
+          if (ABS(x) >= div12)
             {
-              d = d / div12; /* exact */
+              x /= div12; /* exact */
               shift_exp += 4096;
             }
-          if (ABS(d) >= div11)
+          if (ABS(x) >= div11)
             {
-              d = d / div11; /* exact */
+              x /= div11; /* exact */
               shift_exp += 2048;
             }
-          if (ABS(d) >= div10)
+          if (ABS(x) >= div10)
             {
-              d = d / div10; /* exact */
+              x /= div10; /* exact */
               shift_exp += 1024;
             }
-          /* warning: we may have DBL_MAX=2^1024*(1-2^(-53)) < d < 2^1024,
+          /* warning: we may have DBL_MAX=2^1024*(1-2^(-53)) < x < 2^1024,
              therefore we have one extra exponent reduction step */
-          if (ABS(d) >= div9)
+          if (ABS(x) >= div9)
             {
-              d = d / div9; /* exact */
+              x /= div9; /* exact */
               shift_exp += 512;
             }
-          mpfr_set_ui (u, 0, GMP_RNDZ);
         }
       else
         {
-          /* since -DBL_MAX <= d <= DBL_MAX, the cast to double should not
+          long double div9, div10, div11;
+          div9 = (long double) (double) 7.4583407312002067432909653e-155;
+          /* div9 = 2^(-2^9) */
+          div10 = div9  * div9;  /* 2^(-2^10) */
+          div11 = div10 * div10; /* 2^(-2^11) if extended precision */
+          /* since -DBL_MAX <= x <= DBL_MAX, the cast to double should not
              overflow here */
-	  inexact = mpfr_set_d (u, (double) d, GMP_RNDN);
+	  inexact = mpfr_set_d (u, (double) x, GMP_RNDZ);
 	  MPFR_ASSERTD(inexact == 0);
-	  if (MPFR_IS_ZERO (u) && (d != (long double) 0.0)) /* underflow */
-	    {
-	      long double div10, div11, div12, div13;
-	      div10 = (long double) (double) 5.5626846462680034577255e-309; /* 2^(-2^10) */
-	      div11 = div10 * div10; /* 2^(-2^11) */
-	      div12 = div11 * div11; /* 2^(-2^12) */
-	      div13 = div12 * div12; /* 2^(-2^13) */
-	      if (ABS(d) <= div13)
+          if (x != (long double) 0.0 &&
+              ABS(x) < div10 &&
+              div11 != (long double) 0.0 &&
+              div11 / div10 == div10) /* possible underflow */
+            {
+              long double div12, div13;
+              /* After the divisions, any bit of x must be >= div10,
+                 hence the possible division by div9. */
+              div12 = div11 * div11; /* 2^(-2^12) */
+              div13 = div12 * div12; /* 2^(-2^13) */
+	      if (ABS(x) <= div13)
 		{
-		  d = d / div13; /* exact */
+		  x /= div13; /* exact */
 		  shift_exp -= 8192;
 		}
-	      if (ABS(d) <= div12)
+	      if (ABS(x) <= div12)
 		{
-		  d = d / div12; /* exact */
+		  x /= div12; /* exact */
 		  shift_exp -= 4096;
 		}
-	      if (ABS(d) <= div11)
+	      if (ABS(x) <= div11)
 		{
-		  d = d / div11; /* exact */
+		  x /= div11; /* exact */
 		  shift_exp -= 2048;
 		}
-	      if (ABS(d) <= div10)
+	      if (ABS(x) <= div10)
 		{
-		  d = d / div10; /* exact */
+		  x /= div10; /* exact */
 		  shift_exp -= 1024;
 		}
+	      if (ABS(x) <= div9)
+		{
+		  x /= div9;  /* exact */
+		  shift_exp -= 512;
+		}
 	    }
+          else
+            {
+              if (mpfr_add (t, t, u, GMP_RNDZ) != 0)
+                {
+                  if (!mpfr_number_p (t))
+                    break;
+                  /* Inexact. This cannot happen unless the C implementation
+                     "lies" on the precision or when long doubles are
+                     implemented with FP expansions like under Mac OS X. */
+                  if (MPFR_PREC (t) != MPFR_PREC (r) + 1)
+                    {
+                      /* We assume that MPFR_PREC (r) < MPFR_PREC_MAX.
+                         The precision MPFR_PREC (r) + 1 allows us to
+                         deduce the rounding bit and the sticky bit. */
+                      mpfr_set_prec (t, MPFR_PREC (r) + 1);
+                      goto convert;
+                    }
+                  else
+                    {
+                      mp_limb_t *tp;
+                      int rb_mask;
+
+                      /* Since mpfr_add was inexact, the sticky bit is 1. */
+                      tp = MPFR_MANT (t);
+                      rb_mask = MPFR_LIMB_ONE <<
+                        (BITS_PER_MP_LIMB - 1 -
+                         (MPFR_PREC (r) & (BITS_PER_MP_LIMB - 1)));
+                      if (rnd_mode == GMP_RNDN)
+                        rnd_mode = (*tp & rb_mask) ^ MPFR_IS_NEG (t) ?
+                          GMP_RNDU : GMP_RNDD;
+                      *tp |= rb_mask;
+                      break;
+                    }
+                }
+              x -= (long double) mpfr_get_d1 (u); /* exact */
+            }
         }
-      mpfr_add (t, t, u, GMP_RNDN); /* exact */
-      if (!mpfr_number_p (t))
-        break;
-      d = d - (long double) mpfr_get_d1 (u); /* exact */
     }
-  /* now t is exactly the input value d */
-  inexact = mpfr_set (r, t, rnd_mode);
-  if (shift_exp > 0)
-    inexact2 = mpfr_mul_2exp (r, r, shift_exp, rnd_mode);
-  else if (shift_exp < 0)
-    inexact2 = mpfr_div_2exp (r, r, -shift_exp, rnd_mode);
-  if (inexact2) /* overflow */
-    inexact = inexact2;
+  inexact = mpfr_mul_2si (r, t, shift_exp, rnd_mode);
   mpfr_clear (t);
   mpfr_clear (u);
   mpfr_restore_emin_emax ();

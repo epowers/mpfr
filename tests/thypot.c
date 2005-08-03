@@ -1,6 +1,6 @@
 /* Test file for mpfr_hypot.
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 Adapted from tarctan.c.
 
 This file is part of the MPFR Library.
@@ -106,6 +106,47 @@ test_large (void)
   mpfr_clear (t);
 }
 
+static void
+test_large_small (void)
+{
+  mpfr_t x, y, z;
+  int inexact;
+
+  mpfr_init2 (x, 3);
+  mpfr_init2 (y, 2);
+  mpfr_init2 (z, 2);
+
+  mpfr_set_ui_2exp (x, 1, mpfr_get_emax () / 2, GMP_RNDN);
+  mpfr_set_ui_2exp (y, 1, -1, GMP_RNDN);
+  inexact = mpfr_hypot (z, x, y, GMP_RNDN);
+  if (inexact >= 0 || mpfr_cmp (x, z))
+    {
+      printf ("Error 1 in test_large_small\n");
+      exit (1);
+    }
+
+  mpfr_mul_ui (x, x, 5, GMP_RNDN);
+  inexact = mpfr_hypot (z, x, y, GMP_RNDN);
+  if (mpfr_cmp (x, z) >= 0)
+    {
+      printf ("Error 2 in test_large_small\n");
+      printf ("x = ");
+      mpfr_out_str (stdout, 2, 0, x, GMP_RNDN);
+      printf ("\n");
+      printf ("y = ");
+      mpfr_out_str (stdout, 2, 0, y, GMP_RNDN);
+      printf ("\n");
+      printf ("z = ");
+      mpfr_out_str (stdout, 2, 0, z, GMP_RNDN);
+      printf (" (in precision 2)\n");
+      exit (1);
+    }
+
+  mpfr_clear (x);
+  mpfr_clear (y);
+  mpfr_clear (z);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -147,7 +188,7 @@ main (int argc, char *argv[])
             mpfr_neg (x1, x1, GMP_RNDN);
           if (randlimb () % 2)
             mpfr_neg (x2, x2, GMP_RNDN);
-          rnd = RND_RAND ();
+          rnd = (mp_rnd_t) RND_RAND ();
           mpfr_set_prec (y, yprec);
 
           compare =TEST_FUNCTION (y, x1,x2, rnd);
@@ -204,6 +245,7 @@ main (int argc, char *argv[])
   mpfr_clear (t);
 
   test_large ();
+  test_large_small ();
 
   tests_end_mpfr ();
   return 0;

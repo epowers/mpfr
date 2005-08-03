@@ -1,7 +1,7 @@
 /* mpfr_get_ld -- convert a multiple precision floating-point number
                   to a machine long double
 
-Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -22,8 +22,15 @@ MA 02111-1307, USA. */
 
 #include <float.h>
 
-
 #include "mpfr-impl.h"
+
+/* FIXME: rounding direction can be wrong if |x| < LDBL_MIN. */
+
+/* The MPFR number rounded to the size MPFR_LDBL_MANT_DIG of a long double
+   will be scaled so that all its bits are representable in a double.
+   Therefore the exponent of its LSB must be >= -1074, and the exponent
+   of the MPFR number must be >= -1074 + MPFR_LDBL_MANT_DIG. */
+#define EMIN (-1074 + MPFR_LDBL_MANT_DIG)
 
 long double
 mpfr_get_ld (mpfr_srcptr x, mp_rnd_t rnd_mode)
@@ -57,10 +64,10 @@ mpfr_get_ld (mpfr_srcptr x, mp_rnd_t rnd_mode)
           sh = e - 1023;
           MPFR_SET_EXP (y, 1023);
         }
-      else if (e < -1021)
+      else if (e < EMIN)
         {
-          sh = e + 1021;
-          MPFR_SET_EXP (y, -1021);
+          sh = e - EMIN;
+          MPFR_SET_EXP (y, EMIN);
         }
       else
         {

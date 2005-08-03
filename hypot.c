@@ -1,6 +1,6 @@
 /* mpfr_hypot -- Euclidean distance
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -84,19 +84,33 @@ mpfr_hypot (mpfr_ptr z, mpfr_srcptr x , mpfr_srcptr y , mp_rnd_t rnd_mode)
      or 2^(2*Ey) <= 2^(2*Ex-1-Nz), i.e. 2*diff_exp > Nz.
      Warning: this is true only for Nx <= Nz, otherwise the trailing bits
      of x may be already very close to 1/2*ulp(x,Nz)!
+     If Nx > Nz, then we can notice that it is possible to round on Nx bits
+     if 2*diff_exp > Nx (see above as if Nz = Nx), therefore on Nz bits.
+     Hence the condition: 2*diff_exp > MAX(Nz,Nx).
   */
-  if (MPFR_PREC(x) <= Nz && diff_exp > Nz / 2) /* result is |x| or |x|+ulp(|x|,Nz) */
+  if (diff_exp > MAX (Nz, MPFR_PREC (x)) / 2)
+    /* result is |x| or |x|+ulp(|x|,Nz) */
     {
       if (rnd_mode == GMP_RNDU)
         {
-          /* if z > abs(x), then it was already rounded up */
-          if (mpfr_abs (z, x, rnd_mode) <= 0)
+          /* If z > abs(x), then it was already rounded up; otherwise
+             z = abs(x), and we need to add one ulp due to y. */
+          if (mpfr_abs (z, x, rnd_mode) == 0)
             mpfr_add_one_ulp (z, rnd_mode);
           return 1;
         }
       else /* GMP_RNDZ, GMP_RNDD, GMP_RNDN */
         {
           inexact = mpfr_abs (z, x, rnd_mode);
+          if (inexact == -MPFR_EVEN_INEX)
+            {
+              /* In case of tie in GMP_RNDN, one must round away from 0.
+                 Note: One could do better, by using GMP_RNDNA or similar,
+                 but I want to keep the change minimal. Anyway this case
+                 should be quite rare in practice. */
+              mpfr_add_one_ulp (z, rnd_mode);
+              return 1;
+            }
           return (inexact) ? inexact : -1;
         }
     }

@@ -1,6 +1,6 @@
 /* Test file for mpfr_atan.
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 Written by Paul Zimmermann, INRIA Lorraine.
 
 This file is part of the MPFR Library.
@@ -29,7 +29,7 @@ static void
 special (void)
 {
   mpfr_t x, y, z;
-  mp_rnd_t r;
+  int r;
 
   mpfr_init2 (x, 53);
   mpfr_init2 (y, 53);
@@ -55,12 +55,13 @@ special (void)
   for (r = 0; r < GMP_RND_MAX ; r++)
     {
       mpfr_set_inf (x, 1);
-      mpfr_atan (y, x, r);
-      mpfr_const_pi (x, r);
-      mpfr_div_2exp (x, x, 1, r);
+      mpfr_atan (y, x, (mp_rnd_t) r);
+      mpfr_const_pi (x, (mp_rnd_t) r);
+      mpfr_div_2exp (x, x, 1, (mp_rnd_t) r);
       if (mpfr_cmp (x, y))
         {
-          printf ("Error: mpfr_atan(+Inf), rnd=%s\n", mpfr_print_rnd_mode (r));
+          printf ("Error: mpfr_atan(+Inf), rnd=%s\n",
+                  mpfr_print_rnd_mode ((mp_rnd_t) r));
           exit (1);
         }
     }
@@ -69,13 +70,14 @@ special (void)
   for (r = 0; r < GMP_RND_MAX ; r++)
     {
       mpfr_set_inf (x, -1);
-      mpfr_atan (y, x, r);
-      mpfr_const_pi (x, MPFR_INVERT_RND(r));
-      mpfr_neg (x, x, r);
-      mpfr_div_2exp (x, x, 1, r);
+      mpfr_atan (y, x, (mp_rnd_t) r);
+      mpfr_const_pi (x, MPFR_INVERT_RND((mp_rnd_t) r));
+      mpfr_neg (x, x, (mp_rnd_t) r);
+      mpfr_div_2exp (x, x, 1, (mp_rnd_t) r);
       if (mpfr_cmp (x, y))
         {
-          printf ("Error: mpfr_atan(-Inf), rnd=%s\n", mpfr_print_rnd_mode (r));
+          printf ("Error: mpfr_atan(-Inf), rnd=%s\n",
+                  mpfr_print_rnd_mode ((mp_rnd_t) r));
           exit (1);
         }
     }
@@ -91,17 +93,31 @@ special (void)
 
   /* atan(+/-0) = +/-0 */
   mpfr_set_ui (x, 0, GMP_RNDN);
+  MPFR_SET_NEG (y);
   mpfr_atan (y, x, GMP_RNDN);
-  if (mpfr_cmp_ui (y, 0) || mpfr_sgn (y) < 0)
+  if (mpfr_cmp_ui (y, 0) || MPFR_IS_NEG (y))
     {
       printf ("Error: mpfr_atan (+0) <> +0\n");
       exit (1);
     }
+  mpfr_atan (x, x, GMP_RNDN);
+  if (mpfr_cmp_ui (x, 0) || MPFR_IS_NEG (x))
+    {
+      printf ("Error: mpfr_atan (+0) <> +0 (in place)\n");
+      exit (1);
+    }
   mpfr_neg (x, x, GMP_RNDN);
+  MPFR_SET_POS (y);
   mpfr_atan (y, x, GMP_RNDN);
-  if (mpfr_cmp_ui (y, 0) || mpfr_sgn (y) > 0)
+  if (mpfr_cmp_ui (y, 0) || MPFR_IS_POS (y))
     {
       printf ("Error: mpfr_atan (-0) <> -0\n");
+      exit (1);
+    }
+  mpfr_atan (x, x, GMP_RNDN);
+  if (mpfr_cmp_ui (x, 0) || MPFR_IS_POS (x))
+    {
+      printf ("Error: mpfr_atan (-0) <> -0 (in place)\n");
       exit (1);
     }
 
@@ -157,8 +173,8 @@ special_overflow (void)
 {
   mpfr_t x, y;
 
-  mpfr_set_emin (-125);
-  mpfr_set_emax (128);
+  set_emin (-125);
+  set_emax (128);
   mpfr_init2 (x, 24);
   mpfr_init2 (y, 48);
   mpfr_set_str_binary (x, "0.101101010001001101111010E0");
@@ -172,8 +188,8 @@ special_overflow (void)
     }
   mpfr_clear (y);
   mpfr_clear (x);
-  mpfr_set_emin (MPFR_EMIN_MIN);
-  mpfr_set_emax (MPFR_EMAX_MAX);
+  set_emin (MPFR_EMIN_MIN);
+  set_emax (MPFR_EMAX_MAX);
 }
 
 int

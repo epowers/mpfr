@@ -1,6 +1,6 @@
 /* Test file for mpfr_set_ld and mpfr_get_ld.
 
-Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -23,6 +23,9 @@ MA 02111-1307, USA. */
 #include <stdlib.h>
 #include <float.h>
 #include <time.h>
+#if WITH_FPU_CONTROL
+#include <fpu_control.h>
+#endif
 
 #include "mpfr-test.h"
 
@@ -57,13 +60,13 @@ Isnan_ld (long double d)
 static void
 check_set_get (long double d, mpfr_t x)
 {
-  mp_rnd_t r;
+  int r;
   long double e;
   int inex;
 
   for (r = 0; r < GMP_RND_MAX; r++)
     {
-      inex = mpfr_set_ld (x, d, r);
+      inex = mpfr_set_ld (x, d, (mp_rnd_t) r);
       if (inex != 0)
         {
           printf ("Error: mpfr_set_ld should be exact\n");
@@ -72,7 +75,7 @@ check_set_get (long double d, mpfr_t x)
           mpfr_dump (x);
           exit (1);
         }
-      e = mpfr_get_ld (x, r);
+      e = mpfr_get_ld (x, (mp_rnd_t) r);
       if (e != d && !(Isnan_ld(e) && Isnan_ld(d)))
         {
           printf ("Error: mpfr_get_ld o mpfr_set_ld <> Id\n");
@@ -87,6 +90,47 @@ check_set_get (long double d, mpfr_t x)
     }
 }
 
+static void
+test_small (void)
+{
+  mpfr_t x, y, z;
+  long double d;
+
+  mpfr_init2 (x, 64);
+  mpfr_init2 (y, 64);
+  mpfr_init2 (z, 64);
+
+  mpfr_set_str (x, "0.1010010100111100110000001110101101000111010110000001111101110011E-16381", 2, GMP_RNDN);
+  d = mpfr_get_ld (x, GMP_RNDN);  /* infinite loop? */
+  mpfr_set_ld (y, d, GMP_RNDN);
+  mpfr_sub (z, x, y, GMP_RNDN);
+  mpfr_abs (z, z, GMP_RNDN);
+  mpfr_clear_erangeflag ();
+  /* If long double = double, d should be equal to 0;
+     in this case, everything is OK. */
+  if (d != 0 && (mpfr_cmp_str (z, "1E-16434", 2, GMP_RNDN) > 0 ||
+                 mpfr_erangeflag_p ()))
+    {
+      printf ("Error with x = ");
+      mpfr_out_str (NULL, 10, 20, x, GMP_RNDN);
+      printf (" = ");
+      mpfr_out_str (NULL, 16, 0, x, GMP_RNDN);
+      printf ("\n        -> d = %.20Lg", d);
+      printf ("\n        -> y = ");
+      mpfr_out_str (NULL, 10, 20, y, GMP_RNDN);
+      printf (" = ");
+      mpfr_out_str (NULL, 16, 0, y, GMP_RNDN);
+      printf ("\n        -> |x-y| = ");
+      mpfr_out_str (NULL, 16, 0, z, GMP_RNDN);
+      printf ("\n");
+      exit (1);
+    }
+
+  mpfr_clear (x);
+  mpfr_clear (y);
+  mpfr_clear (z);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -94,6 +138,16 @@ main (int argc, char *argv[])
   mpfr_t x;
   int i;
   mp_exp_t emax;
+#if WITH_FPU_CONTROL
+  fpu_control_t cw;
+
+  if (argc > 1)
+    {
+      cw = strtol(argv[1], NULL, 0);
+      printf ("FPU control word: 0x%x\n", (unsigned int) cw);
+      _FPU_SETCW (cw);
+    }
+#endif
 
   check_gcc33_bug ();
 
@@ -101,7 +155,7 @@ main (int argc, char *argv[])
   mpfr_test_init ();
   tests_machine_prec_long_double ();
 
-  mpfr_init2 (x, 113);
+  mpfr_init2 (x, MPFR_LDBL_MANT_DIG);
 
   /* check +0.0 and -0.0 */
   d = 0.0;
@@ -144,7 +198,9 @@ main (int argc, char *argv[])
   check_set_get (-d, x);
 
   /* checks the smallest power of two */
-  d = 1.0; while ((e = d / 2.0) != (long double) 0.0) d = e;
+  d = 1.0;
+  while ((e = d / 2.0) != (long double) 0.0 && e != d)
+    d = e;
   check_set_get (d, x);
   check_set_get (-d, x);
 
@@ -154,7 +210,7 @@ main (int argc, char *argv[])
 
   /* checks that 2^i, 2^i+1 and 2^i-1 are correctly converted */
   d = 1.0;
-  for (i = 1; i <= 113; i++)
+  for (i = 1; i < MPFR_LDBL_MANT_DIG; i++)
     {
       d = 2.0 * d; /* d = 2^i */
       check_set_get (d, x);
@@ -172,16 +228,18 @@ main (int argc, char *argv[])
   /* check with reduced emax to exercise overflow */
   emax = mpfr_get_emax ();
   mpfr_set_prec (x, 2);
-  mpfr_set_emax (1);
+  set_emax (1);
   mpfr_set_ld (x, (long double) 2.0, GMP_RNDN);
   MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) > 0);
   for (d = (long double) 2.0, i = 0; i < 13; i++, d *= d);
   /* now d = 2^8192 */
   mpfr_set_ld (x, d, GMP_RNDN);
   MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) > 0);
-  mpfr_set_emax (emax);
+  set_emax (emax);
 
   mpfr_clear (x);
+
+  test_small ();
 
   tests_end_mpfr ();
 

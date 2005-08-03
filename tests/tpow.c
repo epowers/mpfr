@@ -1,6 +1,6 @@
 /* Test file for mpfr_pow, mpfr_pow_ui and mpfr_pow_si.
 
-Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -84,6 +84,22 @@ check_pow_ui (void)
       exit (1);
     }
 
+  mpfr_set_prec (a, 29);
+  mpfr_set_prec (b, 29);
+  mpfr_set_str_binary (a, "1.0000000000000000000000001111");
+  mpfr_set_str_binary (b, "1.1001101111001100111001010111e165");
+  mpfr_pow_ui (a, a, 2055225053, GMP_RNDZ);
+  if (mpfr_cmp (a, b) != 0)
+    {
+      printf ("Error for x^2055225053\n");
+      printf ("Expected ");
+      mpfr_out_str (stdout, 2, 0, b, GMP_RNDN);
+      printf ("\nGot      ");
+      mpfr_out_str (stdout, 2, 0, a, GMP_RNDN);
+      printf ("\n");
+      exit (1);
+    }
+
   mpfr_clear (a);
   mpfr_clear (b);
 }
@@ -155,7 +171,7 @@ check_inexact (mp_prec_t p)
   unsigned long u;
   mp_prec_t q;
   int inexact, cmp;
-  mp_rnd_t rnd;
+  int rnd;
 
   mpfr_init2 (x, p);
   mpfr_init (y);
@@ -169,15 +185,15 @@ check_inexact (mp_prec_t p)
         mpfr_set_prec (y, q);
         mpfr_set_prec (z, q + 10);
         mpfr_set_prec (t, q);
-        inexact = mpfr_pow_ui (y, x, u, rnd);
-        cmp = mpfr_pow_ui (z, x, u, rnd);
-        if (mpfr_can_round (z, q + 10, rnd, rnd, q))
+        inexact = mpfr_pow_ui (y, x, u, (mp_rnd_t) rnd);
+        cmp = mpfr_pow_ui (z, x, u, (mp_rnd_t) rnd);
+        if (mpfr_can_round (z, q + 10, (mp_rnd_t) rnd, (mp_rnd_t) rnd, q))
           {
-            cmp = mpfr_set (t, z, rnd) || cmp;
+            cmp = mpfr_set (t, z, (mp_rnd_t) rnd) || cmp;
             if (mpfr_cmp (y, t))
               {
                 printf ("results differ for u=%lu rnd=%s\n",
-                        u, mpfr_print_rnd_mode(rnd));
+                        u, mpfr_print_rnd_mode ((mp_rnd_t) rnd));
                 printf ("x="); mpfr_print_binary (x); puts ("");
                 printf ("y="); mpfr_print_binary (y); puts ("");
                 printf ("t="); mpfr_print_binary (t); puts ("");
@@ -189,7 +205,7 @@ check_inexact (mp_prec_t p)
               {
                 printf ("Wrong inexact flag for p=%u, q=%u, rnd=%s\n",
                         (unsigned int) p, (unsigned int) q,
-                        mpfr_print_rnd_mode (rnd));
+                        mpfr_print_rnd_mode ((mp_rnd_t) rnd));
                 printf ("expected %d, got %d\n", cmp, inexact);
                 printf ("u=%lu x=", u); mpfr_print_binary (x); puts ("");
                 printf ("y="); mpfr_print_binary (y); puts ("");

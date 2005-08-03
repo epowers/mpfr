@@ -1,6 +1,6 @@
 /* mpfr_set -- copy of a floating-point number
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 
 This file is part of the MPFR Library.
 
@@ -20,6 +20,10 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 MA 02111-1307, USA. */
 
 #include "mpfr-impl.h"
+
+/* Note: In case of even rounding when rnd = GMP_RNDN, MPFR_EVEN_INEX (2)
+   or -MPFR_EVEN_INEX (-2) is returned. This is used internally. This is
+   no longer valid in the CVS trunk. */
 
 /* set a to abs(b) * signb: a=b when signb = SIGN(b), a=abs(b) when signb=1 */
 int

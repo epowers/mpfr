@@ -1,6 +1,6 @@
 /* Test file for mpfr_out_str.
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the MPFR Library.
 
@@ -135,7 +135,12 @@ main (int argc, char *argv[])
   /* with no argument: prints to /dev/null,
      tout_str N: prints N tests to stdout */
   if (argc == 1)
-    fout = fopen ("/dev/null", "w");
+    {
+      fout = fopen ("/dev/null", "w");
+      /* If we failed to open this device, try with a dummy file */
+      if (fout == NULL)
+	fout = fopen ("mpfrtest.txt", "w");
+    }
   else
     {
       fout = stdout;
@@ -183,7 +188,7 @@ main (int argc, char *argv[])
 #endif
       r = RND_RAND ();
       p = 2 + randlimb () % 35;
-      check (d, r, p);
+      check (d, (mp_rnd_t) r, p);
     }
 
   fclose (fout);

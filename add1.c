@@ -1,6 +1,6 @@
 /* mpfr_add1 -- internal function to perform a "real" addition
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 Contributed by the Spaces project, INRIA Lorraine.
 
 This file is part of the MPFR Library.
@@ -523,14 +523,13 @@ mpfr_add1 (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
  add_one_ulp: /* add one unit in last place to a */
   if (MPFR_UNLIKELY(mpn_add_1(ap, ap, an, MPFR_LIMB_ONE << sh)))
     {
-      /* Case 100000x0 + 1*/
       if (MPFR_UNLIKELY(exp == __gmpfr_emax))
-        inex = mpfr_set_overflow(a, rnd_mode, MPFR_SIGN(a));
-      else
         {
-          exp++;
-          ap[an-1] = MPFR_LIMB_HIGHBIT;
+          inex = mpfr_set_overflow(a, rnd_mode, MPFR_SIGN(a));
+          goto end_of_add;
         }
+      exp++;
+      ap[an-1] = MPFR_LIMB_HIGHBIT;
     }
 
  set_exponent:

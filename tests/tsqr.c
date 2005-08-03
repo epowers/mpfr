@@ -1,6 +1,6 @@
 /* Test file for mpfr_sqr.
 
-Copyright 2004 Free Software Foundation.
+Copyright 2004, 2005 Free Software Foundation.
 
 This file is part of the MPFR Library.
 
@@ -66,7 +66,7 @@ error2 (mp_rnd_t rnd, mpfr_prec_t prec, mpfr_t in, mpfr_t out,
 void check_random(mpfr_prec_t p)
 {
   mpfr_t x,y,z;
-  mp_rnd_t r;
+  int r;
   int i, inexact1, inexact2;
 
   mpfr_inits2(p, x, y, z, NULL);
@@ -74,14 +74,14 @@ void check_random(mpfr_prec_t p)
     {
       mpfr_random (x);
       if (MPFR_IS_PURE_FP(x))
-        for(r = 0 ; r < GMP_RND_MAX ; r++)
+        for (r = 0 ; r < GMP_RND_MAX ; r++)
           {
-            inexact1 = mpfr_mul (y, x, x, r);
-            inexact2 = mpfr_sqr (z, x, r);
-            if (mpfr_cmp(y, z))
-              error1 (r,p,x,y,z);
+            inexact1 = mpfr_mul (y, x, x, (mp_rnd_t) r);
+            inexact2 = mpfr_sqr (z, x, (mp_rnd_t) r);
+            if (mpfr_cmp (y, z))
+              error1 ((mp_rnd_t) r,p,x,y,z);
             if (inexact1 != inexact2)
-              error2 (r,p,x,y,inexact1,inexact2);
+              error2 ((mp_rnd_t) r,p,x,y,inexact1,inexact2);
           }
     }
   mpfr_clears(x,y,z,NULL);
