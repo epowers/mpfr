@@ -1,4 +1,68 @@
+2005-08-03  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* FAQ.html, Makefile.am, NEWS, README: Added FAQ. [2.1 branch]
+
+	* NEWS: Update. [2.1 branch]
+
+2005-07-29  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* set_ld.c:
+	Forgot to keep the old value of d when computations need to be redone.
+	[2.1 branch]
+
+	* tests/tset_ld.c: Fixed the tests. [2.1 branch]
+
+	* set_ld.c:
+	Support C implementations giving an incorrect value for the precision
+	of long double or where long doubles are implemented with FP expansions
+	(like under Mac OS X). Not tested yet... [2.1 branch]
+
+2005-07-11  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* strtofr.c: Updated copyright line. [2.1 branch]
+
+	* strtofr.c: Fixed locale bug. [2.1 branch]
+
+2005-07-05  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* tests/tatan.c, atan.c: Fixed bug for atan(-0). [2.1 branch]
+
+2005-06-08  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* add1.c: [2.1 branch]
+	Fixed bug introduced with the new internal format on 2003-10-27.
+
+2005-05-14  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.texi: Ported description of mpfr_hypot to the 2.1 branch.
+
+2005-05-12  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* hypot.c: Replaced -2 by -MPFR_EVEN_INEX. [2.1 branch]
+
+	* hypot.c: Added a comment about the bug fix. [2.1 branch]
+
+	* BUGS, hypot.c, tests/thypot.c:
+	Fixed bug in mpfr_hypot + testcase. [2.1 branch]
+
+2005-05-04  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* div_ui.c, tests/tdiv_ui.c:
+	Ported div_ui.c bug fix (1.45) with testcase to the 2.1 branch.
+
+2005-05-02  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* BUGS, tests/thypot.c:
+	Added the test_large_small test for mpfr_hypot (disabled by default)
+	and mentioned this bug in BUGS. [2.1 branch]
+
+2005-04-28  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.texi: Updated mpfr_set* documentation. [2.1 branch]
+
 2005-04-21  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* ChangeLog: Update. (2.1 branch)
 
 	* BUGS, get_ld.c:
 	In mpfr_get_ld, the rounding direction can be wrong if |x| < LDBL_MIN.
