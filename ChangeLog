@@ -1,4 +1,14 @@
+2005-08-30  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mul.c:
+	Patch from Patrick to solve efficiency problem when one operand is
+	sparse (e.g. from ui_pow_ui) + other minor changes. [2.2 branch]
+
 2005-08-24  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* add1sp.c, mpfr-impl.h, mul.c, print_raw.c, sub1sp.c:
+	When WANT_ASSERT >= 2: the corresponding messages are now output
+	to stderr instead of stdout.
 
 	* set_uj.c:
 	Improved C compliance when mp_limb_t and uintmax_t have the same size
