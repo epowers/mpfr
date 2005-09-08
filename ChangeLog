@@ -1,3 +1,60 @@
+2005-09-08  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* tests/Makefile.am: Fix: readded dependencies. [2.2 branch]
+
+2005-09-06  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* Makefile.am, NEWS, TODO, gamma.c, mpfr-impl.h, mpfr.h, tests/Makefile.am, tests/tgamma.c, tests/tversion.c:
+	Patches from the trunk: added mpfr_lngamma, fixed mpfr_gamma,
+	more detailed error message in tversion. [2.2 branch]
+
+2005-09-06  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* set_str_raw.c, tests/tsub.c:
+	Ported patches from the trunk to the 2.2 branch.
+
+	* mpfr-impl.h:
+	Replaced unsigned long bit-fields (GCC extension) by insigned int
+	bit-fields. [2.2 branch]
+
+2005-09-05  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr-gmp.h:
+	MPN_COPY now calls memcpy only if dst != src (otherwise this is an
+	undefined behavior), and if WANT_ASSERT is defined, it checks that
+	there is no overlap. [2.2 branch]
+
+2005-09-02  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* acinclude.m4, mpfr-impl.h:
+	Avoid MIPSpro / IRIX64 (incorrect) optimizations for DOUBLE_ISNAN.
+	[2.2 branch]
+
+	* add1sp.c, sub1sp.c:
+	Do not put expressions with side effects in MPFR_ASSERTN. [2.2 branch]
+
+2005-09-01  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.texi: Updated month. [2.2 branch]
+
+	* log.c, tests/tlog.c: Ported fix to the 2.2 branch.
+
+2005-08-31  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* sum.c:
+	Fixed memory leak (missing MPFR_TMP_FREE in a particular case).
+	[2.2 branch, patch ported from the trunk]
+
+	* mul.c:
+	Fixed memory leak (missing MPFR_TMP_FREE in a particular case).
+	[2.2 branch]
+
+2005-08-31  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* configure.in:
+	Fix for the following problem: #error is not sufficient with cc
+	on IRIX64, and autoconf 2.59 doesn't cope with that. [2.2 branch]
+
 2005-08-30  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* mul.c:
