@@ -1,5 +1,7 @@
 2005-09-11  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
+	* mparam_h.in, mul.c, tuneup.c: Fixed tuneup. [2.2 branch]
+
 	* README.dev, mpfr-impl.h, tests/trint.c, tests/tstckintc.c:
 	[2.2 branch]
 	Fixed a #ifdef in mpfr-impl.h (when --enable-assert isn't used).
