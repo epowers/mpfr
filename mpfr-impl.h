@@ -785,7 +785,7 @@ extern unsigned char *mpfr_stack;
 #if __MPFR_GNUC(2,95) || __MPFR_ICC(8,1,0)
 # define MPFR_INT_CEIL_LOG2(x)                            \
     (__extension__ ({int _b; mp_limb_t _limb = (x);       \
-      MPFR_ASSERTD (_limb == (x));                        \
+      MPFR_ASSERTN (_limb == (x));                        \
       count_leading_zeros (_b, _limb);                    \
       (BITS_PER_MP_LIMB - _b); }))
 #else
@@ -1027,7 +1027,7 @@ typedef struct {
 /*
  * Round Mantissa (`srcp`, `sprec`) to mpfr_t `dest` using rounding mode `rnd`
  * assuming dest's sign is `sign`.
- * Execute OVERFLOW_HANDLE in case of overflow when rounding (Power 2 case)
+ * Execute OVERFLOW_HANDLER in case of overflow when rounding (Power 2 case)
  * Return MPFR_EVEN_INEX in case of EVEN rounding
  */
 #define MPFR_RNDRAW_EVEN(inexact, dest, srcp, sprec, rnd, sign, OVERFLOW_HANDLER)\
