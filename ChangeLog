@@ -1,3 +1,13 @@
+2005-09-11  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* README.dev, int_ceil_log2.c, mpfr-impl.h:
+	Minor patches from the trunk. [2.2 branch]
+
+2005-09-09  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* tests/tset_f.c, algorithms.tex, gamma.c, lngamma.c, mparam_h.in, mul.c, tests/tgamma.c, tests/tlngamma.c:
+	Ported patches from the trunk to the 2.2 branch.
+
 2005-09-08  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* README.dev, fixperm:
