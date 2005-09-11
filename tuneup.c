@@ -22,6 +22,7 @@ MA 02110-1301, USA. */
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <limits.h>
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
@@ -197,7 +198,7 @@ static double domeasure (mp_prec_t *threshold,
       fprintf (stderr, "Failed to measure function 1!\n");
       abort ();
     }
-  *threshold = /*MPFR_PREC_MIN*/0;
+  *threshold = 1;
   t2 = speed_measure (func, &s);
   if (t2 == -1.0)
     {
