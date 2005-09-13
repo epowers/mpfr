@@ -1,3 +1,9 @@
+2005-09-13  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* constant.c: Added missing MPFR_THREAD_ATTR. [2.2 branch]
+
+	* NEWS: Minor update. [2.2 branch]
+
 2005-09-11  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* mparam_h.in, mul.c, tuneup.c: Fixed tuneup. [2.2 branch]
