@@ -1,5 +1,9 @@
 2005-09-13  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
+	* exp.c, tests/texp.c:
+	Fixed bug in exp(-eps) for rounding toward zero (test was also wrong).
+	[2.2 branch]
+
 	* constant.c: Added missing MPFR_THREAD_ATTR. [2.2 branch]
 
 	* NEWS: Minor update. [2.2 branch]
