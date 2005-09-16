@@ -1,3 +1,19 @@
+2005-09-16  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* zeta.c: Better initial precision. [2.2 branch]
+
+	* const_euler.c:
+	Fixed overflow problem for large precisions. [2.2 branch]
+
+	* tests/tcoth.c, coth.c:
+	Fixed stupid bug (coth was computing 1/tan instead of 1/tanh).
+	[2.2 branch]
+
+	* mpfr.texi: Propagated the changes from the trunk to the 2.2 branch:
+	- documented the mpfr_get_f and mpfr_pow_z functions;
+	- fixed typos found by Tomonori Kouya in mpfr_atan2 description;
+	- updated Contributors section.
+
 2005-09-13  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* exp.c, tests/texp.c:
