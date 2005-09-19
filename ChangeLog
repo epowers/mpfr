@@ -1,3 +1,17 @@
+2005-09-18  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* INSTALL:
+	Mentioned problems with the Tru64 make and other minor changes.
+	[2.2 branch]
+
+2005-09-17  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* configure.in: [2.2 branch]
+	Fixed the GMP linking test: replaced __gmp_version, which corresponds
+	to a variable, by __gmpz_init (suggested by the GMP documentation),
+	which corresponds to a function, as the auto tools assume the symbol
+	corresponds to a function. It was failing with the AIX linker.
+
 2005-09-16  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
 
 	* zeta.c: Better initial precision. [2.2 branch]
