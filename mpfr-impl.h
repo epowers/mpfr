@@ -290,6 +290,7 @@ __MPFR_DECLSPEC extern MPFR_THREAD_ATTR const mpfr_t __gmpfr_four;
 /* Definition of constants */
 #define LOG2 0.69314718055994528622 /* log(2) rounded to zero on 53 bits */
 #define ALPHA 4.3191365662914471407 /* a+2 = a*log(a), rounded to +infinity */
+#define EXPM1 0.36787944117144227851 /* exp(-1), rounded to zero */
 
 /* MPFR_DOUBLE_SPEC = 1 if the C type 'double' corresponds to IEEE-754
    double precision, 0 if it doesn't, and undefined if one doesn't know.
@@ -345,7 +346,13 @@ typedef union ieee_double_extract Ieee_double_extract;
                          (((Ieee_double_extract *)&(x))->s.manh != 0)))
 #else
 # define DOUBLE_ISINF(x) ((x) > DBL_MAX || (x) < -DBL_MAX)
-# define DOUBLE_ISNAN(x) ((x) != (x))
+# if MPFR_NANISNAN
+/* Avoid MIPSpro / IRIX64 (incorrect) optimizations.
+   The + must not be replaced by a ||. */
+#  define DOUBLE_ISNAN(x) (!(((x) >= 0.0) + ((x) <= 0.0)))
+# else
+#  define DOUBLE_ISNAN(x) ((x) != (x))
+# endif
 #endif
 
 
@@ -388,12 +395,12 @@ typedef union ieee_double_extract Ieee_double_extract;
     union {                                                     \
       long double    ld;                                        \
       struct {                                                  \
-        unsigned long  sign : 1;                                \
-        unsigned long  exp  : 15;                               \
-        unsigned long  man3 : 16;                               \
-        unsigned long  man2 : 32;                               \
-        unsigned long  man1 : 32;                               \
-        unsigned long  man0 : 32;                               \
+        unsigned int sign : 1;                                  \
+        unsigned int exp  : 15;                                 \
+        unsigned int man3 : 16;                                 \
+        unsigned int man2 : 32;                                 \
+        unsigned int man1 : 32;                                 \
+        unsigned int man0 : 32;                                 \
       } s;                                                      \
     } u;                                                        \
     u.ld = (x);                                                 \
@@ -435,11 +442,11 @@ __MPFR_DECLSPEC long double __gmpfr_longdouble_volatile _MPFR_PROTO ((long doubl
 typedef union {
   long double    ld;
   struct {
-    unsigned long manl : 32;
-    unsigned long manh : 32;
-    unsigned long expl : 8 ;
-    unsigned long exph : 7;
-    unsigned long sign : 1;
+    unsigned int manl : 32;
+    unsigned int manh : 32;
+    unsigned int expl : 8 ;
+    unsigned int exph : 7;
+    unsigned int sign : 1;
   } s;
 } mpfr_long_double_t;
 
@@ -778,7 +785,7 @@ extern unsigned char *mpfr_stack;
 #if __MPFR_GNUC(2,95) || __MPFR_ICC(8,1,0)
 # define MPFR_INT_CEIL_LOG2(x)                            \
     (__extension__ ({int _b; mp_limb_t _limb = (x);       \
-      MPFR_ASSERTD (_limb == (x));                        \
+      MPFR_ASSERTN (_limb == (x));                        \
       count_leading_zeros (_b, _limb);                    \
       (BITS_PER_MP_LIMB - _b); }))
 #else
@@ -1020,7 +1027,7 @@ typedef struct {
 /*
  * Round Mantissa (`srcp`, `sprec`) to mpfr_t `dest` using rounding mode `rnd`
  * assuming dest's sign is `sign`.
- * Execute OVERFLOW_HANDLE in case of overflow when rounding (Power 2 case)
+ * Execute OVERFLOW_HANDLER in case of overflow when rounding (Power 2 case)
  * Return MPFR_EVEN_INEX in case of EVEN rounding
  */
 #define MPFR_RNDRAW_EVEN(inexact, dest, srcp, sprec, rnd, sign, OVERFLOW_HANDLER)\
@@ -1457,7 +1464,7 @@ __MPFR_DECLSPEC void mpfr_setmin _MPFR_PROTO ((mpfr_ptr, mp_exp_t));
 __MPFR_DECLSPEC long mpfr_mpn_exp _MPFR_PROTO ((mp_limb_t *, mp_exp_t *, int,
                            mp_exp_t, size_t));
 
-#ifdef WANT_ASSERT
+#ifdef _MPFR_H_HAVE_FILE
 __MPFR_DECLSPEC void mpfr_fprint_binary _MPFR_PROTO ((FILE *, mpfr_srcptr));
 #endif
 __MPFR_DECLSPEC void mpfr_print_binary _MPFR_PROTO ((mpfr_srcptr));

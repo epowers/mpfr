@@ -1,4 +1,142 @@
+2005-09-18  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* INSTALL:
+	Mentioned problems with the Tru64 make and other minor changes.
+	[2.2 branch]
+
+2005-09-17  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* configure.in: [2.2 branch]
+	Fixed the GMP linking test: replaced __gmp_version, which corresponds
+	to a variable, by __gmpz_init (suggested by the GMP documentation),
+	which corresponds to a function, as the auto tools assume the symbol
+	corresponds to a function. It was failing with the AIX linker.
+
+2005-09-16  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* zeta.c: Better initial precision. [2.2 branch]
+
+	* const_euler.c:
+	Fixed overflow problem for large precisions. [2.2 branch]
+
+	* tests/tcoth.c, coth.c:
+	Fixed stupid bug (coth was computing 1/tan instead of 1/tanh).
+	[2.2 branch]
+
+	* mpfr.texi: Propagated the changes from the trunk to the 2.2 branch:
+	- documented the mpfr_get_f and mpfr_pow_z functions;
+	- fixed typos found by Tomonori Kouya in mpfr_atan2 description;
+	- updated Contributors section.
+
+2005-09-13  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* exp.c, tests/texp.c:
+	Fixed bug in exp(-eps) for rounding toward zero (test was also wrong).
+	[2.2 branch]
+
+	* constant.c: Added missing MPFR_THREAD_ATTR. [2.2 branch]
+
+	* NEWS: Minor update. [2.2 branch]
+
+2005-09-11  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mparam_h.in, mul.c, tuneup.c: Fixed tuneup. [2.2 branch]
+
+	* README.dev, mpfr-impl.h, tests/trint.c, tests/tstckintc.c:
+	[2.2 branch]
+	Fixed a #ifdef in mpfr-impl.h (when --enable-assert isn't used).
+	Fixed uninitialized variable in trint.c (with gcc -std=c99).
+	Added #include <string.h> for memmove in tstckintc.c (see ISO C99).
+
+	* README.dev, int_ceil_log2.c, mpfr-impl.h:
+	Minor patches from the trunk. [2.2 branch]
+
+2005-09-09  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* tests/tset_f.c, algorithms.tex, gamma.c, lngamma.c, mparam_h.in, mul.c, tests/tgamma.c, tests/tlngamma.c:
+	Ported patches from the trunk to the 2.2 branch.
+
+2005-09-08  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* README.dev, fixperm:
+	Added fixperm script to fix the file permissions broken by CVS.
+	[2.2 branch]
+
+	* fixperm:
+	file fixperm was added on branch mpfr-2-2-branch on 2005-09-08 09:05:58 +0000
+
+	* tests/tlngamma.c: Forgot to add tlngamma.c. [2.2 branch]
+
+	* mpfr.texi: Update (mpfr_lngamma). [2.2 branch]
+
+	* lngamma.c: Forgot to add lngamma.c. [2.2 branch]
+
+	* tests/Makefile.am: Fix: readded dependencies. [2.2 branch]
+
+2005-09-06  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* Makefile.am, NEWS, TODO, gamma.c, mpfr-impl.h, mpfr.h, tests/Makefile.am, tests/tgamma.c, tests/tversion.c:
+	Patches from the trunk: added mpfr_lngamma, fixed mpfr_gamma,
+	more detailed error message in tversion. [2.2 branch]
+
+2005-09-06  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* set_str_raw.c, tests/tsub.c:
+	Ported patches from the trunk to the 2.2 branch.
+
+	* mpfr-impl.h:
+	Replaced unsigned long bit-fields (GCC extension) by insigned int
+	bit-fields. [2.2 branch]
+
+2005-09-05  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr-gmp.h:
+	MPN_COPY now calls memcpy only if dst != src (otherwise this is an
+	undefined behavior), and if WANT_ASSERT is defined, it checks that
+	there is no overlap. [2.2 branch]
+
+2005-09-02  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* acinclude.m4, mpfr-impl.h:
+	Avoid MIPSpro / IRIX64 (incorrect) optimizations for DOUBLE_ISNAN.
+	[2.2 branch]
+
+	* add1sp.c, sub1sp.c:
+	Do not put expressions with side effects in MPFR_ASSERTN. [2.2 branch]
+
+2005-09-01  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mpfr.texi: Updated month. [2.2 branch]
+
+	* log.c, tests/tlog.c: Ported fix to the 2.2 branch.
+
+2005-08-31  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* sum.c:
+	Fixed memory leak (missing MPFR_TMP_FREE in a particular case).
+	[2.2 branch, patch ported from the trunk]
+
+	* mul.c:
+	Fixed memory leak (missing MPFR_TMP_FREE in a particular case).
+	[2.2 branch]
+
+2005-08-31  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* configure.in:
+	Fix for the following problem: #error is not sufficient with cc
+	on IRIX64, and autoconf 2.59 doesn't cope with that. [2.2 branch]
+
+2005-08-30  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* mul.c:
+	Patch from Patrick to solve efficiency problem when one operand is
+	sparse (e.g. from ui_pow_ui) + other minor changes. [2.2 branch]
+
 2005-08-24  Vincent Lefevre  <Vincent.Lefevre@loria.fr>
+
+	* add1sp.c, mpfr-impl.h, mul.c, print_raw.c, sub1sp.c:
+	When WANT_ASSERT >= 2: the corresponding messages are now output
+	to stderr instead of stdout.
 
 	* set_uj.c:
 	Improved C compliance when mp_limb_t and uintmax_t have the same size
