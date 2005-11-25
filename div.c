@@ -298,17 +298,16 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
           MPN_COPY(bp, vp, vsize);
         }
       sticky_v = sticky_v || mpn_cmpzero (vp, k);
+      k = 0;
     }
-  else /* vsize < qsize */
+  else /* vsize < qsize: small divisor case */
     {
+      bp = vp;
       k = qsize - vsize;
-      bp = (mp_ptr) MPFR_TMP_ALLOC (qsize * sizeof(mp_limb_t));
-      MPN_COPY(bp + k, vp, vsize);
-      MPN_ZERO(bp, k);
     }
 
   /* we now can perform the division */
-  qh = mpn_divrem (qp, 0, ap, qqsize, bp, qsize);
+  qh = mpn_divrem (qp, 0, ap + k, qqsize - k, bp, qsize - k);
   /* warning: qh may be 1 if u1 == v1, but u < v */
 #ifdef DEBUG
   printf ("q="); mpn_print (qp, qsize);
