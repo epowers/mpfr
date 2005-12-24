@@ -162,10 +162,12 @@ mpfr_sin (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
         {
           /* the absolute error on c is at most 2^(3-m-EXP(c)) */
           e = 2 * MPFR_GET_EXP (c) + m - 3;
-          if (mpfr_can_round (c, e, GMP_RNDZ, GMP_RNDZ,
+          if (mpfr_can_round (c, e, GMP_RNDN, GMP_RNDZ,
                               precy + (rnd_mode == GMP_RNDN)))
-            /* WARNING: need one more bit for rounding to nearest,
-               to be able to get the inexact flag correct */
+            /* WARNING: even if we know c <= sin(x), don't give GMP_RNDZ
+               as 3rd argument to mpfr_can_round, since if c is exactly
+               representable to the target precision (inexact = 0 below),
+               we would have to add one ulp when rounding away from 0. */
             break;
 
           /* check for huge cancellation (Near 0) */
@@ -183,14 +185,8 @@ mpfr_sin (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
   MPFR_ZIV_FREE (loop);
 
   inexact = mpfr_set (y, c, rnd_mode);
-
-  /* sin(x) is exact only for x = 0, which was treated apart above;
-     nevertheless, we can have inexact = 0 here if the approximation c
-     is exactly representable with PREC(y) bits. Since c is an approximation
-     towards zero, in that case the inexact flag should have the opposite sign
-     as y. */
-  if (MPFR_UNLIKELY (inexact == 0))
-    inexact = -MPFR_INT_SIGN (y);
+  /* inexact cannot be 0, since this would mean that c was representable
+     within the target precision, but in that case mpfr_can_round will fail */
 
   mpfr_clear (c);
 
