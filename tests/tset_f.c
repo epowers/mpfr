@@ -22,6 +22,7 @@ MA 02110-1301, USA. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h> /* for ULONG_MAX */
 
 #include "mpfr-test.h"
 
@@ -30,6 +31,7 @@ main (void)
 {
   mpfr_t x, u;
   mpf_t y, z;
+  mp_exp_t emax;
   unsigned long k, pr;
   int r, inexact;
 
@@ -87,8 +89,6 @@ main (void)
     }
   MPFR_ASSERTN(mpfr_cmp_ui_2exp (x, 1, 901) == 0);
 
-  mpfr_clear (u);
-
   for (k = 1; k <= 100000; k++)
     {
       pr = 2 + (randlimb () & 255);
@@ -131,7 +131,49 @@ main (void)
       mpf_mul_2exp (y, y, 1);
     }
 
+  mpf_set_ui (y, 1);
+  mpf_mul_2exp (y, y, ULONG_MAX);
+  mpfr_set_f (x, y, GMP_RNDN);
+  mpfr_set_ui (u, 1, GMP_RNDN);
+  mpfr_mul_2ui (u, u, ULONG_MAX, GMP_RNDN);
+  if (!mpfr_equal_p (x, u))
+    {
+      printf ("Error: mpfr_set_f (x, y, GMP_RNDN) for y = 2^ULONG_MAX\n");
+      exit (1);
+    }
+
+  emax = mpfr_get_emax ();
+
+  /* For mpf_mul_2exp, emax must fit in an unsigned long! */
+  if (emax >= 0 && emax <= ULONG_MAX)
+    {
+      mpf_set_ui (y, 1);
+      mpf_mul_2exp (y, y, emax);
+      mpfr_set_f (x, y, GMP_RNDN);
+      mpfr_set_ui_2exp (u, 1, emax, GMP_RNDN);
+      if (!mpfr_equal_p (x, u))
+        {
+          printf ("Error: mpfr_set_f (x, y, GMP_RNDN) for y = 2^emax\n");
+          exit (1);
+        }
+    }
+
+  /* For mpf_mul_2exp, emax - 1 must fit in an unsigned long! */
+  if (emax >= 1 && emax - 1 <= ULONG_MAX)
+    {
+      mpf_set_ui (y, 1);
+      mpf_mul_2exp (y, y, emax - 1);
+      mpfr_set_f (x, y, GMP_RNDN);
+      mpfr_set_ui_2exp (u, 1, emax - 1, GMP_RNDN);
+      if (!mpfr_equal_p (x, u))
+        {
+          printf ("Error: mpfr_set_f (x, y, GMP_RNDN) for y = 2^(emax-1)\n");
+          exit (1);
+        }
+    }
+
   mpfr_clear (x);
+  mpfr_clear (u);
   mpf_clear (y);
   mpf_clear (z);
 
