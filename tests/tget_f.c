@@ -22,6 +22,7 @@ MA 02110-1301, USA. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 
 #include "mpfr-test.h"
 
@@ -31,6 +32,7 @@ main (void)
   mpf_t x;
   mpfr_t y;
   unsigned long i;
+  mp_exp_t e;
 
   MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
@@ -83,11 +85,14 @@ main (void)
           printf ("Error: mpfr_get_f(%lu) fails\n", i);
           exit (1);
         }
-      mpfr_set_si (y, (signed long) -i, GMP_RNDN);
-      if (mpfr_get_f (x, y, GMP_RNDN) || mpf_cmp_si (x, (signed long) -i))
+      if (i <= - (unsigned long) LONG_MIN)
         {
-          printf ("Error: mpfr_get_f(-%lu) fails\n", i);
-          exit (1);
+          mpfr_set_si (y, - (long) i, GMP_RNDN);
+          if (mpfr_get_f (x, y, GMP_RNDN) || mpf_cmp_si (x, - (long) i))
+            {
+              printf ("Error: mpfr_get_f(-%lu) fails\n", i);
+              exit (1);
+            }
         }
       i *= 2;
     }
@@ -111,6 +116,42 @@ main (void)
           exit (1);
         }
       i *= 2;
+    }
+
+  /* bug reported by Jim White */
+  for (e = 0; e <= 2 * BITS_PER_MP_LIMB; e++)
+    {
+      /* test with 2^(-e) */
+      mpfr_set_ui (y, 1, GMP_RNDN);
+      mpfr_div_2exp (y, y, e, GMP_RNDN);
+      mpfr_get_f (x, y, GMP_RNDN);
+      mpf_mul_2exp (x, x, e);
+      if (mpf_cmp_ui (x, 1) != 0)
+        {
+          printf ("Error: mpfr_get_f(x,y,GMP_RNDN) fails\n");
+          printf ("y=");
+          mpfr_dump (y);
+          printf ("x=");
+          mpf_div_2exp (x, x, e);
+          mpf_dump (x);
+          exit (1);
+        }
+
+      /* test with 2^(e) */
+      mpfr_set_ui (y, 1, GMP_RNDN);
+      mpfr_mul_2exp (y, y, e, GMP_RNDN);
+      mpfr_get_f (x, y, GMP_RNDN);
+      mpf_div_2exp (x, x, e);
+      if (mpf_cmp_ui (x, 1) != 0)
+        {
+          printf ("Error: mpfr_get_f(x,y,GMP_RNDN) fails\n");
+          printf ("y=");
+          mpfr_dump (y);
+          printf ("x=");
+          mpf_mul_2exp (x, x, e);
+          mpf_dump (x);
+          exit (1);
+        }
     }
 
   mpfr_clear (y);
