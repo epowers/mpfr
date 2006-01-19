@@ -161,11 +161,11 @@ main (int argc, char *argv[])
   /* check +0.0 and -0.0 */
   d = 0.0;
   check_set_get (d, x);
-  d = -0.0;
+  d = DBL_NEG_ZERO;
   check_set_get (d, x);
 
   /* checks that sign of -0.0 is set */
-  mpfr_set_ld (x, -0.0, GMP_RNDN);
+  mpfr_set_ld (x, DBL_NEG_ZERO, GMP_RNDN);
   if (MPFR_SIGN(x) > 0)
     {
       printf ("Error: sign of -0.0 is not set correctly\n");
