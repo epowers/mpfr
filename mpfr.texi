@@ -1623,7 +1623,9 @@ is set to +0.
 Generate a uniformly distributed random float in the interval
 @math{0 @le{} @var{rop} < 1}.
 Return 0, unless the exponent is not in the current exponent range, in
-which case @var{rop} is set to NaN and a non-zero value is returned.
+which case @var{rop} is set to NaN and a non-zero value is returned. The
+second argument is a @code{gmp_randstate_t} structure which should be
+created using the GMP @code{gmp_randinit} function, see the GMP manual.
 @end deftypefun
 
 @deftypefun void mpfr_random (mpfr_t @var{rop})
