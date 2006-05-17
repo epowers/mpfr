@@ -306,6 +306,8 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
       cn = tn;
     }
   MPFR_ASSERTD (bn >= cn);
+  /* May be useful for HP-UX. See INSTALL file. */
+#ifndef HAVE_BUGGY_UMUL_PPMM
   if (MPFR_LIKELY (bn <= 2))
     {
       if (bn == 1)
@@ -346,6 +348,7 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
         mpn_lshift (tmp, tmp, tn, 1); /* tn <= k, so no stack corruption */
     }
   else
+#endif
     if (MPFR_UNLIKELY (bn > MPFR_MUL_THRESHOLD))
       {
         mp_limb_t *bp, *cp;
