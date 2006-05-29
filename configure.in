@@ -235,6 +235,13 @@ dnl Finally set up LibTool
 AC_PROG_LIBTOOL
 
 
+dnl
+dnl For mpfr-longlong.h - TODO: should be replaced (see acinclude.m4).
+dnl
+
+GMP_C_ATTRIBUTE_MODE
+
+
 dnl 
 dnl Setup GMP detection
 dnl 
