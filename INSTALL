@@ -154,17 +154,6 @@ In case of problem
    the test suite: C and C++ are not the same language!
    You should use a C compiler instead.
 
-Notes on HP-UX
-==============
-
-   The use of umul_ppmm did not work correctly on some HP-UX platforms
-   in the past. We can no longer reproduce this problem. In case you
-   get failures under HP-UX, you may want to define HAVE_BUGGY_UMUL_PPMM
-   (with -DHAVE_BUGGY_UMUL_PPMM in the CPPFLAGS environment variable at
-   configure time, for instance). Even if the failures disappear, please
-   report the problem to us so that we can write a configure test to set
-   this macro automatically.
-
 Notes on Windows 32
 ===================
 
