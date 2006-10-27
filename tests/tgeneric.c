@@ -144,7 +144,9 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
 #else
               inexact = TEST_FUNCTION (z, x, rnd);
 #endif
-              if (mpfr_cmp (t, z))
+              if ((mpfr_number_p (t) == 0 && mpfr_number_p (z) != 0) ||
+                  (mpfr_number_p (t) != 0 && mpfr_number_p (z) == 0) ||
+                  mpfr_cmp (t, z) != 0)
                 {
                   printf ("results differ for x=");
                   mpfr_out_str (stdout, 2, xprec, x, GMP_RNDN);
@@ -160,7 +162,7 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
                   printf ("expected ");
                   mpfr_out_str (stdout, 2, prec, t, GMP_RNDN);
                   puts ("");
-                  printf ("approx  ");
+                  printf ("approx   ");
                   mpfr_print_binary (y);
                   puts ("");
                   exit (1);
