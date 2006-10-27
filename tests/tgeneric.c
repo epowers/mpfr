@@ -144,6 +144,8 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
 #else
               inexact = TEST_FUNCTION (z, x, rnd);
 #endif
+              if (mpfr_erangeflag_p ())
+                continue;
               if (mpfr_nan_p (z) || mpfr_cmp (t, z) != 0)
                 {
                   printf ("results differ for x=");
