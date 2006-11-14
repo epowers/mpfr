@@ -49,6 +49,31 @@ MA 02110-1301, USA. */
   do if (!(EXPR)) TGENERIC_FAIL (S, x, 0); while (0)
 #endif
 
+#if DEBUG_TGENERIC
+#define STR(F) #F
+#define TGENERIC_IAUX(F,P,X,U)                                          \
+  do                                                                    \
+    {                                                                   \
+      printf ("tgeneric: testing function " STR(F)                      \
+              ", %s, target prec = %lu\nx = ",                          \
+              mpfr_print_rnd_mode (rnd), (unsigned long) (P));          \
+      mpfr_out_str (stdout, 2, 0, (X), GMP_RNDN);                       \
+      printf ("\n");                                                    \
+      if (U)                                                            \
+        {                                                               \
+          printf ("u = ");                                              \
+          mpfr_out_str (stdout, 2, 0, (U), GMP_RNDN);                   \
+          printf ("\n");                                                \
+        }                                                               \
+    }                                                                   \
+  while (0)
+#if defined(TWO_ARGS)
+#define TGENERIC_INFO(F,P) TGENERIC_IAUX(F,P,x,u)
+#else
+#define TGENERIC_INFO(F,P) TGENERIC_IAUX(F,P,x,0)
+#endif
+#endif
+
 static void
 test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
 {
@@ -103,6 +128,9 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
 #endif
           rnd = (mp_rnd_t) RND_RAND ();
           mpfr_clear_flags ();
+#ifdef DEBUG_TGENERIC
+          TGENERIC_INFO (TEST_FUNCTION, MPFR_PREC (y));
+#endif
 #if defined(TWO_ARGS)
           compare = TEST_FUNCTION (y, x, u, rnd);
 #else
@@ -139,6 +167,9 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
           else if (mpfr_can_round (y, yprec, rnd, rnd, prec))
             {
               mpfr_set (t, y, rnd);
+#ifdef DEBUG_TGENERIC
+              TGENERIC_INFO (TEST_FUNCTION, MPFR_PREC (z));
+#endif
 #if defined(TWO_ARGS)
               inexact = TEST_FUNCTION (z, x, u, rnd);
 #else
