@@ -67,6 +67,7 @@ MA 02110-1301, USA. */
         }                                                               \
     }                                                                   \
   while (0)
+#undef TGENERIC_INFO
 #if defined(TWO_ARGS)
 #define TGENERIC_INFO(F,P) TGENERIC_IAUX(F,P,x,u)
 #else
