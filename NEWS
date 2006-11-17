@@ -20,6 +20,12 @@ MA 02110-1301, USA.
 
 ##############################################################################
 
+Changes from versions 2.2.0 to version 2.2.1:
+- Many bug fixes.
+- Updated mpfr-longlong.h from the GMP 4.2 longlong.h file.
+- Moved some internal declarations from mpfr.h to mpfr-impl.h.
+- Improved MPFR manual.
+
 Changes from versions 2.1.* to version 2.2.0:
 - Bug fixes.
 - new functions mpfr_set_overflow, mpfr_set_underflow, mpfr_set_inexflag,
