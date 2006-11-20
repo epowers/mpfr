@@ -196,7 +196,11 @@ static void
 special_overflow (void)
 {
   mpfr_t x, y;
-  mp_exp_t emin = mpfr_get_emin ();
+  mp_exp_t emin, emax;
+  int inex;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   set_emin (-125);
   set_emax (128);
@@ -363,10 +367,34 @@ special_overflow (void)
       exit (1);
     }
 
+  /* check exact result */
+  mpfr_set_prec (x, 2);
+  mpfr_set_ui (x, 3, GMP_RNDN);
+  inex = mpfr_gamma (x, x, GMP_RNDN);
+  if (inex != 0 || mpfr_cmp_ui (x, 2) != 0)
+    {
+      printf ("Error for gamma(3)\n");
+      exit (1);
+    }
+
+  mpfr_set_emax (1024);
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
+  mpfr_set_str_binary (x, "101010110100110011111010000110001000111100000110101E-43");
+  mpfr_gamma (x, x, GMP_RNDU);
+  mpfr_set_str_binary (y, "110000011110001000111110110101011110000100001111111E971");
+  if (mpfr_cmp (x, y) != 0)
+    {
+      printf ("Error for gamma(4)\n");
+      printf ("expected "); mpfr_dump (y);
+      printf ("got      "); mpfr_dump (x);
+      exit (1);
+    }
+
   mpfr_clear (y);
   mpfr_clear (x);
-  set_emin (MPFR_EMIN_MIN);
-  set_emax (MPFR_EMAX_MAX);
+  set_emin (emin);
+  set_emax (emax);
 }
 
 int
