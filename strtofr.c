@@ -21,7 +21,7 @@ MA 02110-1301, USA. */
 
 #include <string.h> /* For strlen */
 #include <stdlib.h> /* For strtol */
-#include <ctype.h>  /* For isdigit and isspace */
+#include <ctype.h>  /* For isspace */
 #include <locale.h> /* For MPFR_DECIMAL_POINT */
 
 #define MPFR_NEED_LONGLONG_H
@@ -175,7 +175,7 @@ digit_value_in_base (int c, int base)
 
   MPFR_ASSERTD (base > 0 && base <= MPFR_MAX_BASE);
 
-  if (isdigit (c))
+  if (c >= '0' && c <= '9')
     digit = c - '0';
   else if (c >= 'a' && c <= 'z')
     digit = (base >= 37) ? c - 'a' + 36 : c - 'a' + 10;
@@ -328,7 +328,9 @@ parse_string (mpfr_t x, struct parsed_string *pstr,
 
   for (;;) /* Loop until an invalid character is read */
     {
-      int c = *str++;
+      int c = (unsigned char) *str++;
+      /* The cast to unsigned char is needed because of digit_value_in_base;
+         decimal_point uses this convention too. */
       if (c == '.' || c == decimal_point)
         {
           if (MPFR_UNLIKELY(point)) /* Second '.': stop parsing */
@@ -339,7 +341,8 @@ parse_string (mpfr_t x, struct parsed_string *pstr,
       c = digit_value_in_base (c, base);
       if (c == -1)
         break;
-      *mant++ = (char) c;
+      MPFR_ASSERTN (c >= 0); /* c is representable in an unsigned char */
+      *mant++ = (unsigned char) c;
       if (!point)
         pstr->exp_base ++;
     }

@@ -393,7 +393,7 @@ special ()
   mpfr_set_str (x, "5.68824667828621954868e-01", 10, GMP_RNDN);
   mpfr_set_str (y, "9.03327850535952658895e-01", 10, GMP_RNDN);
   test_pow (z, x, y, GMP_RNDZ);
-  if (mpfr_cmp_d(z, 0.60071044650456473235))
+  if (mpfr_cmp_str1 (z, "0.60071044650456473235"))
     {
       printf ("Error in mpfr_pow for prec=53, rnd=GMP_RNDZ\n");
       exit (1);
@@ -426,6 +426,35 @@ special ()
       mpfr_out_str (stdout, 2, 0, y, GMP_RNDN);
       printf ("\nGot      ");
       mpfr_out_str (stdout, 2, 0, z, GMP_RNDN);
+      printf ("\n");
+      exit (1);
+    }
+
+  /* From http://www.terra.es/personal9/ismaeljc/hall.htm */
+  mpfr_set_prec (x, 113);
+  mpfr_set_prec (y, 2);
+  mpfr_set_prec (z, 169);
+  mpfr_set_str1 (x, "6078673043126084065007902175846955");
+  mpfr_set_ui_2exp (y, 3, -1, GMP_RNDN);
+  test_pow (z, x, y, GMP_RNDZ);
+  if (mpfr_cmp_str1 (z, "473928882491000966028828671876527456070714790264144"))
+    {
+      printf ("Error in mpfr_pow for 6078673043126084065007902175846955");
+      printf ("^(3/2), GMP_RNDZ\nExpected ");
+      printf ("4.73928882491000966028828671876527456070714790264144e50");
+      printf ("\nGot      ");
+      mpfr_out_str (stdout, 10, 0, z, GMP_RNDN);
+      printf ("\n");
+      exit (1);
+    }
+  test_pow (z, x, y, GMP_RNDU);
+  if (mpfr_cmp_str1 (z, "473928882491000966028828671876527456070714790264145"))
+    {
+      printf ("Error in mpfr_pow for 6078673043126084065007902175846955");
+      printf ("^(3/2), GMP_RNDU\nExpected ");
+      printf ("4.73928882491000966028828671876527456070714790264145e50");
+      printf ("\nGot      ");
+      mpfr_out_str (stdout, 10, 0, z, GMP_RNDN);
       printf ("\n");
       exit (1);
     }
@@ -551,8 +580,11 @@ particular_cases (void)
 static void
 underflows (void)
 {
-  mpfr_t x, y;
+  mpfr_t x, y, z;
+  int err = 0;
+  int inexact;
   int i;
+  mp_exp_t emin;
 
   mpfr_init2 (x, 64);
   mpfr_init2 (y, 64);
@@ -576,8 +608,110 @@ underflows (void)
         }
     }
 
-  mpfr_clear (x);
-  mpfr_clear (y);
+  mpfr_init2 (z, 55);
+  mpfr_set_str (x, "0.110011010011101001110001110100010000110111101E0",
+                2, GMP_RNDN);
+  mpfr_set_str (y, "0.101110010011111001011010100011011100111110011E40",
+                2, GMP_RNDN);
+  mpfr_clear_flags ();
+  inexact = mpfr_pow (z, x, y, GMP_RNDU);
+  if (!mpfr_underflow_p ())
+    {
+      printf ("Underflow flag is not set for special underflow test.\n");
+      err = 1;
+    }
+  if (inexact <= 0)
+    {
+      printf ("Ternary value is wrong for special underflow test.\n");
+      err = 1;
+    }
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  mpfr_nextabove (x);
+  if (mpfr_cmp (x, z) != 0)
+    {
+      printf ("Wrong value for special underflow test.\nGot ");
+      mpfr_out_str (stdout, 2, 0, z, GMP_RNDN);
+      printf ("\ninstead of ");
+      mpfr_out_str (stdout, 2, 2, x, GMP_RNDN);
+      printf ("\n");
+      err = 1;
+    }
+  if (err)
+    exit (1);
+
+  /* MPFR currently (2006-08-19) segfaults on the following code (and
+     possibly makes other programs crash due to the lack of memory),
+     because y is converted into an mpz_t, and the required precision
+     is too high. */
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 2);
+  mpfr_set_prec (z, 12);
+  mpfr_set_ui_2exp (x, 3, -2, GMP_RNDN);
+  mpfr_set_ui_2exp (y, 1, mpfr_get_emax () - 1, GMP_RNDN);
+  mpfr_clear_flags ();
+  mpfr_pow (z, x, y, GMP_RNDN);
+  if (!mpfr_underflow_p () || MPFR_NOTZERO (z))
+    {
+      printf ("Underflow test with large y fails.\n");
+      exit (1);
+    }
+
+  emin = mpfr_get_emin ();
+  mpfr_set_emin (-256);
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 2);
+  mpfr_set_prec (z, 12);
+  mpfr_set_ui_2exp (x, 3, -2, GMP_RNDN);
+  mpfr_set_ui_2exp (y, 1, 38, GMP_RNDN);
+  mpfr_clear_flags ();
+  inexact = mpfr_pow (z, x, y, GMP_RNDN);
+  if (!mpfr_underflow_p () || MPFR_NOTZERO (z) || inexact >= 0)
+    {
+      printf ("Bad underflow detection for 0.75^(2^38). Obtained:\n"
+              "Underflow flag... %-3s (should be 'yes')\n"
+              "Zero result...... %-3s (should be 'yes')\n"
+              "Inexact value.... %-3d (should be negative)\n",
+              mpfr_underflow_p () ? "yes" : "no",
+              MPFR_IS_ZERO (z) ? "yes" : "no", inexact);
+      exit (1);
+    }
+  mpfr_set_emin (emin);
+
+  emin = mpfr_get_emin ();
+  mpfr_set_emin (-256);
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 40);
+  mpfr_set_prec (z, 12);
+  mpfr_set_ui_2exp (x, 3, -1, GMP_RNDN);
+  mpfr_set_si_2exp (y, -1, 38, GMP_RNDN);
+  for (i = 0; i < 4; i++)
+    {
+      if (i == 2)
+        mpfr_neg (x, x, GMP_RNDN);
+      mpfr_clear_flags ();
+      inexact = mpfr_pow (z, x, y, GMP_RNDN);
+      if (!mpfr_underflow_p () || MPFR_NOTZERO (z) ||
+          (i == 3 ? (inexact <= 0) : (inexact >= 0)))
+        {
+          printf ("Bad underflow detection for (");
+          mpfr_out_str (stdout, 10, 0, x, GMP_RNDN);
+          printf (")^(-2^38-%d). Obtained:\n"
+                  "Overflow flag.... %-3s (should be 'no')\n"
+                  "Underflow flag... %-3s (should be 'yes')\n"
+                  "Zero result...... %-3s (should be 'yes')\n"
+                  "Inexact value.... %-3d (should be %s)\n", i,
+                  mpfr_overflow_p () ? "yes" : "no",
+                  mpfr_underflow_p () ? "yes" : "no",
+                  MPFR_IS_ZERO (z) ? "yes" : "no", inexact,
+                  i == 3 ? "positive" : "negative");
+          exit (1);
+        }
+      inexact = mpfr_sub_ui (y, y, 1, GMP_RNDN);
+      MPFR_ASSERTN (inexact == 0);
+    }
+  mpfr_set_emin (emin);
+
+  mpfr_clears (x, y, z, (void *) 0);
 }
 
 static void

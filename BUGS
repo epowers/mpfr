@@ -29,19 +29,6 @@ Known bugs:
   exceeds the hardware limit (2^30 for a 32 bits CPU, and 2^62 for a 64 bits
   CPU).
 
-* In mpfr_pow_z (thus mpfr_pow too, when mpfr_pow_z is called), the
-  underflow flag is not always set. Example: x = 0.11 in base 2,
-  y = 1.0e38, GMP_RNDN.
-
-* On very large positive and negative values, mpfr_coth is very slow,
-  takes a lot of memory (possibly several hundreds of megabytes), and
-  sometimes even crashes (segmentation fault, probably due to lack of
-  memory).
-
-* On very large values, mpfr_csch, mpfr_sech, mpfr_eint and mpfr_erfc
-  crash (segmentation fault, probably due to lack of memory or integer
-  overflow).
-
 Potential bugs:
 
 * Possible integer overflows on some machines.
@@ -53,7 +40,9 @@ Potential bugs:
 
 * Possible infinite loop in some functions for particular cases: when
   the exact result is an exactly representable number or the middle of
-  consecutive two such numbers (for example, erf).
+  consecutive two such numbers. However for non-algebraic functions, it is
+  believed that no such case exists, except the well-known cases like cos(0)=1,
+  exp(0)=1, and so on, and the x^y function when y is an integer or y=1/2^k.
 
 * The mpfr_set_ld function may be quite slow if the long double type has an
   exponent of more than 15 bits.
