@@ -1,4 +1,113 @@
 ------------------------------------------------------------------------
+r4289 | vlefevre | 2006-11-25 00:27:17 +0000 (Sat, 25 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/NEWS
+
+NEWS: added the URL for MPFR 2.2.0 bugs.
+
+------------------------------------------------------------------------
+r4288 | vlefevre | 2006-11-25 00:22:24 +0000 (Sat, 25 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/NEWS
+
+NEWS: update.
+
+------------------------------------------------------------------------
+r4287 | vlefevre | 2006-11-25 00:17:34 +0000 (Sat, 25 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/INSTALL
+
+Partially rewrote the INSTALL file.
+
+------------------------------------------------------------------------
+r4285 | vlefevre | 2006-11-24 14:48:01 +0000 (Fri, 24 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/Makefile.am
+
+Makefile.am: fixed libtool's -version-info flag (and comment).
+
+------------------------------------------------------------------------
+r4283 | vlefevre | 2006-11-24 11:09:31 +0000 (Fri, 24 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/VERSION
+   M /branches/2.2/configure.in
+   M /branches/2.2/mpfr.h
+   M /branches/2.2/mpfr.texi
+   M /branches/2.2/version.c
+
+Update to rc2.
+
+------------------------------------------------------------------------
+r4282 | vlefevre | 2006-11-24 11:08:07 +0000 (Fri, 24 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/NEWS
+
+NEWS: update.
+
+------------------------------------------------------------------------
+r4281 | vlefevre | 2006-11-24 09:10:55 +0000 (Fri, 24 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/Makefile.am
+
+Makefile.am: incremented revision (for versioning).
+
+------------------------------------------------------------------------
+r4280 | vlefevre | 2006-11-24 00:44:33 +0000 (Fri, 24 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/configure.in
+
+configure.in: check for gmp.h a bit earlier.
+
+------------------------------------------------------------------------
+r4275 | vlefevre | 2006-11-23 00:36:52 +0000 (Thu, 23 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/INSTALL
+
+INSTALL: several additions.
+
+------------------------------------------------------------------------
+r4273 | vlefevre | 2006-11-22 17:25:27 +0000 (Wed, 22 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/INSTALL
+
+INSTALL: small update.
+
+------------------------------------------------------------------------
+r4271 | vlefevre | 2006-11-22 15:25:49 +0000 (Wed, 22 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/FAQ.html
+
+FAQ update (added a CSS counter).
+
+------------------------------------------------------------------------
+r4269 | vlefevre | 2006-11-22 15:24:23 +0000 (Wed, 22 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/update-faq
+
+update-faq: added a workaround for the libxslt bug 377440.
+
+------------------------------------------------------------------------
+r4265 | vlefevre | 2006-11-21 18:44:24 +0000 (Tue, 21 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/NEWS
+
+Typo.
+
+------------------------------------------------------------------------
+r4264 | vlefevre | 2006-11-21 18:02:05 +0000 (Tue, 21 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/README
+
+Updated README file.
+
+------------------------------------------------------------------------
+r4262 | vlefevre | 2006-11-21 13:11:27 +0000 (Tue, 21 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/ChangeLog
+
+Updated ChangeLog with "TZ=UTC svn log -v".
+
+------------------------------------------------------------------------
 r4261 | vlefevre | 2006-11-20 17:01:30 +0000 (Mon, 20 Nov 2006) | 2 lines
 Changed paths:
    M /branches/2.2/VERSION
