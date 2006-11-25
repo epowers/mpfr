@@ -26,7 +26,7 @@ Changes from version 2.2.0 to version 2.2.1:
 - Moved some internal declarations from mpfr.h to mpfr-impl.h.
 - Use -search_paths_first on Darwin (Mac OS X) to fix linking behavior.
 - Improved "make check": much more complete generic tests.
-- Improved MPFR manual.
+- Improved INSTALL file and MPFR manual.
 
 Changes from versions 2.1.* to version 2.2.0:
 - Bug fixes.
