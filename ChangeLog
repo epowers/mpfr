@@ -1,4 +1,25 @@
 ------------------------------------------------------------------------
+r4301 | vlefevre | 2006-11-29 08:55:56 +0000 (Wed, 29 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/INSTALL
+
+INSTALL: update of the "Notes on Windows 32" section.
+
+------------------------------------------------------------------------
+r4294 | vlefevre | 2006-11-25 19:46:56 +0000 (Sat, 25 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/BUGS
+
+BUGS: removed obsolete "compiler bugs" section.
+
+------------------------------------------------------------------------
+r4291 | vlefevre | 2006-11-25 01:22:00 +0000 (Sat, 25 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/ChangeLog
+
+Updated ChangeLog with "TZ=UTC svn log -v".
+
+------------------------------------------------------------------------
 r4289 | vlefevre | 2006-11-25 00:27:17 +0000 (Sat, 25 Nov 2006) | 2 lines
 Changed paths:
    M /branches/2.2/NEWS
