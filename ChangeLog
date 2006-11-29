@@ -1,4 +1,30 @@
 ------------------------------------------------------------------------
+r4304 | vlefevre | 2006-11-29 09:46:44 +0000 (Wed, 29 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/INSTALL
+   M /branches/2.2/VERSION
+   M /branches/2.2/configure.in
+   M /branches/2.2/mpfr.h
+   M /branches/2.2/mpfr.texi
+   M /branches/2.2/tests/tversion.c
+   M /branches/2.2/version.c
+
+Updated version to 2.2.2-dev.
+
+------------------------------------------------------------------------
+r4302 | vlefevre | 2006-11-29 09:40:11 +0000 (Wed, 29 Nov 2006) | 2 lines
+Changed paths:
+   M /branches/2.2/ChangeLog
+   M /branches/2.2/VERSION
+   M /branches/2.2/configure.in
+   M /branches/2.2/mpfr.h
+   M /branches/2.2/mpfr.texi
+   M /branches/2.2/tests/tversion.c
+   M /branches/2.2/version.c
+
+Release: MPFR 2.2.1.
+
+------------------------------------------------------------------------
 r4301 | vlefevre | 2006-11-29 08:55:56 +0000 (Wed, 29 Nov 2006) | 2 lines
 Changed paths:
    M /branches/2.2/INSTALL
