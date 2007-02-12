@@ -20,6 +20,10 @@ MA 02110-1301, USA.
 
 ##############################################################################
 
+Changes from version 2.2.1 to version 2.2.2:
+- Bug fixes.
+TO BE COMPLETED BEFORE VERSION 2.2.2 IS RELEASED
+
 Changes from version 2.2.0 to version 2.2.1:
 - Many bug fixes: <http://mpfr.org/mpfr-2.2.0/#bugs>.
 - Updated mpfr-longlong.h from the GMP 4.2 longlong.h file.
@@ -27,6 +31,9 @@ Changes from version 2.2.0 to version 2.2.1:
 - Use -search_paths_first on Darwin (Mac OS X) to fix linking behavior.
 - Improved "make check": much more complete generic tests.
 - Improved INSTALL file and MPFR manual.
+- The mpfr.info file is now installed in the share subdirectory
+  (as required by the Filesystem Hierarchy Standard); see output
+  of "./configure --help".
 
 Changes from versions 2.1.* to version 2.2.0:
 - Bug fixes.
