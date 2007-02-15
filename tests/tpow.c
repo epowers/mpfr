@@ -24,6 +24,7 @@ MA 02110-1301, USA. */
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
+#include <limits.h>
 
 #include "mpfr-test.h"
 
@@ -232,6 +233,55 @@ check_pow_si (void)
   mpfr_pow_si (x, x, -2, GMP_RNDN);
   MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) > 0);
 
+  mpfr_set_si (x, 2, GMP_RNDN);
+  mpfr_pow_si (x, x, LONG_MAX, GMP_RNDN);  /* 2^LONG_MAX */
+  if (LONG_MAX > mpfr_get_emax () - 1)  /* LONG_MAX + 1 > emax */
+    {
+      MPFR_ASSERTN (mpfr_inf_p (x));
+    }
+  else
+    {
+      MPFR_ASSERTN (mpfr_cmp_si_2exp (x, 1, LONG_MAX));
+    }
+
+  mpfr_set_si (x, 2, GMP_RNDN);
+  mpfr_pow_si (x, x, LONG_MIN, GMP_RNDN);  /* 2^LONG_MIN */
+  if (LONG_MIN + 1 < mpfr_get_emin ())
+    {
+      MPFR_ASSERTN (mpfr_zero_p (x));
+    }
+  else
+    {
+      MPFR_ASSERTN (mpfr_cmp_si_2exp (x, 1, LONG_MIN));
+    }
+
+  mpfr_set_si (x, 2, GMP_RNDN);
+  mpfr_pow_si (x, x, LONG_MIN + 1, GMP_RNDN);  /* 2^(LONG_MIN+1) */
+  if (mpfr_nan_p (x))
+    {
+      printf ("Error in pow_si(2, LONG_MIN+1): got NaN\n");
+      exit (1);
+    }
+  if (LONG_MIN + 2 < mpfr_get_emin ())
+    {
+      MPFR_ASSERTN (mpfr_zero_p (x));
+    }
+  else
+    {
+      MPFR_ASSERTN (mpfr_cmp_si_2exp (x, 1, LONG_MIN + 1));
+    }
+
+  mpfr_set_si_2exp (x, 1, -1, GMP_RNDN);  /* 0.5 */
+  mpfr_pow_si (x, x, LONG_MIN, GMP_RNDN);  /* 2^(-LONG_MIN) */
+  if (LONG_MIN < 1 - mpfr_get_emax ())  /* 1 - LONG_MIN > emax */
+    {
+      MPFR_ASSERTN (mpfr_inf_p (x));
+    }
+  else
+    {
+      MPFR_ASSERTN (mpfr_cmp_si_2exp (x, 2, - (LONG_MIN + 1)));
+    }
+
   mpfr_clear (x);
 }
 
@@ -268,6 +318,35 @@ check_special_pow_si ()
   mpfr_set_emin (emin);
   mpfr_clear (a);
   mpfr_clear (b);
+}
+
+static void
+pow_si_long_min (void)
+{
+  mpfr_t x, y, z;
+  int inex;
+
+  mpfr_inits2 (sizeof(long) * CHAR_BIT + 32, x, y, z, (void *) 0);
+  mpfr_set_si_2exp (x, 3, -1, GMP_RNDN);  /* 1.5 */
+
+  inex = mpfr_set_si (y, LONG_MIN, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+  mpfr_nextbelow (y);
+  mpfr_pow (y, x, y, GMP_RNDD);
+
+  inex = mpfr_set_si (z, LONG_MIN, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+  mpfr_nextabove (z);
+  mpfr_pow (z, x, z, GMP_RNDU);
+
+  mpfr_pow_si (x, x, LONG_MIN, GMP_RNDN);  /* 1.5^LONG_MIN */
+  if (mpfr_cmp (x, y) < 0 || mpfr_cmp (x, z) > 0)
+    {
+      printf ("Error in pow_si_long_min\n");
+      exit (1);
+    }
+
+  mpfr_clears (x, y, z, (void *) 0);
 }
 
 static void
@@ -752,6 +831,7 @@ main (void)
   check_pow_ui ();
   check_pow_si ();
   check_special_pow_si ();
+  pow_si_long_min ();
   for (p = 2; p < 100; p++)
     check_inexact (p);
   underflows ();
