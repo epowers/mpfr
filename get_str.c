@@ -187,7 +187,7 @@ mpfr_ceil_double (double x)
 /* Input: an approximation r*2^f of an real Y, with |r*2^f-Y| <= 2^(e+f).
    Returns if possible in the string s the mantissa corresponding to
    the integer nearest to Y, within the direction rnd, and returns the
-   the exponent in exp.
+   exponent in exp.
    n is the number of limbs of r.
    e represents the maximal error in the approximation of Y
       (e < 0 iff the approximation is exact, i.e. r*2^f = Y).
@@ -200,7 +200,7 @@ mpfr_ceil_double (double x)
    Rounding may fail for two reasons:
    - the error is too large to determine the integer N nearest to Y
    - either the number of digits of N in base b is too large (m+1),
-     N=2*N1+(b/2) and the rounding mode is too nearest. This can
+     N=2*N1+(b/2) and the rounding mode is to nearest. This can
      only happen when b is even.
 
    Return value:
