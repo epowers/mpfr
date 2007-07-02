@@ -1,4 +1,26 @@
 ------------------------------------------------------------------------
+r4609 | vlefevre | 2007-07-02 10:40:49 +0000 (Mon, 02 Jul 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/TODO
+   M /branches/2.3/mpfr.texi
+
+Reformat.
+
+------------------------------------------------------------------------
+r4606 | vlefevre | 2007-07-02 00:38:01 +0000 (Mon, 02 Jul 2007) | 2 lines
+Changed paths:
+   A /branches/2.3 (from /trunk:4605)
+
+Created 2.3 branch.
+
+------------------------------------------------------------------------
+r4605 | vlefevre | 2007-07-02 00:32:27 +0000 (Mon, 02 Jul 2007) | 2 lines
+Changed paths:
+   M /trunk/ChangeLog
+
+ChangeLog update.
+
+------------------------------------------------------------------------
 r4604 | vlefevre | 2007-07-02 00:31:13 +0000 (Mon, 02 Jul 2007) | 2 lines
 Changed paths:
    M /trunk/NEWS
