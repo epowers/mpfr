@@ -27,6 +27,7 @@ MA 02110-1301, USA. */
 
 #define TEST_FUNCTION mpfr_j0
 #define RAND_FUNCTION(x) mpfr_random2(x, MPFR_LIMB_SIZE (x), 8)
+#define REDUCE_EMAX 262143 /* otherwise arg. reduction is too expensive */
 #include "tgeneric.c"
 
 int
@@ -86,10 +87,16 @@ main (int argc, char *argv[])
       exit (1);
     }
 
+  /* Bug reported on 2007-07-03 by Sisyphus (assertion failed in r4619) */
+  mpfr_set_si (x, 70000, GMP_RNDN);
+  mpfr_j0 (y, x, GMP_RNDN);
+
   mpfr_clear (x);
   mpfr_clear (y);
 
   test_generic (2, 100, 10);
+
+  data_check ("data/j0", mpfr_j0, "mpfr_j0");
 
   tests_end_mpfr ();
 

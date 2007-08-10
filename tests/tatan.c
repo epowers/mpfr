@@ -352,6 +352,27 @@ special_atan2 (void)
   mpfr_clears (x, y, z, (void *) 0);
 }
 
+/* from Christopher Creutzig, 18 Jul 2007 */
+static void
+smallvals_atan2 (void)
+{
+  mpfr_t a, x, y;
+
+  mpfr_inits (a, x, y, NULL);
+  mpfr_set_ui (y, 0, GMP_RNDN);
+  mpfr_nextbelow (y);
+  mpfr_set_ui (x, 1, GMP_RNDN);
+  /* y=-2^(-emin-1), x=1 */
+
+  mpfr_atan2 (a, y, x, GMP_RNDD);
+  MPFR_ASSERTN (mpfr_equal_p (a, y));
+
+  mpfr_atan2 (a, y, x, GMP_RNDU);
+  MPFR_ASSERTN (mpfr_zero_p (a) && MPFR_IS_NEG(a));
+
+  mpfr_clears (a, x, y, NULL);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -360,10 +381,13 @@ main (int argc, char *argv[])
   special_overflow ();
   special ();
   special_atan2 ();
+  smallvals_atan2 ();
 
   test_generic_atan  (2, 200, 17);
   test_generic_atan2 (2, 200, 17);
   test_generic_atan2_neg (2, 200, 17);
+
+  data_check ("data/atan", mpfr_atan, "mpfr_atan");
 
   tests_end_mpfr ();
   return 0;

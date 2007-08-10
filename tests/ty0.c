@@ -90,6 +90,8 @@ main (int argc, char *argv[])
 
   test_generic (2, 100, 1);
 
+  data_check ("data/y0", mpfr_y0, "mpfr_y0");
+
   tests_end_mpfr ();
 
   return 0;

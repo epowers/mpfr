@@ -360,6 +360,8 @@ main (int argc, char *argv[])
   test_sign ();
   check_tiny ();
 
+  data_check ("data/sin", mpfr_sin, "mpfr_sin");
+
   tests_end_mpfr ();
   return 0;
 }

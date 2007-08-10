@@ -206,5 +206,7 @@ main (void)
 
   tests_end_mpfr ();
 
+  data_check ("data/asin", mpfr_asin, "mpfr_asin");
+
   return 0;
 }

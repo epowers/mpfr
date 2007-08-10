@@ -1024,8 +1024,10 @@ See @code{mpfr_set_str}.
 @deftypefunx _Decimal64 mpfr_get_decimal64 (mpfr_t @var{op}, mp_rnd_t @var{rnd})
 Convert @var{op} to a @code{double} (respectively @code{_Decimal64} or
 @code{long double}), using the rounding mode @var{rnd}.
-If the system doesn't support IEEE 754 standard, these functions
-might not preserve the signed zeros.
+If @var{op} is NaN, some fixed NaN (either quiet or signaling) or the result
+of 0.0/0.0 is returned. If @var{op} is @pom{}Inf, an infinity of the same
+sign or the result of @pom{}1.0/0.0 is returned. If @var{op} is zero, these
+functions return a zero, trying to preserve its sign, if possible.
 The @code{mpfr_get_decimal64} function is built only under some conditions:
 see the documentation of @code{mpfr_set_decimal64}.
 @end deftypefun
@@ -1869,7 +1871,10 @@ and return 0 (even if @var{x} is not a non-zero ordinary number);
 otherwise, return a non-zero value.
 @end deftypefun
 
-
+@c By definition, a C string is always null-terminated, so that we
+@c could just say "string" or "null-terminated character array",
+@c but "null-terminated string" is not an error and probably better
+@c for most users.
 @deftypefun {const char *} mpfr_get_version (void)
 Return the MPFR version, as a null-terminated string.
 @end deftypefun
@@ -1883,13 +1888,18 @@ Return the MPFR version, as a null-terminated string.
 @code{MPFR_VERSION_MAJOR}, @code{MPFR_VERSION_MINOR} and
 @code{MPFR_VERSION_PATCHLEVEL} are respectively the major, minor and patch
 level of MPFR version, as preprocessing constants.
-@code{MPFR_VERSION_STRING} is the version as a string constant, which can
+@code{MPFR_VERSION_STRING} is the version (with an optional suffix, used
+in development and pre-release versions) as a string constant, which can
 be compared to the result of @code{mpfr_get_version} to check at run time
 the header file and library used match:
 @example
 if (strcmp (mpfr_get_version (), MPFR_VERSION_STRING))
-   fprintf (stderr, "Error, header and library files do not match\n");
+  fprintf (stderr, "Warning: header and library do not match\n");
 @end example
+Note: Obtaining different strings is not necessarily an error, as
+in general, a program compiled with some old MPFR version can be
+dynamically linked with a newer MPFR library version (if allowed
+by the library versioning system).
 @end defmac
 
 @deftypefn Macro long MPFR_VERSION_NUM (@var{major}, @var{minor}, @var{patchlevel})
@@ -1902,6 +1912,15 @@ Here is an example of how to check the MPFR version at compile time:
 #endif
 @end example
 @end deftypefn
+
+@deftypefun {const char *} mpfr_get_patches (void)
+Return a null-terminated string containing the ids of the patches applied to
+the MPFR library (contents of the @file{PATCHES} file), separated by spaces.
+Note: If the program has been compiled with an older MPFR version and is
+dynamically linked with a new MPFR library version, the ids of the patches
+applied to the old (compile-time) MPFR version are not available (however
+this information should not have much interest in general).
+@end deftypefun
 
 @node Rounding Mode Related Functions, Exception Related Functions, Miscellaneous Functions, MPFR Interface
 @cindex Rounding mode related functions

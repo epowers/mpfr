@@ -142,7 +142,7 @@ special (void)
   sign = -17;
   mpfr_lgamma (y, &sign, x, GMP_RNDN);
   mpfr_set_str (x, CHECK_Y1, 10, GMP_RNDN);
-  if (MPFR_IS_NAN (y) || mpfr_cmp (y, x) || sign != 1)
+  if (mpfr_equal_p (y, x) == 0 || sign != 1)
     {
       printf ("mpfr_lgamma("CHECK_X1") is wrong:\n"
               "expected ");
@@ -158,7 +158,7 @@ special (void)
   sign = -17;
   mpfr_lgamma (y, &sign, x, GMP_RNDN);
   mpfr_set_str (x, CHECK_Y2, 10, GMP_RNDN);
-  if (MPFR_IS_NAN (y) || mpfr_cmp (y, x) || sign != 1)
+  if (mpfr_equal_p (y, x) == 0 || sign != 1)
     {
       printf ("mpfr_lgamma("CHECK_X2") is wrong:\n"
               "expected ");
@@ -175,7 +175,7 @@ special (void)
   mpfr_lgamma (y, &sign, x, GMP_RNDU);
   mpfr_set_prec (x, 175);
   mpfr_set_str_binary (x, "0.1010001100011101101011001101110010100001000001000001110011000001101100001111001001000101011011100100010101011110100111110101010100010011010010000101010111001100011000101111E7");
-  if (MPFR_IS_NAN (y) || mpfr_cmp (x, y) || sign != 1)
+  if (mpfr_equal_p (x, y) == 0 || sign != 1)
     {
       printf ("Error in mpfr_lgamma (1)\n");
       exit (1);
@@ -188,7 +188,7 @@ special (void)
   mpfr_lgamma (x, &sign, y, GMP_RNDZ);
   mpfr_set_prec (y, 21);
   mpfr_set_str_binary (y, "0.111000101000001100101E9");
-  if (MPFR_IS_NAN (x) || mpfr_cmp (x, y) || sign != 1)
+  if (mpfr_equal_p (x, y) == 0 || sign != 1)
     {
       printf ("Error in mpfr_lgamma (120)\n");
       printf ("Expected "); mpfr_print_binary (y); puts ("");
@@ -203,7 +203,7 @@ special (void)
   inex = mpfr_lgamma (y, &sign, x, GMP_RNDN);
   mpfr_set_prec (x, 206);
   mpfr_set_str_binary (x, "0.10000111011000000011100010101001100110001110000111100011000100100110110010001011011110101001111011110110000001010100111011010000000011100110110101100111000111010011110010000100010111101010001101000110101001E13");
-  if (MPFR_IS_NAN (y) || mpfr_cmp (x, y) || sign != 1)
+  if (mpfr_equal_p (x, y) == 0 || sign != 1)
     {
       printf ("Error in mpfr_lgamma (768)\n");
       exit (1);
@@ -220,7 +220,7 @@ special (void)
   sign = -17;
   mpfr_lgamma (y, &sign, x, GMP_RNDN);
   mpfr_set_str_binary (x, "0.1100E6");
-  if (MPFR_IS_NAN (y) || mpfr_cmp (x, y) || sign != 1)
+  if (mpfr_equal_p (x, y) == 0 || sign != 1)
     {
       printf ("Error for lgamma(0.1100E-66)\n");
       printf ("Expected ");
@@ -239,7 +239,7 @@ special (void)
   mpfr_lgamma (y, &sign, x, GMP_RNDN);
   mpfr_set_prec (x, 32);
   mpfr_set_str_binary (x, "-0.10001000111011111011000010100010E207");
-  if (MPFR_IS_NAN (y) || mpfr_cmp (x, y) || sign != 1)
+  if (mpfr_equal_p (x, y) == 0 || sign != 1)
     {
       printf ("Error for lgamma(-2^199+0.5)\n");
       printf ("Got        ");
@@ -258,7 +258,7 @@ special (void)
   mpfr_lgamma (y, &sign, x, GMP_RNDN);
   mpfr_set_prec (x, 32);
   mpfr_set_str_binary (x, "-0.10001000111011111011000010100010E207");
-  if (MPFR_IS_NAN (y) || mpfr_cmp (x, y) || sign != -1)
+  if (mpfr_equal_p (x, y) == 0 || sign != -1)
     {
       printf ("Error for lgamma(-2^199-0.5)\n");
       printf ("Got        ");
@@ -274,7 +274,7 @@ special (void)
   mpfr_set_str_binary (x, "-0.1101111000E-3");
   inex = mpfr_lgamma (y, &sign, x, GMP_RNDN);
   mpfr_set_str_binary (x, "10.01001011");
-  if (MPFR_IS_NAN (y) || mpfr_cmp (x, y) || sign != -1 || inex >= 0)
+  if (mpfr_equal_p (x, y) == 0 || sign != -1 || inex >= 0)
     {
       printf ("Error for lgamma(-0.1101111000E-3)\n");
       printf ("Got        ");
@@ -285,8 +285,78 @@ special (void)
       exit (1);
     }
 
+  mpfr_set_prec (x, 18);
+  mpfr_set_prec (y, 28);
+  mpfr_set_str_binary (x, "-1.10001101010001101e-196");
+  inex = mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_prec (x, 28);
+  mpfr_set_str_binary (x, "0.100001110110101011011010011E8");
+  MPFR_ASSERTN (mpfr_equal_p (x, y) && inex < 0);
+
+  /* values reported by Kaveh Ghazi on 14 Jul 2007, where mpfr_lgamma()
+     takes forever */
+#define VAL1 "-0.11100001001010110111001010001001001011110100110000110E-55"
+#define OUT1 "100110.01000000010111001110110101110101001001100110111"
+#define VAL2 "-0.11100001001010110111001010001001001011110011111111100E-55"
+#define OUT2 "100110.0100000001011100111011010111010100100110011111"
+#define VAL3 "-0.11100001001010110111001010001001001001110101101010100E-55"
+#define OUT3 "100110.01000000010111001110110101110101001011110111011"
+#define VAL4 "-0.10001111110110110100100100000000001111110001001001011E-57"
+#define OUT4 "101000.0001010111110011101101000101111111010001100011"
+#define VAL5 "-0.10001111110110110100100100000000001111011111100001000E-57"
+#define OUT5 "101000.00010101111100111011010001011111110100111000001"
+#define VAL6 "-0.10001111110110110100100100000000001111011101100011001E-57"
+#define OUT6 "101000.0001010111110011101101000101111111010011101111"
+
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
+
+  mpfr_set_str_binary (x, VAL1);
+  mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_str_binary (x, OUT1);
+  MPFR_ASSERTN(sign == -1 && mpfr_equal_p(x, y));
+
+  mpfr_set_str_binary (x, VAL2);
+  mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_str_binary (x, OUT2);
+  MPFR_ASSERTN(sign == -1 && mpfr_equal_p (x, y));
+
+  mpfr_set_str_binary (x, VAL3);
+  mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_str_binary (x, OUT3);
+  MPFR_ASSERTN(sign == -1 && mpfr_equal_p (x, y));
+
+  mpfr_set_str_binary (x, VAL4);
+  mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_str_binary (x, OUT4);
+  MPFR_ASSERTN(sign == -1 && mpfr_equal_p (x, y));
+
+  mpfr_set_str_binary (x, VAL5);
+  mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_str_binary (x, OUT5);
+  MPFR_ASSERTN(sign == -1 && mpfr_equal_p (x, y));
+
+  mpfr_set_str_binary (x, VAL6);
+  mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_str_binary (x, OUT6);
+  MPFR_ASSERTN(sign == -1 && mpfr_equal_p (x, y));
+
+  /* further test from Kaveh Ghazi */
+  mpfr_set_str_binary (x, "-0.10011010101001010010001110010111010111011101010111001E-53");
+  mpfr_lgamma (y, &sign, x, GMP_RNDN);
+  mpfr_set_str_binary (x, "100101.00111101101010000000101010111010001111001101111");
+  MPFR_ASSERTN(sign == -1 && mpfr_equal_p (x, y));
+
   mpfr_clear (x);
   mpfr_clear (y);
+}
+
+static int
+mpfr_lgamma1 (mpfr_t y, mpfr_t x, mp_rnd_t r)
+{
+  int sign;
+
+  return mpfr_lgamma (y, &sign, x, r);
 }
 
 int
@@ -296,6 +366,8 @@ main (void)
 
   special ();
   test_generic (2, 100, 2);
+
+  data_check ("data/lgamma", mpfr_lgamma1, "mpfr_lgamma");
 
   tests_end_mpfr ();
   return 0;

@@ -27,6 +27,7 @@ MA 02110-1301, USA. */
 
 #define TEST_FUNCTION mpfr_j1
 #define RAND_FUNCTION(x) mpfr_random2(x, MPFR_LIMB_SIZE (x), 8)
+#define REDUCE_EMAX 262143 /* otherwise arg. reduction is too expensive */
 #include "tgeneric.c"
 
 int
@@ -78,6 +79,8 @@ main (int argc, char *argv[])
   mpfr_clear (y);
 
   test_generic (2, 100, 10);
+
+  data_check ("data/j1", mpfr_j1, "mpfr_j1");
 
   tests_end_mpfr ();
 

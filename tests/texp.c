@@ -642,6 +642,8 @@ main (int argc, char *argv[])
 
   overflowed_exp0 ();
 
+  data_check ("data/exp", mpfr_exp, "mpfr_exp");
+
   tests_end_mpfr ();
   return 0;
 }

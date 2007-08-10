@@ -72,7 +72,8 @@ MA 02110-1301, USA. */
 
 #include <fpu_control.h>
 
-static void set_fpu_prec (void)
+static void
+set_fpu_prec (void)
 {
   fpu_control_t cw;
 
@@ -145,13 +146,13 @@ tests_limit_start (void)
          can't set the timeout, we exit immediately. */
       if (getrlimit (RLIMIT_CPU, rlim))
         {
-          fprintf (stderr, "getrlimit failed\n");
+          printf ("Error: getrlimit failed\n");
           exit (1);
         }
       rlim->rlim_cur = timeout;
       if (setrlimit (RLIMIT_CPU, rlim))
         {
-          fprintf (stderr, "setrlimit failed\n");
+          printf ("Error: setrlimit failed\n");
           exit (1);
         }
     }
@@ -167,9 +168,10 @@ tests_rand_start (void)
 
   if (__gmp_rands_initialized)
     {
-      printf ("Please let tests_start() initialize the global __gmp_rands.\n");
-      printf ("ie. ensure that function is called before the first use of RANDS.\n");
-      abort ();
+      printf (
+        "Please let tests_start() initialize the global __gmp_rands, i.e.\n"
+        "ensure that function is called before the first use of RANDS.\n");
+      exit (1);
     }
 
   gmp_randinit_default (__gmp_rands);
@@ -197,7 +199,8 @@ tests_rand_start (void)
           seed = tv;
 #endif
           gmp_randseed_ui (rands, seed);
-          printf ("Seed GMP_CHECK_RANDOMIZE=%lu (include this in bug reports)\n", seed);
+          printf ("Seed GMP_CHECK_RANDOMIZE=%lu "
+                  "(include this in bug reports)\n", seed);
         }
     }
 }
@@ -226,7 +229,7 @@ mpfr_test_init ()
   d = DBL_MIN;
   if (2.0 * (d / 2.0) != d)
     {
-      printf ("Warning: no denormalized numbers\n");
+      printf ("Error: HAVE_DENORMS defined, but no subnormals.\n");
       exit (1);
     }
 #endif
@@ -411,4 +414,175 @@ tests_default_random (mpfr_ptr x)
     mpfr_mul_2si (x, x, (int) (randlimb () % 512) - 256, GMP_RNDN);
   if (randlimb () & 1)
     mpfr_neg (x, x, GMP_RNDN);
+}
+
+/* Check data in file f for function foo, with name 'name'.
+   Each line consists of the file f one:
+
+   xprec yprec rnd x y
+
+   where:
+
+   xprec is the input precision
+   yprec is the output precision
+   rnd is the rounding mode (n, z, u, d, Z)
+   x is the input (hexadecimal format)
+   y is the expected output (hexadecimal format) for foo(x) with rounding rnd
+
+   If rnd is Z, y is the expected output in round-towards-zero, and the
+   three directed rounding modes are tested, then the round-to-nearest
+   mode is tested in precision yprec-1. This is useful for worst cases,
+   where yprec is the minimum value such that one has a worst case in a
+   directed rounding mode.
+ */
+void
+data_check (char *f, int (*foo) (), char *name)
+{
+  FILE *fp;
+  mp_prec_t xprec, yprec;
+  mpfr_t x, y, z;
+  mp_rnd_t rnd, rndnext;
+  char r;
+  int c;
+
+  fp = fopen (f, "r");
+  if (fp == NULL)
+    {
+      char *v = MPFR_VERSION_STRING;
+
+      /* In the '-dev' versions, assume that the data file exists and
+         return an error if the file cannot be opened to make sure
+         that such failures are detected. */
+      while (*v != '\0')
+        v++;
+      if (v[-4] == '-' && v[-3] == 'd' && v[-2] == 'e' && v[-1] == 'v')
+        {
+          printf ("Error: unable to open file '%s'\n", f);
+          exit (1);
+        }
+      else
+        return;
+    }
+
+  mpfr_init (x);
+  mpfr_init (y);
+  mpfr_init (z);
+
+  while (!feof (fp))
+    {
+      fscanf (fp, " ");  /* skip whitespace, for consistency */
+      c = getc (fp);
+      if (c == EOF)
+        break;
+      if (c == '#') /* comment: read entire line */
+        {
+          do
+            {
+              c = getc (fp);
+            }
+          while (!feof (fp) && c != '\n');
+        }
+      else
+        {
+          ungetc (c, fp);
+          if (fscanf (fp, "%lu %lu %c", &xprec, &yprec, &r) != 3)
+            {
+              printf ("Error: corrupted line in file '%s'\n", f);
+              exit (1);
+            }
+          switch (r)
+            {
+            case 'n':
+              rnd = GMP_RNDN;
+              break;
+            case 'z': case 'Z':
+              rnd = GMP_RNDZ;
+              break;
+            case 'u':
+              rnd = GMP_RNDU;
+              break;
+            case 'd':
+              rnd = GMP_RNDD;
+              break;
+            default:
+              printf ("Error: unexpected rounding mode"
+                      " in file '%s': %c\n", f, (int) r);
+              exit (1);
+            }
+          mpfr_set_prec (x, xprec);
+          mpfr_set_prec (y, yprec);
+          mpfr_set_prec (z, yprec);
+          if (mpfr_inp_str (x, fp, 0, GMP_RNDN) == 0)
+            {
+              printf ("Error: corrupted argument in file '%s'\n", f);
+              exit (1);
+            }
+          if (mpfr_inp_str (y, fp, 0, GMP_RNDN) == 0)
+            {
+              printf ("Error: corrupted result in file '%s'\n", f);
+              exit (1);
+            }
+          if (getc (fp) != '\n')
+            {
+              printf ("Error: result not followed by \\n in file '%s'\n", f);
+              exit (1);
+            }
+          /* Skip whitespace, in particular at the end of the file. */
+          fscanf (fp, " ");
+
+          while (1)
+            {
+              foo (z, x, rnd);
+              if (! mpfr_equal_p (y, z))
+                {
+                  printf ("Error for %s with xprec=%ld, yprec=%ld, rnd=%s\nx=",
+                          name, xprec, yprec, mpfr_print_rnd_mode (rnd));
+                  mpfr_out_str (stdout, 16, 0, x, GMP_RNDN);
+                  printf ("\nexpected ");
+                  mpfr_out_str (stdout, 16, 0, y, GMP_RNDN);
+                  printf ("\ngot      ");
+                  mpfr_out_str (stdout, 16, 0, z, GMP_RNDN);
+                  printf ("\n");
+                  exit (1);
+                }
+              if (r != 'Z' || rnd == GMP_RNDN)
+                break;
+              if (rnd == GMP_RNDZ)
+                {
+                  if (MPFR_IS_NEG (y))
+                    {
+                      rnd = GMP_RNDU;
+                      rndnext = GMP_RNDD;
+                    }
+                  else
+                    {
+                      rnd = GMP_RNDD;
+                      rndnext = GMP_RNDU;
+                    }
+                }
+              else
+                {
+                  rnd = rndnext;
+                  if (rndnext != GMP_RNDN)
+                    {
+                      rndnext = GMP_RNDN;
+                      mpfr_nexttoinf (y);
+                    }
+                  else
+                    {
+                      if (yprec == MPFR_PREC_MIN)
+                        break;
+                      mpfr_prec_round (y, --yprec, GMP_RNDZ);
+                      mpfr_set_prec (z, yprec);
+                    }
+                }
+            }
+        }
+    }
+
+  mpfr_clear (x);
+  mpfr_clear (y);
+  mpfr_clear (z);
+
+  fclose (fp);
 }

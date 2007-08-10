@@ -127,6 +127,8 @@ main (int argc, char *argv[])
 
   test_generic (2, 100, 100);
 
+  data_check ("data/tanh", mpfr_tanh, "mpfr_tanh");
+
   tests_end_mpfr ();
   return 0;
 }

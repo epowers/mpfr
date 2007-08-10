@@ -204,7 +204,7 @@ __MPFR_DECLSPEC extern MPFR_THREAD_ATTR mpfr_cache_t __gmpfr_cache_const_euler;
 __MPFR_DECLSPEC extern MPFR_THREAD_ATTR mpfr_cache_t __gmpfr_cache_const_catalan;
 
 #define BASE_MAX 36
-__MPFR_DECLSPEC extern MPFR_THREAD_ATTR mpfr_ptr __gmpfr_l2b[BASE_MAX-1][2];
+__MPFR_DECLSPEC extern const __mpfr_struct __gmpfr_l2b[BASE_MAX-1][2];
 
 __MPFR_DECLSPEC extern const mpfr_t __gmpfr_one;
 __MPFR_DECLSPEC extern const mpfr_t __gmpfr_two;
@@ -1139,8 +1139,9 @@ typedef struct {
  (!MPFR_IS_SINGULAR (b) && mpfr_round_p (MPFR_MANT (b), MPFR_LIMB_SIZE (b),  \
                                          (err), (prec) + ((rnd)==GMP_RNDN)))
 
+/* TODO: fix this description (see round_near_x.c). */
 /* Assuming that the function has a Taylor expansion which looks like:
-    y=o(f(x)) = o(x + g(x)) with |g(x)| <=2^(EXP(v)-err)
+    y=o(f(x)) = o(x + g(x)) with |g(x)| <= 2^(EXP(v)-err)
    we can quickly set y to v if x is small (ie err > prec(y)+1) in most
    cases. It assumes that f(x) is not representable exactly as a FP number.
    v must not be a singular value (NAN, INF or ZERO); usual values are
@@ -1369,26 +1370,31 @@ struct mpfr_group_t {
 #define MPFR_GROUP_DECL(g) struct mpfr_group_t g
 #define MPFR_GROUP_CLEAR(g) do {                                 \
  if (MPFR_UNLIKELY ((g).alloc != 0)) {                           \
-    MPFR_ASSERTD ((g).mant != (g).tab);                          \
-    (*__gmp_free_func)((g).mant, (g).alloc);                     \
+   MPFR_ASSERTD ((g).mant != (g).tab);                           \
+   (*__gmp_free_func) ((g).mant, (g).alloc);                     \
  }} while (0)
 
-#define MPFR_GROUP_INIT_TEMPLATE(g, prec, num, handler) do {     \
- mp_prec_t _prec = (prec);                                       \
- mp_size_t _size;                                                \
- MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                          \
- if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX)) mpfr_abort_prec_max(); \
- _size = (mp_prec_t)(_prec +BITS_PER_MP_LIMB-1)/BITS_PER_MP_LIMB;\
- if (MPFR_UNLIKELY (_size*(num) > MPFR_GROUP_STATIC_SIZE)) {     \
-  (g).alloc = (num)*_size*sizeof (mp_limb_t);                    \
-  (g).mant = (*__gmp_allocate_func) ((g).alloc);                 \
- } else {                                                        \
-  (g).alloc = 0;                                                 \
-  (g).mant = (g).tab;                                            \
- }                                                               \
- handler;                                                        \
+#define MPFR_GROUP_INIT_TEMPLATE(g, prec, num, handler) do {            \
+ mp_prec_t _prec = (prec);                                              \
+ mp_size_t _size;                                                       \
+ MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                                 \
+ if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX))                             \
+   mpfr_abort_prec_max ();                                              \
+ _size = (mp_prec_t) (_prec + BITS_PER_MP_LIMB - 1) / BITS_PER_MP_LIMB; \
+ if (MPFR_UNLIKELY (_size * (num) > MPFR_GROUP_STATIC_SIZE))            \
+   {                                                                    \
+     (g).alloc = (num) * _size * sizeof (mp_limb_t);                    \
+     (g).mant = (mp_limb_t *) (*__gmp_allocate_func) ((g).alloc);       \
+   }                                                                    \
+ else                                                                   \
+   {                                                                    \
+     (g).alloc = 0;                                                     \
+     (g).mant = (g).tab;                                                \
+   }                                                                    \
+ handler;                                                               \
  } while (0)
-#define MPFR_GROUP_TINIT(g, n, x) MPFR_TMP_INIT1 ((g).mant+_size*(n), x, _prec)
+#define MPFR_GROUP_TINIT(g, n, x)                       \
+  MPFR_TMP_INIT1 ((g).mant + _size * (n), x, _prec)
 
 #define MPFR_GROUP_INIT_1(g, prec, x)                            \
  MPFR_GROUP_INIT_TEMPLATE(g, prec, 1, MPFR_GROUP_TINIT(g, 0, x))
@@ -1414,21 +1420,22 @@ struct mpfr_group_t {
    MPFR_GROUP_TINIT(g, 2, z);MPFR_GROUP_TINIT(g, 3, t);          \
    MPFR_GROUP_TINIT(g, 4, a);MPFR_GROUP_TINIT(g, 5, b))
 
-#define MPFR_GROUP_REPREC_TEMPLATE(g, prec, num, handler) do {   \
- mp_prec_t _prec = (prec);                                       \
- size_t    _oalloc = (g).alloc;                                  \
- mp_size_t _size;                                                \
- MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                          \
- if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX)) mpfr_abort_prec_max(); \
- _size = (mp_prec_t)(_prec +BITS_PER_MP_LIMB-1)/BITS_PER_MP_LIMB;\
- (g).alloc = (num)*_size*sizeof(mp_limb_t);                      \
- if (MPFR_LIKELY (_oalloc == 0))                                 \
-  (g).mant = (*__gmp_allocate_func) ((g).alloc);                 \
- else                                                            \
-  (g).mant = (*__gmp_reallocate_func)((g).mant,_oalloc,(g).alloc);\
- handler;                                                        \
-} while (0)
-
+#define MPFR_GROUP_REPREC_TEMPLATE(g, prec, num, handler) do {          \
+ mp_prec_t _prec = (prec);                                              \
+ size_t    _oalloc = (g).alloc;                                         \
+ mp_size_t _size;                                                       \
+ MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                                 \
+ if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX))                             \
+   mpfr_abort_prec_max ();                                              \
+ _size = (mp_prec_t) (_prec + BITS_PER_MP_LIMB - 1) / BITS_PER_MP_LIMB; \
+ (g).alloc = (num) * _size * sizeof (mp_limb_t);                        \
+ if (MPFR_LIKELY (_oalloc == 0))                                        \
+   (g).mant = (mp_limb_t *) (*__gmp_allocate_func) ((g).alloc);         \
+ else                                                                   \
+   (g).mant = (mp_limb_t *)                                             \
+     (*__gmp_reallocate_func) ((g).mant, _oalloc, (g).alloc);           \
+ handler;                                                               \
+ } while (0)
 
 #define MPFR_GROUP_REPREC_1(g, prec, x)                          \
  MPFR_GROUP_REPREC_TEMPLATE(g, prec, 1, MPFR_GROUP_TINIT(g, 0, x))

@@ -114,6 +114,8 @@ main (int argc, char *argv[])
   mpfr_clear (x);
   mpfr_clear (y);
 
+  data_check ("data/log10", mpfr_log10, "mpfr_log10");
+
   tests_end_mpfr ();
   return 0;
 }

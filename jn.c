@@ -26,6 +26,8 @@ MA 02110-1301, USA. */
 
 /* Relations: j(-n,z) = (-1)^n j(n,z) */
 
+static int mpfr_jn_asympt (mpfr_ptr, long, mpfr_srcptr, mp_rnd_t);
+
 int
 mpfr_j0 (mpfr_ptr res, mpfr_srcptr z, mp_rnd_t r)
 {
@@ -93,6 +95,16 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mp_rnd_t r)
        the "extra" argument of MPFR_FAST_COMPUTE_IF_SMALL_INPUT. */
     MPFR_FAST_COMPUTE_IF_SMALL_INPUT (res, z, -2 * MPFR_GET_EXP (z), 3,
                                       0, r, mpfr_div_2ui (res, res, 1, r));
+
+  /* we can use the asymptotic expansion as soon as |z| > p log(2)/2,
+     but to get some margin we use it for |z| > p/2 */
+  if (mpfr_cmp_ui (z, MPFR_PREC(res) / 2 + 3) > 0 ||
+      mpfr_cmp_si (z, - ((long) MPFR_PREC(res) / 2 + 3)) < 0)
+    {
+      inex = mpfr_jn_asympt (res, n, z, r);
+      if (inex != 0)
+        return inex;
+    }
 
   mpfr_init2 (y, 32);
 
@@ -188,3 +200,6 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mp_rnd_t r)
 
   return inex;
 }
+
+#define MPFR_JN
+#include "jyn_asympt.c"
