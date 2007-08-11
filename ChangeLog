@@ -1,4 +1,36 @@
 ------------------------------------------------------------------------
+r4748 | vlefevre | 2007-08-11 21:29:01 +0000 (Sat, 11 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.0-rc2.
+
+------------------------------------------------------------------------
+r4746 | vlefevre | 2007-08-10 02:19:02 +0000 (Fri, 10 Aug 2007) | 2 lines
+Changed paths:
+   A /branches/2.3 (from /trunk:4745)
+
+Created new 2.3 branch from the trunk (there were too many changes).
+
+------------------------------------------------------------------------
+r4744 | vlefevre | 2007-08-10 02:11:05 +0000 (Fri, 10 Aug 2007) | 2 lines
+Changed paths:
+   M /trunk/NEWS
+
+NEWS update.
+
+------------------------------------------------------------------------
+r4743 | vlefevre | 2007-08-10 02:06:56 +0000 (Fri, 10 Aug 2007) | 2 lines
+Changed paths:
+   M /trunk/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -v".
+
+------------------------------------------------------------------------
 r4742 | vlefevre | 2007-08-10 01:41:01 +0000 (Fri, 10 Aug 2007) | 3 lines
 Changed paths:
    M /trunk/asinh.c
