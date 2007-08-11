@@ -1,4 +1,40 @@
 ------------------------------------------------------------------------
+r4754 | vlefevre | 2007-08-11 23:23:56 +0000 (Sat, 11 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.0-rc2.
+
+------------------------------------------------------------------------
+r4753 | vlefevre | 2007-08-11 23:22:49 +0000 (Sat, 11 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/tests/tatan.c
+
+Fixed mpfr_inits and mpfr_clears calls in tests/tatan.c.
+
+------------------------------------------------------------------------
+r4750 | vlefevre | 2007-08-11 22:08:43 +0000 (Sat, 11 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Reverted version to 2.3.0-dev as I've found bugs.
+
+------------------------------------------------------------------------
+r4749 | vlefevre | 2007-08-11 21:37:18 +0000 (Sat, 11 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update.
+
+------------------------------------------------------------------------
 r4748 | vlefevre | 2007-08-11 21:29:01 +0000 (Sat, 11 Aug 2007) | 2 lines
 Changed paths:
    M /branches/2.3/VERSION
