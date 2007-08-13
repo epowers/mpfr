@@ -1,4 +1,71 @@
 ------------------------------------------------------------------------
+r4763 | vlefevre | 2007-08-13 05:08:16 +0000 (Mon, 13 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.0-rc2.
+
+------------------------------------------------------------------------
+r4762 | vlefevre | 2007-08-13 05:06:22 +0000 (Mon, 13 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/NEWS
+
+NEWS: new functions mpfr_signbit, mpfr_setsign, mpfr_copysign.
+
+------------------------------------------------------------------------
+r4760 | vlefevre | 2007-08-13 04:55:57 +0000 (Mon, 13 Aug 2007) | 8 lines
+Changed paths:
+   M /branches/2.3/Makefile.am
+   M /branches/2.3/TODO
+   M /branches/2.3/copysign.c
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   A /branches/2.3/setsign.c (from /trunk/setsign.c:4759)
+   A /branches/2.3/signbit.c (from /trunk/signbit.c:4759)
+   M /branches/2.3/tests/tcopysign.c
+
+Implemented changes suggested in
+<http://websympa.loria.fr/wwsympa/arc/mpfr/2007-07/msg00123.html>.
+* Made mpfr_copysign() like the corresponding function in IEEE 754
+  (was an internal function until now).
+* Added mpfr_signbit() and mpfr_setsign().
+* Documented these three functions.
+* Updated TODO.
+
+------------------------------------------------------------------------
+r4758 | vlefevre | 2007-08-13 04:35:23 +0000 (Mon, 13 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/jyn_asympt.c
+   M /branches/2.3/remquo.c
+   M /branches/2.3/tests/texp10.c
+   M /branches/2.3/tests/tl2b.c
+
+Make svn properties consistent.
+
+------------------------------------------------------------------------
+r4756 | vlefevre | 2007-08-11 23:37:09 +0000 (Sat, 11 Aug 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Reverted version to 2.3.0-dev again (the copysign issue is still
+unresolved).
+
+------------------------------------------------------------------------
+r4755 | vlefevre | 2007-08-11 23:24:51 +0000 (Sat, 11 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update.
+
+------------------------------------------------------------------------
 r4754 | vlefevre | 2007-08-11 23:23:56 +0000 (Sat, 11 Aug 2007) | 2 lines
 Changed paths:
    M /branches/2.3/VERSION
