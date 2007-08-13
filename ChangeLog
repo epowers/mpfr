@@ -1,4 +1,19 @@
 ------------------------------------------------------------------------
+r4766 | vlefevre | 2007-08-13 10:42:59 +0000 (Mon, 13 Aug 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/tests/tstckintc.c
+
+tstckintc.c: fixed bus error on Solaris (the address of Buffer was not
+a multiple of 4).
+
+------------------------------------------------------------------------
+r4764 | vlefevre | 2007-08-13 05:09:19 +0000 (Mon, 13 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update.
+
+------------------------------------------------------------------------
 r4763 | vlefevre | 2007-08-13 05:08:16 +0000 (Mon, 13 Aug 2007) | 2 lines
 Changed paths:
    M /branches/2.3/VERSION
