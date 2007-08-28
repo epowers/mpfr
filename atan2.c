@@ -170,19 +170,47 @@ mpfr_atan2 (mpfr_ptr dest, mpfr_srcptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
     /* use atan2(y,x) = atan(y/x) */
     for (;;)
       {
-        mpfr_div (tmp, y, x, GMP_RNDN);   /* Error <= ulp (tmp) */
-        /* If tmp is 0, this means that |y/x| <= 2^(-emin-2),
-           and since atan(z)/z < 1, we have underflow. */
-        if (MPFR_IS_ZERO (tmp))
+        if (mpfr_div (tmp, y, x, GMP_RNDN) == 0)
           {
+            /* Result is exact. */
+            inexact = mpfr_atan (dest, tmp, rnd_mode);
+            goto end;
+          }
+
+        /* Error <= ulp (tmp) except in case of underflow or overflow. */
+
+        /* If the division underflowed, since |atan(z)/z| < 1, we have
+           an underflow. */
+        if (MPFR_UNLIKELY (mpfr_underflow_p ()))
+          {
+            int sign;
+
+            /* In the case GMP_RNDN with 2^(emin-2) < |y/x| < 2^(emin-1):
+               The smallest significand value S > 1 of |y/x| is:
+                 * 1 / (1 - 2^(-px))                        if py <= px,
+                 * (1 - 2^(-px) + 2^(-py)) / (1 - 2^(-px))  if py >= px.
+               Therefore S - 1 > 2^(-pz), where pz = max(px,py). We have:
+               atan(|y/x|) > atan(z), where z = 2^(emin-2) * (1 + 2^(-pz)).
+                           > z - z^3 / 3.
+                           > 2^(emin-2) * (1 + 2^(-pz) - 2^(2 emin - 5))
+               Assuming pz <= -2 emin + 5, we can round away from zero
+               (this is what mpfr_underflow always does on GMP_RNDN).
+               In the case GMP_RNDN with |y/x| <= 2^(emin-2), we round
+               towards zero, as |atan(z)/z| < 1. */
+            MPFR_ASSERTN (MPFR_PREC_MAX <=
+                          2 * (mpfr_uexp_t) - MPFR_EMIN_MIN + 5);
+            if (rnd_mode == GMP_RNDN && MPFR_IS_ZERO (tmp))
+              rnd_mode = GMP_RNDZ;
+            sign = MPFR_SIGN (tmp);
             mpfr_clear (tmp);
             MPFR_SAVE_EXPO_FREE (expo);
-            return mpfr_underflow (dest, (rnd_mode == GMP_RNDN) ? GMP_RNDZ
-                                   : rnd_mode, MPFR_SIGN(tmp));
+            return mpfr_underflow (dest, rnd_mode, sign);
           }
+
         mpfr_atan (tmp, tmp, GMP_RNDN);   /* Error <= 2*ulp (tmp) since
                                              abs(D(arctan)) <= 1 */
-        /*FIXME: Error <= ulp(tmp) ? */
+        /* TODO: check that the error bound is correct in case of overflow. */
+        /* FIXME: Error <= ulp(tmp) ? */
         if (MPFR_LIKELY (MPFR_CAN_ROUND (tmp, prec - 2, MPFR_PREC (dest),
                                          rnd_mode)))
           break;
@@ -220,9 +248,10 @@ mpfr_atan2 (mpfr_ptr dest, mpfr_srcptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
         }
       mpfr_clear (pi);
     }
-  MPFR_ZIV_FREE (loop);
-
   inexact = mpfr_set (dest, tmp, rnd_mode);
+
+ end:
+  MPFR_ZIV_FREE (loop);
   mpfr_clear (tmp);
   MPFR_SAVE_EXPO_FREE (expo);
   return mpfr_check_range (dest, inexact, rnd_mode);
