@@ -1,4 +1,90 @@
 ------------------------------------------------------------------------
+r4796 | vlefevre | 2007-08-28 15:40:53 +0000 (Tue, 28 Aug 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/atan2.c
+   M /branches/2.3/tests/tatan.c
+
+Ported the mpfr_atan2 fix in underflow case and corresponding testcases
+from the trunk.
+
+------------------------------------------------------------------------
+r4787 | vlefevre | 2007-08-28 13:17:01 +0000 (Tue, 28 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/README.dev
+
+README.dev: added a paragraph concerning Ziv loops.
+
+------------------------------------------------------------------------
+r4782 | vlefevre | 2007-08-27 14:29:03 +0000 (Mon, 27 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3
+   M /branches/2.3/tests
+
+Updated svn:ignore properties.
+
+------------------------------------------------------------------------
+r4780 | vlefevre | 2007-08-27 11:55:25 +0000 (Mon, 27 Aug 2007) | 7 lines
+Changed paths:
+   M /branches/2.3/FAQ.html
+
+FAQ update:
+  * The question numbers are now hardcoded instead of being generated
+    with CSS rules.
+  * Added the list of questions at the top.
+  * CSS styles: a grey bar is displayed on the left of the target answer
+    (if the browser supports the ":target" pseudo-class from CSS3).
+
+------------------------------------------------------------------------
+r4777 | vlefevre | 2007-08-27 10:44:49 +0000 (Mon, 27 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/FAQ.html
+
+FAQ update.
+
+------------------------------------------------------------------------
+r4775 | vlefevre | 2007-08-22 15:52:23 +0000 (Wed, 22 Aug 2007) | 6 lines
+Changed paths:
+   M /branches/2.3/INSTALL
+
+INSTALL: added another warning concerning the --with-gmp options.
+For instance, under Linux, "cpp -I/usr/include -v < /dev/null" says:
+  ignoring duplicate directory "/usr/include"
+    as it is a non-system directory that duplicates a system directory
+and does not modify the include search path as wanted.
+
+------------------------------------------------------------------------
+r4773 | vlefevre | 2007-08-15 17:30:50 +0000 (Wed, 15 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: improved description of mpfr_setsign (merged c4772).
+
+------------------------------------------------------------------------
+r4771 | vlefevre | 2007-08-14 11:43:05 +0000 (Tue, 14 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/NEWS
+
+Added to NEWS: Thread-safe support with Microsoft Visual compiler.
+
+------------------------------------------------------------------------
+r4769 | vlefevre | 2007-08-14 11:36:25 +0000 (Tue, 14 Aug 2007) | 6 lines
+Changed paths:
+   M /branches/2.3/mpfr-impl.h
+
+mpfr-impl.h: if MPFR_USE_THREAD_SAFE is defined (--enable-thread-safe):
+  * Added support for MSC (thanks to Brian Gladman).
+  * Define MPFR_THREAD_ATTR even after #error to make the error more
+    visible (see comment in the source).
+[svn merge -c4768 svn+ssh://gforge/svn/mpfr/trunk]
+
+------------------------------------------------------------------------
+r4767 | vlefevre | 2007-08-13 10:43:38 +0000 (Mon, 13 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update.
+
+------------------------------------------------------------------------
 r4766 | vlefevre | 2007-08-13 10:42:59 +0000 (Mon, 13 Aug 2007) | 3 lines
 Changed paths:
    M /branches/2.3/tests/tstckintc.c
