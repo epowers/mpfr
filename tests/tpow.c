@@ -461,6 +461,8 @@ static void
 special ()
 {
   mpfr_t x, y, z, t;
+  mp_exp_t emin, emax;
+  int inex;
 
   mpfr_init2 (x, 53);
   mpfr_init2 (y, 53);
@@ -631,6 +633,52 @@ special ()
   test_pow (z, x, y, GMP_RNDN);
   MPFR_ASSERTN (MPFR_IS_ZERO (z) && MPFR_IS_POS (z));
 
+  /* Bugs reported by Kevin Rauch on 29 Oct 2007 */
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
+  mpfr_set_emin (-1000000);
+  mpfr_set_emax ( 1000000);
+  mpfr_set_prec (x, 64);
+  mpfr_set_prec (y, 64);
+  mpfr_set_prec (z, 64);
+  mpfr_set_str (x, "-0.5", 10, GMP_RNDN);
+  mpfr_set_str (y, "-0.ffffffffffffffff", 16, GMP_RNDN);
+  mpfr_set_exp (y, mpfr_get_emax ());
+  inex = mpfr_pow (z, x, y, GMP_RNDN);
+  /* (-0.5)^(-n) = 1/2^n for n even */
+  MPFR_ASSERTN(mpfr_inf_p (z) && MPFR_IS_POS (z) && inex > 0);
+
+  /* (-1)^(-n) = 1 for n even */
+  mpfr_set_str (x, "-1", 10, GMP_RNDN);
+  inex = mpfr_pow (z, x, y, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_cmp_ui (z, 1) == 0 && inex == 0);
+
+  /* (-1)^n = 1 for n even */
+  mpfr_set_str (x, "-1", 10, GMP_RNDN);
+  mpfr_neg (y, y, GMP_RNDN);
+  inex = mpfr_pow (z, x, y, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_cmp_ui (z, 1) == 0 && inex == 0);
+
+  /* (-1.5)^n = +Inf for n even */
+  mpfr_set_str (x, "-1.5", 10, GMP_RNDN);
+  inex = mpfr_pow (z, x, y, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_inf_p (z) && MPFR_IS_POS (z) && inex > 0);
+
+  /* (-n)^1.5 = NaN for n even */
+  mpfr_neg (y, y, GMP_RNDN);
+  mpfr_set_str (x, "1.5", 10, GMP_RNDN);
+  inex = mpfr_pow (z, y, x, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_nan_p (z));
+
+  /* x^(-1.5) = NaN for x small < 0 */
+  mpfr_set_str (x, "-0.8", 16, GMP_RNDN);
+  mpfr_set_exp (x, mpfr_get_emin ());
+  mpfr_set_str (y, "-1.5", 10, GMP_RNDN);
+  inex = mpfr_pow (z, x, y, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_nan_p (z));
+
+  mpfr_set_emin (emin);
+  mpfr_set_emax (emax);
   mpfr_clear (x);
   mpfr_clear (y);
   mpfr_clear (z);
@@ -863,6 +911,91 @@ overflows (void)
 }
 
 static void
+overflows2 (void)
+{
+  mpfr_t x, y, z;
+  mp_exp_t emin, emax;
+  int e;
+
+  /* x^y in reduced exponent range, where x = 2^b and y is not an integer
+     (so that mpfr_pow_z is not used). */
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
+  set_emin (-128);
+
+  mpfr_inits2 (16, x, y, z, (void *) 0);
+
+  mpfr_set_si_2exp (x, 1, -64, GMP_RNDN);  /* 2^(-64) */
+  mpfr_set_si_2exp (y, -1, -1, GMP_RNDN);  /* -0.5 */
+  for (e = 2; e <= 32; e += 17)
+    {
+      set_emax (e);
+      mpfr_clear_flags ();
+      mpfr_pow (z, x, y, GMP_RNDN);
+      if (MPFR_IS_NEG (z) || ! mpfr_inf_p (z))
+        {
+          printf ("Error in overflows2 (e = %d): expected +Inf, got ", e);
+          mpfr_dump (z);
+          exit (1);
+        }
+      if (__gmpfr_flags != (MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_INEXACT))
+        {
+          printf ("Error in overflows2 (e = %d): bad flags (%u)\n",
+                  e, __gmpfr_flags);
+          exit (1);
+        }
+    }
+
+  mpfr_clears (x, y, z, (void *) 0);
+
+  set_emin (emin);
+  set_emax (emax);
+}
+
+static void
+overflows3 (void)
+{
+  /* x^y where x = 2^b, y is not an integer (so that mpfr_pow_z is not used)
+     and b * y = emax in the extended exponent range. If emax is divisible
+     by 3, we choose x = 2^(-2*emax/3) and y = -3/2. */
+
+  if (MPFR_EMAX_MAX % 3 == 0)
+    {
+      mpfr_t x, y, z;
+      mp_exp_t emin, emax;
+
+      emin = mpfr_get_emin ();
+      emax = mpfr_get_emax ();
+      set_emin (MPFR_EMIN_MIN);
+      set_emax (MPFR_EMAX_MAX);
+
+      mpfr_inits2 (16, x, y, z, (void *) 0);
+
+      mpfr_set_si_2exp (x, 1, -2 * (MPFR_EMAX_MAX / 3), GMP_RNDN);
+      mpfr_set_si_2exp (y, -3, -1, GMP_RNDN);
+      mpfr_clear_flags ();
+      mpfr_pow (z, x, y, GMP_RNDN);
+      if (MPFR_IS_NEG (z) || ! mpfr_inf_p (z))
+        {
+          printf ("Error in overflows3: expected +Inf, got ");
+          mpfr_dump (z);
+          exit (1);
+        }
+      if (__gmpfr_flags != (MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_INEXACT))
+        {
+          printf ("Error in overflows3: bad flags (%u)\n", __gmpfr_flags);
+          exit (1);
+        }
+
+      mpfr_clears (x, y, z, (void *) 0);
+
+      set_emin (emin);
+      set_emax (emax);
+    }
+}
+
+static void
 x_near_one (void)
 {
   mpfr_t x, y, z;
@@ -899,6 +1032,73 @@ mpfr_pow275 (mpfr_t y, mpfr_t x, mp_rnd_t r)
   return inex;
 }
 
+/* Bug found by Kevin P. Rauch */
+static void
+bug20071103 (void)
+{
+  mpfr_t x, y, z;
+  mp_exp_t emin, emax;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
+  mpfr_set_emin (-1000000);
+  mpfr_set_emax ( 1000000);
+
+  mpfr_inits2 (64, x, y, z, (void *) 0);
+  mpfr_set_si_2exp (x, -3, -1, GMP_RNDN);  /* x = -1.5 */
+  mpfr_set_str (y, "-0.ffffffffffffffff", 16, GMP_RNDN);
+  mpfr_set_exp (y, mpfr_get_emax ());
+  mpfr_clear_flags ();
+  mpfr_pow (z, x, y, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_zero_p (z) && MPFR_SIGN (z) > 0 &&
+                __gmpfr_flags == (MPFR_FLAGS_UNDERFLOW | MPFR_FLAGS_INEXACT));
+  mpfr_clears (x, y, z, (void *) 0);
+
+  set_emin (emin);
+  set_emax (emax);
+}
+
+/* Bug found by Kevin P. Rauch */
+static void
+bug20071104 (void)
+{
+  mpfr_t x, y, z;
+  mp_exp_t emin, emax;
+  int inex;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
+  mpfr_set_emin (-1000000);
+  mpfr_set_emax ( 1000000);
+
+  mpfr_inits2 (20, x, y, z, (void *) 0);
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  mpfr_nextbelow (x);             /* x = -2^(emin-1) */
+  mpfr_set_si (y, -2, GMP_RNDN);  /* y = -2 */
+  mpfr_clear_flags ();
+  inex = mpfr_pow (z, x, y, GMP_RNDN);
+  if (! mpfr_inf_p (z) || MPFR_SIGN (z) < 0)
+    {
+      printf ("Error in bug20071104: expected +Inf, got ");
+      mpfr_dump (z);
+      exit (1);
+    }
+  if (inex <= 0)
+    {
+      printf ("Error in bug20071104: bad ternary value (%d)\n", inex);
+      exit (1);
+    }
+  if (__gmpfr_flags != (MPFR_FLAGS_OVERFLOW | MPFR_FLAGS_INEXACT))
+    {
+      printf ("Error in bug20071104: bad flags (%u)\n", __gmpfr_flags);
+      exit (1);
+    }
+  mpfr_clears (x, y, z, (void *) 0);
+
+  set_emin (emin);
+  set_emax (emax);
+}
+
 int
 main (void)
 {
@@ -917,7 +1117,11 @@ main (void)
     check_inexact (p);
   underflows ();
   overflows ();
+  overflows2 ();
+  overflows3 ();
   x_near_one ();
+  bug20071103 ();
+  bug20071104 ();
 
   test_generic (2, 100, 100);
   test_generic_ui (2, 100, 100);
