@@ -1432,7 +1432,7 @@ cotangent of @var{op}, rounded in the direction @var{rnd}.
 Set simultaneously @var{sop} to the sine of @var{op} and
                    @var{cop} to the cosine of @var{op},
 rounded in the direction @var{rnd} with the corresponding precisions of
-@var{sop} and @var{cop}.
+@var{sop} and @var{cop}, which must be different variables.
 Return 0 iff both results are exact.
 @end deftypefun
 
