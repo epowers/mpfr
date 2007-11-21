@@ -246,9 +246,9 @@ mpfr_sqrt (mpfr_ptr r, mpfr_srcptr u, mp_rnd_t rnd_mode)
 
  truncate: /* inexact = 0 or -1 */
 
-  MPFR_SET_EXP(r, expr);
+  MPFR_ASSERTN (expr >= MPFR_EMIN_MIN && expr <= MPFR_EMAX_MAX);
+  MPFR_EXP (r) = expr;
 
   MPFR_TMP_FREE(marker);
-
-  return inexact;
+  return mpfr_check_range (r, inexact, rnd_mode);
 }
