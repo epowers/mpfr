@@ -1394,6 +1394,10 @@ All those functions, except explicitly stated, return zero for an
 exact return value, a positive value for a return value larger than the
 exact result, and a negative value otherwise.
 
+Important note: in some domains, computing special functions (either with
+correct or incorrect rounding) is expensive, even for small precision,
+for example the trigonometric and Bessel functions for large argument.
+
 @deftypefun int mpfr_log (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
 @deftypefunx int mpfr_log2 (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
 @deftypefunx int mpfr_log10 (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
@@ -2034,6 +2038,13 @@ if @var{x} is outside the subnormal exponent range, it just propagates the
 ternary value @var{t}; otherwise, it rounds @var{x} to precision
 @code{EXP(x)-emin+1} according to rounding mode @var{rnd} and previous
 ternary value @var{t}, avoiding double rounding problems.
+More precisely in the subnormal domain, denoting by @var{e} the value of
+@code{emin}, @var{x} is rounded in fixed-point
+arithmetic to an integer multiple of @m{2^{e-1}, two to the power
+@var{e}@minus{}1}; as a consequence, @m{1.5 \times 2^{e-1},
+1.5 multiplied by two to the power @var{e}@minus{}1} when @var{t} is zero
+is rounded to @m{2^e, two to the power @var{e}} with rounding to nearest.
+
 @code{PREC(x)} is not modified by this function.
 @var{rnd} and @var{t} must be the used rounding mode for computing @var{x}
 and the returned ternary value when computing @var{x}.
@@ -2248,8 +2259,9 @@ Nothing has to be done to destroy the FP numbers except garbaging the used
 memory: all the memory stuff (allocating, destroying, garbaging) is kept to
 the application.
 
-Each function is this interface is also implemented as a macro for
-efficiency reasons.
+Each function in this interface is also implemented as a macro for
+efficiency reasons: for example @code{mpfr_custom_init (s, p)}
+uses the macro, while @code{(mpfr_custom_init) (s, p)} uses the function.
 
 Note 1: MPFR functions may still initialize temporary FP numbers
 using standard mpfr_init. See Custom Allocation (GNU MP).
