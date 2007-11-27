@@ -269,6 +269,35 @@ __MPFR_DECLSPEC extern const mpfr_t __gmpfr_four;
 #define mpfr_erangeflag_p() \
   ((int) (__gmpfr_flags & MPFR_FLAGS_ERANGE))
 
+/* Testing an exception flag correctly is tricky. There are mainly two
+   pitfalls: First, one needs to remember to clear the corresponding
+   flag, in case it was set before the function call or during some
+   intermediate computations (in practice, one can clear all the flags).
+   Secondly, one needs to test the flag early enough, i.e. before it
+   can be modified by another function. Moreover, it is quite difficult
+   (if not impossible) to reliably check problems with "make check". To
+   avoid these pitfalls, it is recommended to use the following macros.
+   Other use of the exception-flag predicate functions/macros will be
+   detected by mpfrlint.
+   Note: _op can be either a statement or an expression. */
+#define MPFR_BLOCK_DECL(_flags) unsigned int flags
+#define MPFR_BLOCK(_flags,_op)          \
+  do                                    \
+    {                                   \
+      mpfr_clear_flags ();              \
+      _op;                              \
+      (_flags) = __gmpfr_flags;         \
+    }                                   \
+  while (0)
+#define MPFR_BLOCK_TEST(_flags,_f) MPFR_UNLIKELY ((_flags) & (_f))
+/* Let's use a MPFR_ prefix, because e.g. OVERFLOW is defined by glibc's
+   math.h, though this is not a reserved identifier! */
+#define MPFR_UNDERFLOW(_flags)  MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_UNDERFLOW)
+#define MPFR_OVERFLOW(_flags)   MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_OVERFLOW)
+#define MPFR_NANFLAG(_flags)    MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_NAN)
+#define MPFR_INEXFLAG(_flags)   MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_INEXACT)
+#define MPFR_ERANGEFLAG(_flags) MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_ERANGE)
+
 
 /******************************************************
  ******************** Assertions **********************
