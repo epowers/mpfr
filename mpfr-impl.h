@@ -280,7 +280,7 @@ __MPFR_DECLSPEC extern const mpfr_t __gmpfr_four;
    Other use of the exception-flag predicate functions/macros will be
    detected by mpfrlint.
    Note: _op can be either a statement or an expression. */
-#define MPFR_BLOCK_DECL(_flags) unsigned int flags
+#define MPFR_BLOCK_DECL(_flags) unsigned int _flags
 #define MPFR_BLOCK(_flags,_op)          \
   do                                    \
     {                                   \
