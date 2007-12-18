@@ -35,6 +35,7 @@ mpfr_pow_ui (mpfr_ptr x, mpfr_srcptr y, unsigned long int n, mp_rnd_t rnd)
   mp_rnd_t rnd1;
   MPFR_SAVE_EXPO_DECL (expo);
   MPFR_ZIV_DECL (loop);
+  MPFR_BLOCK_DECL (flags);
 
   if (MPFR_UNLIKELY (MPFR_IS_SINGULAR (y)))
     {
@@ -99,24 +100,24 @@ mpfr_pow_ui (mpfr_ptr x, mpfr_srcptr y, unsigned long int n, mp_rnd_t rnd)
   for (;;)
     {
       int i;
+
       for (m = n, i = 0; m; i++, m >>= 1)
         ;
       /* now 2^(i-1) <= n < 2^i */
       MPFR_ASSERTD (prec > (mpfr_prec_t) i);
       err = prec - 1 - (mpfr_prec_t) i;
       MPFR_ASSERTD (i >= 1);
-      mpfr_clear_overflow ();
-      mpfr_clear_underflow ();
       /* First step: compute square from y */
-      inexact = mpfr_mul (res, y, y, GMP_RNDU);
-      if (n & (1UL << (i-2)))
-        inexact |= mpfr_mul (res, res, y, rnd1);
-      for (i -= 3; i >= 0 && !mpfr_overflow_p () && !mpfr_underflow_p (); i--)
-        {
-          inexact |= mpfr_mul (res, res, res, GMP_RNDU);
-          if (n & (1UL << i))
-            inexact |= mpfr_mul (res, res, y, rnd1);
-        }
+      MPFR_BLOCK (flags,
+                  inexact = mpfr_mul (res, y, y, GMP_RNDU);
+                  if (n & (1UL << (i-2)))
+                    inexact |= mpfr_mul (res, res, y, rnd1);
+                  for (i -= 3; i >= 0 && !MPFR_BLOCK_EXCEP; i--)
+                    {
+                      inexact |= mpfr_mul (res, res, res, GMP_RNDU);
+                      if (n & (1UL << i))
+                        inexact |= mpfr_mul (res, res, y, rnd1);
+                    });
       /* let r(n) be the number of roundings: we have r(2)=1, r(3)=2,
          and r(2n)=2r(n)+1, r(2n+1)=2r(n)+2, thus r(n)=n-1.
          Using Higham's method, to each rounding corresponds a factor
@@ -126,7 +127,7 @@ mpfr_pow_ui (mpfr_ptr x, mpfr_srcptr y, unsigned long int n, mp_rnd_t rnd)
          error of 2^(1+i)*ulp(res).
       */
       if (MPFR_LIKELY (inexact == 0
-                       || mpfr_overflow_p () || mpfr_underflow_p ()
+                       || MPFR_OVERFLOW (flags) || MPFR_UNDERFLOW (flags)
                        || MPFR_CAN_ROUND (res, err, MPFR_PREC (x), rnd)))
         break;
       /* Actualisation of the precision */
@@ -135,25 +136,25 @@ mpfr_pow_ui (mpfr_ptr x, mpfr_srcptr y, unsigned long int n, mp_rnd_t rnd)
     }
   MPFR_ZIV_FREE (loop);
 
-  inexact = mpfr_set (x, res, rnd);
-  mpfr_clear (res);
-
   /* Check Overflow */
-  if (MPFR_UNLIKELY (mpfr_overflow_p ()))
+  if (MPFR_OVERFLOW (flags))
     {
+      mpfr_clear (res);
       MPFR_SAVE_EXPO_FREE (expo);
       return mpfr_overflow (x, rnd,
                             (n % 2) ? MPFR_SIGN (y) : MPFR_SIGN_POS);
     }
   /* Check Underflow  */
-  else if (MPFR_UNLIKELY (mpfr_underflow_p ()))
+  else if (MPFR_UNDERFLOW (flags))
     {
-      if (rnd == GMP_RNDN)
-        rnd = GMP_RNDZ;
+      mpfr_clear (res);
       MPFR_SAVE_EXPO_FREE (expo);
-      return mpfr_underflow (x, rnd,
+      return mpfr_underflow (x, rnd == GMP_RNDN ? GMP_RNDZ : rnd,
                              (n % 2) ? MPFR_SIGN(y) : MPFR_SIGN_POS);
     }
+
+  inexact = mpfr_set (x, res, rnd);
+  mpfr_clear (res);
 
   MPFR_SAVE_EXPO_FREE (expo);
   return mpfr_check_range (x, inexact, rnd);

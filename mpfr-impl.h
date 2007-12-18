@@ -279,7 +279,9 @@ __MPFR_DECLSPEC extern const mpfr_t __gmpfr_four;
    avoid these pitfalls, it is recommended to use the following macros.
    Other use of the exception-flag predicate functions/macros will be
    detected by mpfrlint.
-   Note: _op can be either a statement or an expression. */
+   Note: _op can be either a statement or an expression.
+   MPFR_BLOCK_EXCEP should be used only inside a block; it is useful to
+   detect some exception in order to exit the block as soon as possible. */
 #define MPFR_BLOCK_DECL(_flags) unsigned int _flags
 #define MPFR_BLOCK(_flags,_op)          \
   do                                    \
@@ -290,6 +292,9 @@ __MPFR_DECLSPEC extern const mpfr_t __gmpfr_four;
     }                                   \
   while (0)
 #define MPFR_BLOCK_TEST(_flags,_f) MPFR_UNLIKELY ((_flags) & (_f))
+#define MPFR_BLOCK_EXCEP (__gmpfr_flags & (MPFR_FLAGS_UNDERFLOW | \
+                                           MPFR_FLAGS_OVERFLOW | \
+                                           MPFR_FLAGS_NAN))
 /* Let's use a MPFR_ prefix, because e.g. OVERFLOW is defined by glibc's
    math.h, though this is not a reserved identifier! */
 #define MPFR_UNDERFLOW(_flags)  MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_UNDERFLOW)
