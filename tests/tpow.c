@@ -1113,6 +1113,7 @@ bug20071104 (void)
   set_emin (emin);
   set_emax (emax);
 }
+
 /* Bug found by Kevin P. Rauch */
 static void
 bug20071127 (void)
@@ -1198,8 +1199,52 @@ bug20071128 (void)
   mpfr_set_emax (emax);
 }
 
+/* Bug found by Kevin P. Rauch */
+static void
+bug20071218 (void)
+{
+  mpfr_t x, y, z, t;
+  int tern;
+
+  mpfr_inits2 (64, x, y, z, t, (void *) 0);
+  mpfr_set_str (x, "0x.80000000000002P-1023", 0, GMP_RNDN);
+  mpfr_set_str (y, "100000.000000002", 16, GMP_RNDN);
+  mpfr_set_ui (t, 0, GMP_RNDN);
+  mpfr_nextabove (t);
+  tern = mpfr_pow (z, x, y, GMP_RNDN);
+  if (mpfr_cmp0 (z, t) != 0)
+    {
+      printf ("Error in bug20071218 (1): Expected\n");
+      mpfr_dump (t);
+      printf ("Got\n");
+      mpfr_dump (z);
+      exit (1);
+    }
+  if (tern <= 0)
+    {
+      printf ("Error in bug20071218 (1): bad ternary value"
+              " (%d instead of positive)\n", tern);
+      exit (1);
+    }
+  mpfr_mul_2ui (y, y, 32, GMP_RNDN);
+  tern = mpfr_pow (z, x, y, GMP_RNDN);
+  if (MPFR_NOTZERO (z) || MPFR_IS_NEG (z))
+    {
+      printf ("Error in bug20071218 (2): expected 0, got\n");
+      mpfr_dump (z);
+      exit (1);
+    }
+  if (tern >= 0)
+    {
+      printf ("Error in bug20071218 (2): bad ternary value"
+              " (%d instead of negative)\n", tern);
+      exit (1);
+    }
+  mpfr_clears (x, y, z, t, (void *) 0);
+}
+
 int
-main (void)
+main (int argc, char **argv)
 {
   mp_prec_t p;
 
@@ -1223,6 +1268,7 @@ main (void)
   bug20071103 ();
   bug20071104 ();
   bug20071128 ();
+  bug20071218 ();
 
   test_generic (2, 100, 100);
   test_generic_ui (2, 100, 100);
