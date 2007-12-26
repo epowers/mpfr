@@ -204,6 +204,10 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
           else if (mpfr_can_round (y, yprec, rnd, rnd, prec))
             {
               mpfr_set (t, y, rnd);
+              /* Risk of failures are known when some flags are already set
+                 before the function call. */
+              if (randlimb () & 1)
+                __gmpfr_flags = MPFR_FLAGS_ALL;
 #ifdef DEBUG_TGENERIC
               TGENERIC_INFO (TEST_FUNCTION, MPFR_PREC (z));
 #endif
