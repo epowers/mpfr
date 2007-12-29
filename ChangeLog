@@ -1,4 +1,571 @@
 ------------------------------------------------------------------------
+r5141 | vlefevre | 2007-12-28 03:01:51 +0000 (Fri, 28 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/Makefile.am
+
+Makefile.am: incremented revision for -version-info.
+
+------------------------------------------------------------------------
+r5140 | vlefevre | 2007-12-28 02:52:57 +0000 (Fri, 28 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/NEWS
+
+NEWS update.
+
+------------------------------------------------------------------------
+r5139 | vlefevre | 2007-12-28 02:41:18 +0000 (Fri, 28 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.1-rc1; updated month in mpfr.texi.
+
+------------------------------------------------------------------------
+r5137 | vlefevre | 2007-12-27 16:24:24 +0000 (Thu, 27 Dec 2007) | 5 lines
+Changed paths:
+   M /branches/2.3/tests/tadd1sp.c
+   M /branches/2.3/tests/tests.c
+   M /branches/2.3/tests/texceptions.c
+   M /branches/2.3/tests/tset_exp.c
+   M /branches/2.3/tests/tsubnormal.c
+
+tests: Restore the exponent range in some tests. Check the exponent
+range, in particular at the end of each test. Such a test may fail
+(and signal a bug) when some MPFR function does not restore the
+exponent range (see bug fixed in r4917).
+
+------------------------------------------------------------------------
+r5133 | vlefevre | 2007-12-27 03:11:43 +0000 (Thu, 27 Dec 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/exp2.c
+
+exp2.c: removed incorrect comment (merged changeset 5132 from the
+trunk).
+
+------------------------------------------------------------------------
+r5130 | vlefevre | 2007-12-26 03:18:01 +0000 (Wed, 26 Dec 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/pow.c
+   M /branches/2.3/tests/tpow.c
+
+Fixed bug in mpfr_pow + testcase: detect all underflow cases (some of
+them were leading to an infinite loop, see bug20071218 in tpow.c).
+[merged changesets 5118, 5119, 5122 and 5124 from the trunk]
+
+------------------------------------------------------------------------
+r5129 | vlefevre | 2007-12-26 03:13:46 +0000 (Wed, 26 Dec 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/tests/ttrunc.c
+
+ttrunc.c: exit(-1) -> exit(1) as values outside the range [0,125]
+(mod 256) have a special meaning in POSIX (see Section 2.8.2).
+
+------------------------------------------------------------------------
+r5128 | vlefevre | 2007-12-26 03:02:21 +0000 (Wed, 26 Dec 2007) | 14 lines
+Changed paths:
+   M /branches/2.3/acosh.c
+   M /branches/2.3/atan2.c
+   M /branches/2.3/cosh.c
+   M /branches/2.3/cot.c
+   M /branches/2.3/exp2.c
+   M /branches/2.3/exp3.c
+   M /branches/2.3/exp_2.c
+   M /branches/2.3/expm1.c
+   M /branches/2.3/fma.c
+   M /branches/2.3/fms.c
+   M /branches/2.3/gamma.c
+   M /branches/2.3/mpfr-impl.h
+   A /branches/2.3/mpfrlint
+   M /branches/2.3/pow.c
+   M /branches/2.3/pow_ui.c
+   M /branches/2.3/pow_z.c
+   M /branches/2.3/rint.c
+   M /branches/2.3/sinh.c
+   M /branches/2.3/tests/tgeneric.c
+   M /branches/2.3/yn.c
+
+Added mpfrlint script from the trunk and merged the feature-block branch
+(corresponding to changeset 5115) to the 2.3 branch:
+* New MPFR_BLOCK* macros (see mpfr-impl.h) and mpfrlint check to test
+  exception flags in a more reliable way and detect possible problems
+  with mpfrlint.
+* Improved the generic tests (tests/tgeneric.c): for the second
+  function call, sometimes set all the flags since risk of failures
+  are known when some flags are already set.
+* Modified code to use these new MPFR_BLOCK* macros. This fixed bugs
+  related to exceptions (where flags are set before the call); in
+  particular, tcot and ty1 failed with the improved generic tests.
+[merge -c4865 .../trunk/sinh.c (reformatting -- to avoid a conflict)
+ merge -c5115 .../trunk/       (feature-block)]
+
+------------------------------------------------------------------------
+r5126 | vlefevre | 2007-12-20 09:02:58 +0000 (Thu, 20 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/BUGS
+
+Updated BUGS (merged changesets 5106 and 5123 from the trunk).
+
+------------------------------------------------------------------------
+r5125 | vlefevre | 2007-12-20 09:01:18 +0000 (Thu, 20 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr-impl.h
+   M /branches/2.3/round_p.c
+
+Corrected comments (merged changesets 5120 and 5121 from the trunk).
+
+------------------------------------------------------------------------
+r5111 | vlefevre | 2007-12-18 12:57:24 +0000 (Tue, 18 Dec 2007) | 7 lines
+Changed paths:
+   M /branches/2.3/pow_z.c
+   M /branches/2.3/tests/tpow_z.c
+
+Fixed bug in mpfr_pow_z: if x = y (same mpfr_t argument), the input
+argument is negative and not a power of two, z is positive and odd,
+an overflow or underflow occurs, and the temporary result res is
+positive, then the result gets a wrong sign (positive instead of
+negative). Testcase.
+[merged changeset 5110 from the trunk]
+
+------------------------------------------------------------------------
+r5109 | vlefevre | 2007-12-18 12:13:11 +0000 (Tue, 18 Dec 2007) | 6 lines
+Changed paths:
+   M /branches/2.3/pow_ui.c
+   M /branches/2.3/tests/tpow.c
+
+Fixed bug in mpfr_pow_ui (introduced in r3214): if x = y (same mpfr_t
+argument), the input argument is negative, n is odd, an overflow or
+underflow occurs, and the temporary result res is positive, then the
+result gets a wrong sign (positive instead of negative). Testcase.
+[merged changeset 5108 from the trunk]
+
+------------------------------------------------------------------------
+r5098 | vlefevre | 2007-12-16 01:06:17 +0000 (Sun, 16 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/asin.c
+   M /branches/2.3/tests/tasin.c
+
+Fixed bug in mpfr_asin: the sign of 0 was not set for asin(+/-0).
+
+------------------------------------------------------------------------
+r5097 | vlefevre | 2007-12-16 00:58:02 +0000 (Sun, 16 Dec 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/round_near_x.c
+
+round_near_x.c: got rid of compiler warnings, added an assertion
+(merged changeset 5087 from the trunk).
+
+------------------------------------------------------------------------
+r5096 | vlefevre | 2007-12-16 00:54:23 +0000 (Sun, 16 Dec 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/sin_cos.c
+   M /branches/2.3/tests/tsin_cos.c
+
+sin_cos.c, tsin_cos.c: fixed bug occurring when the input and the output
+for sin are the same and MPFR_FAST_COMPUTE_IF_SMALL_INPUT fails (merged
+changesets 5084, 5085 and 5089 from the trunk).
+
+------------------------------------------------------------------------
+r5095 | vlefevre | 2007-12-16 00:40:48 +0000 (Sun, 16 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/get_d64.c
+
+get_d64.c: fixed comment (merged changeset 5076 from the trunk).
+
+------------------------------------------------------------------------
+r5094 | vlefevre | 2007-12-16 00:33:20 +0000 (Sun, 16 Dec 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/exp.c
+   M /branches/2.3/exp3.c
+   M /branches/2.3/exp_2.c
+   M /branches/2.3/pow.c
+   M /branches/2.3/pow_ui.c
+   M /branches/2.3/pow_z.c
+   M /branches/2.3/tests/texp.c
+   M /branches/2.3/tests/tpow.c
+
+Fixed underflow bugs in exp/pow-related functions (merged changesets
+5054, 5058, 5059, 5062, 5064, 5066 and 5093 from the trunk).
+
+------------------------------------------------------------------------
+r5060 | vlefevre | 2007-11-30 09:37:36 +0000 (Fri, 30 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: s/rounding to the nearest mode/rounding to nearest mode/
+
+------------------------------------------------------------------------
+r4992 | vlefevre | 2007-11-23 17:17:02 +0000 (Fri, 23 Nov 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/isqrt.c
+   M /branches/2.3/tests
+   M /branches/2.3/tests/Makefile.am
+   A /branches/2.3/tests/tisqrt.c
+
+Fixed bugs in isqrt.c (__gmpfr_isqrt and __gmpfr_cuberoot internal
+functions). Added tisqrt.c test file from the trunk.
+
+------------------------------------------------------------------------
+r4983 | vlefevre | 2007-11-23 13:17:33 +0000 (Fri, 23 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/jn.c
+   M /branches/2.3/jyn_asympt.c
+   M /branches/2.3/tests/tj0.c
+
+Fixed bug in mpfr_j0/mpfr_jn reported by Kevin Rauch: wrong sign for
+jn(n even, large negative x).
+[merged changesets: 4927, 4982]
+
+------------------------------------------------------------------------
+r4981 | vlefevre | 2007-11-23 12:59:53 +0000 (Fri, 23 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/jn.c
+
+jn.c: added integer overflow checking (merged r4980).
+
+------------------------------------------------------------------------
+r4979 | vlefevre | 2007-11-23 10:07:06 +0000 (Fri, 23 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/tests/memory.c
+
+tests/memory.c: fixed copyright notice.
+
+------------------------------------------------------------------------
+r4977 | vlefevre | 2007-11-21 16:10:26 +0000 (Wed, 21 Nov 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfr-impl.h
+   M /branches/2.3/pow.c
+   M /branches/2.3/pow_z.c
+   M /branches/2.3/tests/tpow.c
+   M /branches/2.3/tests/tpow_z.c
+
+Fixed various bugs in mpfr_pow and mpfr_pow_z. Added testcases.
+[merged changesets: 4932, 4933, 4936 to 4945, 4947, 4948]
+
+------------------------------------------------------------------------
+r4976 | vlefevre | 2007-11-21 16:03:21 +0000 (Wed, 21 Nov 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/tests/tgeneric.c
+
+tests/tgeneric.c: undefine some macros at the end (needed by r4958).
+[merged changeset: 4829]
+
+------------------------------------------------------------------------
+r4975 | vlefevre | 2007-11-21 15:41:45 +0000 (Wed, 21 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/cmp_abs.c
+
+In cmp_abs.c, changed MPFR_GET_EXP into MPFR_EXP to allow exponents
+outside the current exponent range (this is needed for mpfr_pow).
+[merged changeset: 4934]
+
+------------------------------------------------------------------------
+r4974 | vlefevre | 2007-11-21 15:28:58 +0000 (Wed, 21 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr-impl.h
+
+mpfr-impl.h: fixed typo in a comment (from changeset 4932).
+
+------------------------------------------------------------------------
+r4973 | vlefevre | 2007-11-21 15:22:08 +0000 (Wed, 21 Nov 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/tests/tasin.c
+
+tests/tasin.c: added missing call to tests_end_mpfr.
+[merged changeset: 4954]
+
+------------------------------------------------------------------------
+r4972 | vlefevre | 2007-11-21 15:19:23 +0000 (Wed, 21 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/div_ui.c
+   M /branches/2.3/tests/tdiv_ui.c
+
+Fixed bug in mpfr_div_ui for x=0 and u<>0 (sign of result was not set).
+Added testcase.
+[merged changeset: 4950]
+
+------------------------------------------------------------------------
+r4971 | vlefevre | 2007-11-21 15:12:34 +0000 (Wed, 21 Nov 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/mul.c
+
+mul.c: fixed problem reported by valgrind (thanks to Michael Abshoff).
+[merged changeset: 4951]
+
+------------------------------------------------------------------------
+r4970 | vlefevre | 2007-11-21 15:00:17 +0000 (Wed, 21 Nov 2007) | 6 lines
+Changed paths:
+   M /branches/2.3/tests/tzeta.c
+   M /branches/2.3/zeta.c
+
+Fixed bug in mpfr_zeta when the argument is a large negative number,
+so that there is an overflow: the ternary value was wrong (0 instead
+of non-zero), and the return value was also wrong in GMP_RNDU (-Inf
+instead of the largest negative number). Added testcases.
+[merged changesets: 4920, 4969]
+
+------------------------------------------------------------------------
+r4968 | vlefevre | 2007-11-21 14:27:51 +0000 (Wed, 21 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/erfc.c
+   M /branches/2.3/tests/terf.c
+
+Fixed important inefficiency in mpfr_erfc (reported by Kevin Rauch)
+when x is a large negative number (erfc -> 2). Added testcase.
+[merged changeset: 4919]
+
+------------------------------------------------------------------------
+r4967 | vlefevre | 2007-11-21 14:20:47 +0000 (Wed, 21 Nov 2007) | 9 lines
+Changed paths:
+   M /branches/2.3/gamma.c
+   M /branches/2.3/lngamma.c
+   M /branches/2.3/tests/tgamma.c
+   M /branches/2.3/tests/tlgamma.c
+
+Fixed gamma-related bugs mentioned by Kevin Rauch:
+  * the exponent range was not restored for mpfr_lgamma and mpfr_lngamma
+    on 1 and 2;
+  * mpfr_lgamma and mpfr_lngamma were looping on tiny inputs;
+  * mpfr_gamma(huge integer) failed on 64-bit machines (there may still
+    be problems in huge precisions).
+Added testcases.
+[merged changesets: 4917, 4918, 4922, 4928]
+
+------------------------------------------------------------------------
+r4966 | vlefevre | 2007-11-21 14:01:45 +0000 (Wed, 21 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: misc improvements (changesets: 4912, 4913, 4921, 4925).
+
+------------------------------------------------------------------------
+r4965 | vlefevre | 2007-11-21 13:55:58 +0000 (Wed, 21 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/sin.c
+
+mpfr_sin: extend the exponent range. [merged changeset: 4852]
+
+------------------------------------------------------------------------
+r4964 | vlefevre | 2007-11-21 13:54:33 +0000 (Wed, 21 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/sqr.c
+   M /branches/2.3/tests/tsqr.c
+
+mpfr_sqr: the inexact flag wasn't set. Added generic tests (showing this
+problem).
+[merged changesets: 4849, 4851]
+
+------------------------------------------------------------------------
+r4963 | vlefevre | 2007-11-21 13:47:18 +0000 (Wed, 21 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/sqrt.c
+   M /branches/2.3/tests/tsqrt.c
+
+mpfr_sqrt: check the exponent range; set the inexact flag (if needed).
+Added generic tests (this shows that the inexact flag wasn't set).
+[merged changesets: 4847, 4848, 4850]
+
+------------------------------------------------------------------------
+r4962 | vlefevre | 2007-11-21 13:36:05 +0000 (Wed, 21 Nov 2007) | 5 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/sin_cos.c
+   M /branches/2.3/tests/reuse.c
+   M /branches/2.3/tests/tsin_cos.c
+
+Fixed two bugs in mpfr_sin_cos: one when x is tiny and one when z = x.
+Added testcases.
+[Manual updates from changesets 4838 & 4839 corresponding to
+mpfr_sin_cos; svn merge -r4839:4845 svn+ssh://gforge/svn/mpfr/trunk/]
+
+------------------------------------------------------------------------
+r4961 | vlefevre | 2007-11-21 13:11:36 +0000 (Wed, 21 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/algorithms.tex
+
+algorithms.tex: updated Section "The inverse hyperbolic cosine function"
+(though the algorithms.tex file isn't distributed in the releases, it is
+better to make it match the source).
+
+------------------------------------------------------------------------
+r4960 | vlefevre | 2007-11-21 13:07:20 +0000 (Wed, 21 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/algorithms.tex
+
+algorithms.tex: correction in section on mpfr_asinh: acosh -> asinh.
+
+------------------------------------------------------------------------
+r4959 | vlefevre | 2007-11-21 13:05:19 +0000 (Wed, 21 Nov 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/algorithms.tex
+
+algorithms.tex: deleted trailing spaces.
+
+------------------------------------------------------------------------
+r4958 | vlefevre | 2007-11-21 12:59:45 +0000 (Wed, 21 Nov 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/acosh.c
+   M /branches/2.3/tests/tacosh.c
+
+Fixed bugs in mpfr_acosh with x very large (internal overflow) and x
+very slightly larger than 1. Added testcases and improved generic tests.
+[merged changesets: 4826, 4827, 4828, 4830, 4831, 4891, 4892, 4893]
+
+------------------------------------------------------------------------
+r4911 | vlefevre | 2007-10-23 02:55:52 +0000 (Tue, 23 Oct 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/INSTALL
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.1-dev (for future patches).
+(The previous version update was incorrect!)
+
+------------------------------------------------------------------------
+r4910 | vlefevre | 2007-10-23 02:54:09 +0000 (Tue, 23 Oct 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: updated month.
+
+------------------------------------------------------------------------
+r4909 | vlefevre | 2007-10-23 02:53:06 +0000 (Tue, 23 Oct 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/subnormal.c
+   M /branches/2.3/tests/tsubnormal.c
+
+Fixed mpfr_subnormalize bugs and added testcases.
+[svn merge -r4902:4908 .../trunk]
+
+------------------------------------------------------------------------
+r4900 | vlefevre | 2007-10-21 00:04:33 +0000 (Sun, 21 Oct 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/configure.in
+
+configure.in: better error message if libgmp is not found.
+[svn merge -c4872 .../mpfr/trunk]
+
+------------------------------------------------------------------------
+r4889 | vlefevre | 2007-10-09 11:49:23 +0000 (Tue, 09 Oct 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/FAQ.html
+
+FAQ update (added Question 8).
+
+------------------------------------------------------------------------
+r4877 | vlefevre | 2007-10-05 11:04:53 +0000 (Fri, 05 Oct 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/atan2.c
+   M /branches/2.3/tests/tatan.c
+
+Fixed a bug (found by Robert Bajema) in mpfr_atan2, which can occur if
+the underflow flag is set before the call and x > 0; added testcase.
+[svn merge -c4876 svn+ssh://gforge/svn/mpfr/trunk]
+
+------------------------------------------------------------------------
+r4824 | vlefevre | 2007-09-02 23:19:04 +0000 (Sun, 02 Sep 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/Makefile.am
+
+Makefile.am: fixed get_patches rule. [svn merge -c4823 .../trunk]
+
+------------------------------------------------------------------------
+r4822 | vlefevre | 2007-09-02 22:30:58 +0000 (Sun, 02 Sep 2007) | 4 lines
+Changed paths:
+   M /branches/2.3/Makefile.am
+
+Makefile.am: cd $(srcdir) before executing get_patches.sh (thanks to
+Daniel Jacobowitz for noticing this); for more information, see the
+note just before the get_patches.c rule. [svn merge -c4821 .../trunk]
+
+------------------------------------------------------------------------
+r4820 | vlefevre | 2007-08-31 17:09:59 +0000 (Fri, 31 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/acosh.c
+
+acosh.c: added MPFR_UNLIKELY.
+
+------------------------------------------------------------------------
+r4818 | vlefevre | 2007-08-31 16:22:54 +0000 (Fri, 31 Aug 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/acosh.c
+   M /branches/2.3/tests/tacosh.c
+
+Fixed bug in mpfr_acosh for arguments slightly larger than 1 (assertion
+failure due to MPFR_GET_EXP on zero) and added testcase.
+
+------------------------------------------------------------------------
+r4807 | vlefevre | 2007-08-30 10:37:54 +0000 (Thu, 30 Aug 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/configure.in
+
+configure.in: updated copyright notice (for consistency).
+[svn merge -c4806 .../mpfr/trunk]
+
+------------------------------------------------------------------------
+r4805 | vlefevre | 2007-08-30 10:33:34 +0000 (Thu, 30 Aug 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/tests/mpfr-test.h
+
+Bug fix (can affect only pre-ANSI compilers): added missing _MPFR_PROTO
+in mpfr-test.h. [svn merge -c4803 .../mpfr/trunk]
+
+------------------------------------------------------------------------
+r4804 | vlefevre | 2007-08-30 10:31:35 +0000 (Thu, 30 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/tests/tgeneric.c
+
+tgeneric.c: corrected description line. [svn merge -c4802 .../trunk]
+
+------------------------------------------------------------------------
+r4801 | vlefevre | 2007-08-29 20:00:47 +0000 (Wed, 29 Aug 2007) | 3 lines
+Changed paths:
+   M /branches/2.3/BUGS
+   M /branches/2.3/FAQ.html
+   M /branches/2.3/NEWS
+   M /branches/2.3/README
+   M /branches/2.3/TODO
+   M /branches/2.3/acinclude.m4
+   M /branches/2.3/comparisons.c
+   M /branches/2.3/exp.c
+   M /branches/2.3/faq.xsl
+   M /branches/2.3/neg.c
+
+Updated copyright notice (for an unknown reason, some files were missing
+from the change done in r4350). [svn merge -c4800 .../mpfr/trunk]
+
+------------------------------------------------------------------------
+r4799 | vlefevre | 2007-08-29 12:44:21 +0000 (Wed, 29 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/tests/tversion.c
+   M /branches/2.3/version.c
+
+Updated version to 2.3.0-dev (for future patches).
+
+------------------------------------------------------------------------
+r4797 | vlefevre | 2007-08-29 10:16:19 +0000 (Wed, 29 Aug 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/tests/tversion.c
+   M /branches/2.3/version.c
+
+Release: MPFR 2.3.0.
+
+------------------------------------------------------------------------
 r4796 | vlefevre | 2007-08-28 15:40:53 +0000 (Tue, 28 Aug 2007) | 3 lines
 Changed paths:
    M /branches/2.3/atan2.c
