@@ -1,4 +1,542 @@
 ------------------------------------------------------------------------
+r5208 | vlefevre | 2008-01-22 09:52:18 +0000 (Tue, 22 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/NEWS
+
+NEWS: noted the changes concerning mpfr_strtofr (changeset 5174).
+
+------------------------------------------------------------------------
+r5206 | vlefevre | 2008-01-22 09:26:15 +0000 (Tue, 22 Jan 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/mpfr-gmp.c
+   M /branches/2.3/mpfr-gmp.h
+
+mpfr-gmp.{c,h}: for temporary allocations, use alloca() only if
+size < 16384; otherwise MPFR can crash in some high precisions,
+due to limited stack.
+
+------------------------------------------------------------------------
+r5192 | vlefevre | 2008-01-16 09:17:52 +0000 (Wed, 16 Jan 2008) | 6 lines
+Changed paths:
+   M /branches/2.3/mpfr-impl.h
+
+mpfr-impl.h: when building MPFR with the GMP build directory,
+use TMP_ALLOC(s) instead of TMP_SALLOC(s), as we don't know
+whether allocations are small or big (see gmp-impl.h). This
+should avoid some crashes in huge precisions.
+[svn merge -c5191 svn+ssh://gforge/svn/mpfr/trunk/]
+
+------------------------------------------------------------------------
+r5183 | vlefevre | 2008-01-14 08:37:00 +0000 (Mon, 14 Jan 2008) | 6 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: added notes about
+  * output of acos/asin/atan/atan2 which might be outside the
+    function output range;
+  * huge precisions.
+[Merged changesets 5176, 5177, 5180 and 5182 from the trunk.]
+
+------------------------------------------------------------------------
+r5174 | vlefevre | 2008-01-04 22:34:46 +0000 (Fri, 04 Jan 2008) | 31 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/strtofr.c
+   M /branches/2.3/tests/tset_str.c
+   M /branches/2.3/tests/tstrtofr.c
+
+Changes related to mpfr_strtofr.
+  * strtofr.c (mpfr_strtofr function):
+    - Base arguments different from 0 and 2..36 have never been accepted
+      and the corresponding behavior is undefined. Instead of returning
+      the confusing -1 (the return value is a ternary value), let's add
+      an assert for the moment. A better behavior could be specified in
+      the future, such as setting x to NaN, returning 0 and setting the
+      erange flag for unsupported base arguments (while still allowing
+      new bases to be supported by future versions without an interface
+      change).
+    - Subject sequences (input data) corresponding to NaN can now start
+      with an optional sign (since the documentation said that parsing
+      followed the standard C strtod function; and this change makes
+      invalid data now valid, so that there should be no compatibility
+      problems).
+    - Fixed the return value in case of invalid data: it was -1, and it
+      is now 0 since it is a ternary value and the result is 0, which is
+      exact.
+  * mpfr.texi: almost completely rewrote the specification of the
+    mpfr_strtofr function. Changes:
+    - the binary exponent is now accepted even without the 0b or 0x
+      prefix;
+    - data corresponding to NaN can now have an optional sign (the old
+      documentation was a bit ambiguous);
+    - many other ambiguities avoided.
+  * tests/tset_str.c: removed a test with an invalid base since this now
+    yields an assertion failure (this was an undefined behavior anyway,
+    so that there wasn't really anything to test).
+  * tests/tstrtofr.c: added tests.
+[Merged changesets 5146, 5147, 5148, 5149, 5167, 5172, 5173 from trunk.]
+
+------------------------------------------------------------------------
+r5170 | vlefevre | 2008-01-04 13:11:03 +0000 (Fri, 04 Jan 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: improved mpfr_get_exp and mpfr_set_exp description,
+added hint for mpfr_can_round to get the ternary value.
+[Merged changesets 4874, 4875, 4880 from the trunk.]
+
+------------------------------------------------------------------------
+r5169 | vlefevre | 2008-01-04 12:47:29 +0000 (Fri, 04 Jan 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi consistency changes: "towards" -> "toward" (because this
+is what the IEEE-754 standard uses, and we have mpfr_nexttoward).
+
+------------------------------------------------------------------------
+r5168 | vlefevre | 2008-01-04 12:43:28 +0000 (Fri, 04 Jan 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: mantissa -> significand (to use standard terminology such as
+in IEEE 754 and ISO C99). [Merged changeset 4873 from the trunk.]
+
+------------------------------------------------------------------------
+r5165 | vlefevre | 2008-01-02 17:19:59 +0000 (Wed, 02 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/FAQ.html
+
+FAQ update.
+
+------------------------------------------------------------------------
+r5163 | vlefevre | 2008-01-01 12:38:59 +0000 (Tue, 01 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: updated month to match the date of the future release.
+
+------------------------------------------------------------------------
+r5162 | vlefevre | 2008-01-01 12:36:54 +0000 (Tue, 01 Jan 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/gamma.c
+   M /branches/2.3/tests/tgamma.c
+
+Fixed wrong sign for mpfr_gamma in case of underflow with positive
+result, e.g. on -1000000001.5 in the default exponent range. Added
+testcase. [Merged changesets 5159 and 5161 from the trunk.]
+
+------------------------------------------------------------------------
+r5158 | vlefevre | 2008-01-01 04:00:15 +0000 (Tue, 01 Jan 2008) | 5 lines
+Changed paths:
+   M /branches/2.3/gen_inverse.h
+
+gen_inverse.h: fixed the bug reported by Kevin Rauch a few hours ago
+(and that was detected by the generic tests and by mpfrlint after the
+latest changes).
+[svn merge -c5157 svn+ssh://gforge/svn/mpfr/trunk/]
+
+------------------------------------------------------------------------
+r5156 | vlefevre | 2008-01-01 03:50:47 +0000 (Tue, 01 Jan 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfrlint
+
+mpfrlint: incorrect use of mpfr_<flag>_p is also checked in .h files.
+[svn merge -c5154 svn+ssh://gforge/svn/mpfr/trunk/]
+
+------------------------------------------------------------------------
+r5155 | vlefevre | 2008-01-01 03:49:23 +0000 (Tue, 01 Jan 2008) | 6 lines
+Changed paths:
+   M /branches/2.3/tests/tgeneric.c
+
+tgeneric.c: in the bug detection with flags set before the function
+call, the erange flag was set, so that no checks were performed on
+the return value. Fixed that by not setting the erange flag.
+-> Now, 6 tests fail!
+[svn merge -c5150 svn+ssh://gforge/svn/mpfr/trunk/]
+
+------------------------------------------------------------------------
+r5153 | vlefevre | 2008-01-01 03:30:20 +0000 (Tue, 01 Jan 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/BUGS
+   M /branches/2.3/FAQ.html
+   M /branches/2.3/NEWS
+   M /branches/2.3/README
+   M /branches/2.3/TODO
+   M /branches/2.3/abort_prec_max.c
+   M /branches/2.3/acinclude.m4
+   M /branches/2.3/acos.c
+   M /branches/2.3/acosh.c
+   M /branches/2.3/add.c
+   M /branches/2.3/add1.c
+   M /branches/2.3/add1sp.c
+   M /branches/2.3/add_ui.c
+   M /branches/2.3/agm.c
+   M /branches/2.3/asin.c
+   M /branches/2.3/asinh.c
+   M /branches/2.3/atan.c
+   M /branches/2.3/atan2.c
+   M /branches/2.3/atanh.c
+   M /branches/2.3/cache.c
+   M /branches/2.3/cbrt.c
+   M /branches/2.3/check.c
+   M /branches/2.3/clear.c
+   M /branches/2.3/clears.c
+   M /branches/2.3/cmp.c
+   M /branches/2.3/cmp2.c
+   M /branches/2.3/cmp_abs.c
+   M /branches/2.3/cmp_d.c
+   M /branches/2.3/cmp_ld.c
+   M /branches/2.3/cmp_si.c
+   M /branches/2.3/cmp_ui.c
+   M /branches/2.3/comparisons.c
+   M /branches/2.3/configure.in
+   M /branches/2.3/const_catalan.c
+   M /branches/2.3/const_euler.c
+   M /branches/2.3/const_log2.c
+   M /branches/2.3/const_pi.c
+   M /branches/2.3/constant.c
+   M /branches/2.3/copysign.c
+   M /branches/2.3/cos.c
+   M /branches/2.3/cosh.c
+   M /branches/2.3/cot.c
+   M /branches/2.3/coth.c
+   M /branches/2.3/csc.c
+   M /branches/2.3/csch.c
+   M /branches/2.3/dim.c
+   M /branches/2.3/div.c
+   M /branches/2.3/div_2exp.c
+   M /branches/2.3/div_2si.c
+   M /branches/2.3/div_2ui.c
+   M /branches/2.3/div_ui.c
+   M /branches/2.3/dump.c
+   M /branches/2.3/eint.c
+   M /branches/2.3/eq.c
+   M /branches/2.3/erf.c
+   M /branches/2.3/erfc.c
+   M /branches/2.3/exceptions.c
+   M /branches/2.3/exp.c
+   M /branches/2.3/exp10.c
+   M /branches/2.3/exp2.c
+   M /branches/2.3/exp3.c
+   M /branches/2.3/exp_2.c
+   M /branches/2.3/expm1.c
+   M /branches/2.3/extract.c
+   M /branches/2.3/factorial.c
+   M /branches/2.3/faq.xsl
+   M /branches/2.3/fits_intmax.c
+   M /branches/2.3/fits_s.h
+   M /branches/2.3/fits_sint.c
+   M /branches/2.3/fits_slong.c
+   M /branches/2.3/fits_sshort.c
+   M /branches/2.3/fits_u.h
+   M /branches/2.3/fits_uint.c
+   M /branches/2.3/fits_uintmax.c
+   M /branches/2.3/fits_ulong.c
+   M /branches/2.3/fits_ushort.c
+   M /branches/2.3/fma.c
+   M /branches/2.3/fms.c
+   M /branches/2.3/frac.c
+   M /branches/2.3/free_cache.c
+   M /branches/2.3/gamma.c
+   M /branches/2.3/gen_inverse.h
+   M /branches/2.3/generic.c
+   M /branches/2.3/get_d.c
+   M /branches/2.3/get_d64.c
+   M /branches/2.3/get_exp.c
+   M /branches/2.3/get_f.c
+   M /branches/2.3/get_ld.c
+   M /branches/2.3/get_patches.sh
+   M /branches/2.3/get_si.c
+   M /branches/2.3/get_sj.c
+   M /branches/2.3/get_str.c
+   M /branches/2.3/get_ui.c
+   M /branches/2.3/get_uj.c
+   M /branches/2.3/get_z.c
+   M /branches/2.3/get_z_exp.c
+   M /branches/2.3/gmp_op.c
+   M /branches/2.3/hypot.c
+   M /branches/2.3/init.c
+   M /branches/2.3/init2.c
+   M /branches/2.3/inits.c
+   M /branches/2.3/inits2.c
+   M /branches/2.3/inp_str.c
+   M /branches/2.3/int_ceil_log2.c
+   M /branches/2.3/isinf.c
+   M /branches/2.3/isinteger.c
+   M /branches/2.3/isnan.c
+   M /branches/2.3/isnum.c
+   M /branches/2.3/isqrt.c
+   M /branches/2.3/iszero.c
+   M /branches/2.3/jn.c
+   M /branches/2.3/jyn_asympt.c
+   M /branches/2.3/lngamma.c
+   M /branches/2.3/log.c
+   M /branches/2.3/log10.c
+   M /branches/2.3/log1p.c
+   M /branches/2.3/log2.c
+   M /branches/2.3/logging.c
+   M /branches/2.3/minmax.c
+   M /branches/2.3/mp_clz_tab.c
+   M /branches/2.3/mparam_h.in
+   M /branches/2.3/mpf2mpfr.h
+   M /branches/2.3/mpfr-gmp.c
+   M /branches/2.3/mpfr-gmp.h
+   M /branches/2.3/mpfr-impl.h
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/mpn_exp.c
+   M /branches/2.3/mul.c
+   M /branches/2.3/mul_2exp.c
+   M /branches/2.3/mul_2si.c
+   M /branches/2.3/mul_2ui.c
+   M /branches/2.3/mul_ui.c
+   M /branches/2.3/mulders.c
+   M /branches/2.3/neg.c
+   M /branches/2.3/next.c
+   M /branches/2.3/out_str.c
+   M /branches/2.3/pow.c
+   M /branches/2.3/pow_si.c
+   M /branches/2.3/pow_ui.c
+   M /branches/2.3/pow_z.c
+   M /branches/2.3/powerof2.c
+   M /branches/2.3/print_raw.c
+   M /branches/2.3/print_rnd_mode.c
+   M /branches/2.3/random.c
+   M /branches/2.3/random2.c
+   M /branches/2.3/reldiff.c
+   M /branches/2.3/remquo.c
+   M /branches/2.3/rint.c
+   M /branches/2.3/root.c
+   M /branches/2.3/round_near_x.c
+   M /branches/2.3/round_p.c
+   M /branches/2.3/round_prec.c
+   M /branches/2.3/round_raw_generic.c
+   M /branches/2.3/sec.c
+   M /branches/2.3/sech.c
+   M /branches/2.3/set.c
+   M /branches/2.3/set_d.c
+   M /branches/2.3/set_d64.c
+   M /branches/2.3/set_dfl_prec.c
+   M /branches/2.3/set_exp.c
+   M /branches/2.3/set_f.c
+   M /branches/2.3/set_inf.c
+   M /branches/2.3/set_ld.c
+   M /branches/2.3/set_nan.c
+   M /branches/2.3/set_prc_raw.c
+   M /branches/2.3/set_prec.c
+   M /branches/2.3/set_q.c
+   M /branches/2.3/set_rnd.c
+   M /branches/2.3/set_si.c
+   M /branches/2.3/set_si_2exp.c
+   M /branches/2.3/set_sj.c
+   M /branches/2.3/set_str.c
+   M /branches/2.3/set_str_raw.c
+   M /branches/2.3/set_ui.c
+   M /branches/2.3/set_ui_2exp.c
+   M /branches/2.3/set_uj.c
+   M /branches/2.3/set_z.c
+   M /branches/2.3/setmax.c
+   M /branches/2.3/setmin.c
+   M /branches/2.3/setsign.c
+   M /branches/2.3/sgn.c
+   M /branches/2.3/si_op.c
+   M /branches/2.3/signbit.c
+   M /branches/2.3/sin.c
+   M /branches/2.3/sin_cos.c
+   M /branches/2.3/sinh.c
+   M /branches/2.3/sqr.c
+   M /branches/2.3/sqrt.c
+   M /branches/2.3/sqrt_ui.c
+   M /branches/2.3/stack_interface.c
+   M /branches/2.3/strtofr.c
+   M /branches/2.3/sub.c
+   M /branches/2.3/sub1.c
+   M /branches/2.3/sub1sp.c
+   M /branches/2.3/sub_ui.c
+   M /branches/2.3/subnormal.c
+   M /branches/2.3/sum.c
+   M /branches/2.3/swap.c
+   M /branches/2.3/tan.c
+   M /branches/2.3/tanh.c
+   M /branches/2.3/tests/cmp_str.c
+   M /branches/2.3/tests/memory.c
+   M /branches/2.3/tests/mpf_compat.c
+   M /branches/2.3/tests/mpf_compat.h
+   M /branches/2.3/tests/mpfr-test.h
+   M /branches/2.3/tests/mpfr_compat.c
+   M /branches/2.3/tests/reuse.c
+   M /branches/2.3/tests/rnd_mode.c
+   M /branches/2.3/tests/tabs.c
+   M /branches/2.3/tests/tacos.c
+   M /branches/2.3/tests/tacosh.c
+   M /branches/2.3/tests/tadd.c
+   M /branches/2.3/tests/tadd1sp.c
+   M /branches/2.3/tests/tadd_ui.c
+   M /branches/2.3/tests/tagm.c
+   M /branches/2.3/tests/tasin.c
+   M /branches/2.3/tests/tasinh.c
+   M /branches/2.3/tests/tatan.c
+   M /branches/2.3/tests/tatanh.c
+   M /branches/2.3/tests/tcan_round.c
+   M /branches/2.3/tests/tcbrt.c
+   M /branches/2.3/tests/tcheck.c
+   M /branches/2.3/tests/tcmp.c
+   M /branches/2.3/tests/tcmp2.c
+   M /branches/2.3/tests/tcmp_d.c
+   M /branches/2.3/tests/tcmp_ld.c
+   M /branches/2.3/tests/tcmp_ui.c
+   M /branches/2.3/tests/tcmpabs.c
+   M /branches/2.3/tests/tcomparisons.c
+   M /branches/2.3/tests/tconst_catalan.c
+   M /branches/2.3/tests/tconst_euler.c
+   M /branches/2.3/tests/tconst_log2.c
+   M /branches/2.3/tests/tconst_pi.c
+   M /branches/2.3/tests/tcopysign.c
+   M /branches/2.3/tests/tcos.c
+   M /branches/2.3/tests/tcosh.c
+   M /branches/2.3/tests/tcot.c
+   M /branches/2.3/tests/tcoth.c
+   M /branches/2.3/tests/tcsc.c
+   M /branches/2.3/tests/tcsch.c
+   M /branches/2.3/tests/tdim.c
+   M /branches/2.3/tests/tdiv.c
+   M /branches/2.3/tests/tdiv_ui.c
+   M /branches/2.3/tests/teint.c
+   M /branches/2.3/tests/teq.c
+   M /branches/2.3/tests/terf.c
+   M /branches/2.3/tests/tests.c
+   M /branches/2.3/tests/texceptions.c
+   M /branches/2.3/tests/texp.c
+   M /branches/2.3/tests/texp10.c
+   M /branches/2.3/tests/texp2.c
+   M /branches/2.3/tests/texpm1.c
+   M /branches/2.3/tests/tfactorial.c
+   M /branches/2.3/tests/tfits.c
+   M /branches/2.3/tests/tfma.c
+   M /branches/2.3/tests/tfms.c
+   M /branches/2.3/tests/tfrac.c
+   M /branches/2.3/tests/tgamma.c
+   M /branches/2.3/tests/tgeneric.c
+   M /branches/2.3/tests/tgeneric_ui.c
+   M /branches/2.3/tests/tget_d.c
+   M /branches/2.3/tests/tget_d_2exp.c
+   M /branches/2.3/tests/tget_f.c
+   M /branches/2.3/tests/tget_ld_2exp.c
+   M /branches/2.3/tests/tget_set_d64.c
+   M /branches/2.3/tests/tget_sj.c
+   M /branches/2.3/tests/tget_str.c
+   M /branches/2.3/tests/tget_z.c
+   M /branches/2.3/tests/tgmpop.c
+   M /branches/2.3/tests/thyperbolic.c
+   M /branches/2.3/tests/thypot.c
+   M /branches/2.3/tests/tinits.c
+   M /branches/2.3/tests/tinp_str.c
+   M /branches/2.3/tests/tinternals.c
+   M /branches/2.3/tests/tisnan.c
+   M /branches/2.3/tests/tisqrt.c
+   M /branches/2.3/tests/tj0.c
+   M /branches/2.3/tests/tj1.c
+   M /branches/2.3/tests/tjn.c
+   M /branches/2.3/tests/tl2b.c
+   M /branches/2.3/tests/tlgamma.c
+   M /branches/2.3/tests/tlngamma.c
+   M /branches/2.3/tests/tlog.c
+   M /branches/2.3/tests/tlog10.c
+   M /branches/2.3/tests/tlog1p.c
+   M /branches/2.3/tests/tlog2.c
+   M /branches/2.3/tests/tminmax.c
+   M /branches/2.3/tests/tmul.c
+   M /branches/2.3/tests/tmul_2exp.c
+   M /branches/2.3/tests/tmul_ui.c
+   M /branches/2.3/tests/tnext.c
+   M /branches/2.3/tests/tout_str.c
+   M /branches/2.3/tests/toutimpl.c
+   M /branches/2.3/tests/tpow.c
+   M /branches/2.3/tests/tpow3.c
+   M /branches/2.3/tests/tpow_z.c
+   M /branches/2.3/tests/trandom.c
+   M /branches/2.3/tests/tremquo.c
+   M /branches/2.3/tests/trint.c
+   M /branches/2.3/tests/troot.c
+   M /branches/2.3/tests/tround_prec.c
+   M /branches/2.3/tests/tsec.c
+   M /branches/2.3/tests/tsech.c
+   M /branches/2.3/tests/tset.c
+   M /branches/2.3/tests/tset_d.c
+   M /branches/2.3/tests/tset_exp.c
+   M /branches/2.3/tests/tset_f.c
+   M /branches/2.3/tests/tset_ld.c
+   M /branches/2.3/tests/tset_q.c
+   M /branches/2.3/tests/tset_si.c
+   M /branches/2.3/tests/tset_sj.c
+   M /branches/2.3/tests/tset_str.c
+   M /branches/2.3/tests/tset_z.c
+   M /branches/2.3/tests/tsgn.c
+   M /branches/2.3/tests/tsi_op.c
+   M /branches/2.3/tests/tsin.c
+   M /branches/2.3/tests/tsin_cos.c
+   M /branches/2.3/tests/tsinh.c
+   M /branches/2.3/tests/tsqr.c
+   M /branches/2.3/tests/tsqrt.c
+   M /branches/2.3/tests/tsqrt_ui.c
+   M /branches/2.3/tests/tstckintc.c
+   M /branches/2.3/tests/tstrtofr.c
+   M /branches/2.3/tests/tsub.c
+   M /branches/2.3/tests/tsub1sp.c
+   M /branches/2.3/tests/tsub_ui.c
+   M /branches/2.3/tests/tsubnormal.c
+   M /branches/2.3/tests/tsum.c
+   M /branches/2.3/tests/tswap.c
+   M /branches/2.3/tests/ttan.c
+   M /branches/2.3/tests/ttanh.c
+   M /branches/2.3/tests/ttrunc.c
+   M /branches/2.3/tests/tui_div.c
+   M /branches/2.3/tests/tui_pow.c
+   M /branches/2.3/tests/tui_sub.c
+   M /branches/2.3/tests/tversion.c
+   M /branches/2.3/tests/ty0.c
+   M /branches/2.3/tests/ty1.c
+   M /branches/2.3/tests/tyn.c
+   M /branches/2.3/tests/tzeta.c
+   M /branches/2.3/tests/tzeta_ui.c
+   M /branches/2.3/tuneup.c
+   M /branches/2.3/uceil_exp2.c
+   M /branches/2.3/uceil_log2.c
+   M /branches/2.3/ufloor_log2.c
+   M /branches/2.3/ui_div.c
+   M /branches/2.3/ui_pow.c
+   M /branches/2.3/ui_pow_ui.c
+   M /branches/2.3/ui_sub.c
+   M /branches/2.3/urandomb.c
+   M /branches/2.3/version.c
+   M /branches/2.3/volatile.c
+   M /branches/2.3/yn.c
+   M /branches/2.3/zeta.c
+   M /branches/2.3/zeta_ui.c
+
+Copyright notice update: added 2008 with
+  perl -pi -e 's/2007 Free Software/2007, 2008 Free Software/' **/*(^/)
+under zsh.
+
+------------------------------------------------------------------------
+r5152 | vlefevre | 2008-01-01 03:29:21 +0000 (Tue, 01 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Reverted version to 2.3.1-dev.
+
+------------------------------------------------------------------------
+r5142 | vlefevre | 2007-12-29 03:12:08 +0000 (Sat, 29 Dec 2007) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update.
+
+------------------------------------------------------------------------
 r5141 | vlefevre | 2007-12-28 03:01:51 +0000 (Fri, 28 Dec 2007) | 2 lines
 Changed paths:
    M /branches/2.3/Makefile.am
