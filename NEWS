@@ -21,6 +21,9 @@ MA 02110-1301, USA.
 ##############################################################################
 
 Changes from version 2.3.0 to version 2.3.1:
+- Changes in the behavior of mpfr_strtofr and in its documentation
+  concerning particular cases where the code and the documentation
+  did not match.
 - Bug fixes; see <http://www.mpfr.org/mpfr-2.3.0/#bugs>.
 - Improved MPFR manual.
 
