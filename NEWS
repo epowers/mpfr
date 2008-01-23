@@ -25,6 +25,7 @@ Changes from version 2.3.0 to version 2.3.1:
   concerning particular cases where the code and the documentation
   did not match.
 - Bug fixes; see <http://www.mpfr.org/mpfr-2.3.0/#bugs>.
+- Configure test for TLS support.
 - Improved MPFR manual.
 
 Changes from versions 2.2.* to version 2.3.0:
