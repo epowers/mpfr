@@ -1,4 +1,36 @@
 ------------------------------------------------------------------------
+r5220 | vlefevre | 2008-01-23 13:37:00 +0000 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/acinclude.m4
+
+acinclude.m4: fixed configure test for TLS support.
+
+------------------------------------------------------------------------
+r5218 | vlefevre | 2008-01-23 12:30:03 +0000 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/NEWS
+
+NEWS file update (configure test for TLS support).
+
+------------------------------------------------------------------------
+r5216 | vlefevre | 2008-01-23 12:25:55 +0000 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.1-rc2.
+
+------------------------------------------------------------------------
+r5215 | vlefevre | 2008-01-23 12:20:14 +0000 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update (with "TZ=UTC svn log -v").
+
+------------------------------------------------------------------------
 r5214 | vlefevre | 2008-01-23 12:19:23 +0000 (Wed, 23 Jan 2008) | 9 lines
 Changed paths:
    M /branches/2.3/Makefile.am
