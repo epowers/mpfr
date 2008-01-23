@@ -1,4 +1,28 @@
 ------------------------------------------------------------------------
+r5214 | vlefevre | 2008-01-23 12:19:23 +0000 (Wed, 23 Jan 2008) | 9 lines
+Changed paths:
+   M /branches/2.3/Makefile.am
+   M /branches/2.3/acinclude.m4
+   M /branches/2.3/mpfr-impl.h
+   A /branches/2.3/mpfr-thread.h
+
+Changes related to thread-local variables / TLS support.
+  * Moved the MPFR_THREAD_ATTR definition from mpfr-impl.h into a new
+    header file mpfr-thread.h, and updated Makefile.am accordingly.
+  * Removed the compiler check __MPFR_GNUC(3,3) || __MPFR_ICC(8,1,0)
+    as this test leaded to both false positives and false negatives
+    concerning TLS support. Assume that __thread should be used for
+    thread-local variables (except for the MS compiler).
+  * Added a configure test to acinclude.m4 (in MPFR_CONFIGS).
+
+------------------------------------------------------------------------
+r5209 | vlefevre | 2008-01-22 10:32:20 +0000 (Tue, 22 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update (with "TZ=UTC svn log -v").
+
+------------------------------------------------------------------------
 r5208 | vlefevre | 2008-01-22 09:52:18 +0000 (Tue, 22 Jan 2008) | 2 lines
 Changed paths:
    M /branches/2.3/NEWS
