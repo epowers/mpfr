@@ -1,4 +1,29 @@
 ------------------------------------------------------------------------
+r5226 | vlefevre | 2008-01-23 17:03:59 +0000 (Wed, 23 Jan 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/tests/mpfr-test.h
+   M /branches/2.3/tests/tests.c
+   M /branches/2.3/tests/tversion.c
+
+Test that the MPFR library version matches the mpfr.h version in any
+test file (this should avoid some bug reports that don't mention the
+real problem).
+
+------------------------------------------------------------------------
+r5223 | vlefevre | 2008-01-23 16:25:44 +0000 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/tests/tversion.c
+
+tversion.c: improved an error message.
+
+------------------------------------------------------------------------
+r5221 | vlefevre | 2008-01-23 13:37:58 +0000 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update (with "TZ=UTC svn log -rHEAD:0 -v").
+
+------------------------------------------------------------------------
 r5220 | vlefevre | 2008-01-23 13:37:00 +0000 (Wed, 23 Jan 2008) | 2 lines
 Changed paths:
    M /branches/2.3/acinclude.m4
