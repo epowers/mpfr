@@ -25,5 +25,5 @@ MA 02110-1301, USA. */
 const char *
 mpfr_get_version (void)
 {
-  return "2.3.1-dev";
+  return "2.3.1-rc2";
 }
