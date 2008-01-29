@@ -37,7 +37,7 @@ main (void)
   version = mpfr_get_version ();
 
   /* This test is disabled when a suffix (e.g. -dev) has been defined. */
-#if 0
+#if 1
   sprintf (buffer, "%d.%d.%d", MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR,
            MPFR_VERSION_PATCHLEVEL);
   if (strcmp (buffer, version) != 0)
