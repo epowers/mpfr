@@ -3,7 +3,7 @@
 @setfilename mpfr.info
 @documentencoding ISO-8859-1
 @set VERSION 2.3.2-dev
-@set UPDATED-MONTH January 2008
+@set UPDATED-MONTH June 2008
 @settitle MPFR @value{VERSION}
 @synindex tp fn
 @iftex
@@ -18,7 +18,7 @@ Floating-Point Reliable Library, version @value{VERSION}.
 Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.1 or any later
+the terms of the GNU Free Documentation License, Version 1.2 or any later
 version published by the Free Software Foundation; with no Invariant Sections,
 with no Front-Cover Texts, and with no Back-Cover Texts.  A copy of the
 license is included in @ref{GNU Free Documentation License}.
@@ -188,6 +188,34 @@ log
 @end macro
 @end ifnottex
 
+@c The following macro have been copied from gmp.texi
+@c
+@c  Usage: @MPFRpxreftop{info,title}
+@c
+@c  Like @pxref{}, but designed for a reference to the top of a document, not
+@c  a particular section.
+@c
+@c  The texinfo manual recommends putting a likely section name in references
+@c  like this, eg. "Introduction", but it seems better to just give the title.
+@c
+@iftex
+@macro MPFRpxreftop{info,title}
+see @cite{\title\}.
+@end macro
+@end iftex
+@ifhtml
+@macro MPFRpxreftop{info,title}
+see @cite{\title\}.
+@end macro
+@end ifhtml
+@ifnottex
+@ifnothtml
+@macro MPFRpxreftop{info,title}
+@pxref{Top,\title\,\title\,\info\,\title\}
+@end macro
+@end ifnothtml
+@end ifnottex
+
 @node Copying, Introduction to MPFR, Top, Top
 @comment  node-name, next, previous,  up
 @unnumbered MPFR Copying Conditions
@@ -235,24 +263,26 @@ GNU MP library by a precise semantics. The main differences
 with the @code{mpf} class from GNU MP are:
 
 @itemize @bullet
-@item the @code{mpfr} code is portable, i.e.@: the result of any operation
+@item the MPFR code is portable, i.e.@: the result of any operation
 does not depend (or should not) on the machine word size
 @code{mp_bits_per_limb} (32 or 64 on most machines);
 @item the precision in bits can be set exactly to any valid value
 for each variable (including very small precision);
-@item @code{mpfr} provides the four rounding modes from the IEEE 754-1985
+@item MPFR provides the four rounding modes from the IEEE 754-1985
 standard.
 @end itemize
 
-In particular, with a precision of 53 bits, @code{mpfr} should be able
-to exactly reproduce all computations with double-precision machine
-floating-point
-numbers (@code{double} type in C), except the default exponent range
-is much wider and subnormal numbers are not implemented but can be emulated.
+In particular, with a precision of 53 bits, MPFR should be able to
+exactly reproduce all computations with double-precision machine
+floating-point numbers (e.g., @code{double} type in C, with a C
+implementation that rigorously follows Annex F of the ISO C99 standard
+and @code{FP_CONTRACT} pragma set to @code{OFF}) on the four arithmetic
+operations and the square root, except the default exponent range is much
+wider and subnormal numbers are not implemented (but can be emulated).
 
 This version of MPFR is released under the GNU Lesser General Public
-License.
-It is permitted to link MPFR to non-free programs, as long as when
+License, Version 2.1 or any later version.
+It is permitted to link MPFR to most non-free programs, as long as when
 distributing them the MPFR source code and a means to re-link with a
 modified MPFR library is provided.
 
@@ -364,14 +394,20 @@ Delete all files copied by @samp{make install}.
 @end itemize
 
 
-@section Known Build Problems
+@section Build Problems
 
-MPFR suffers from all bugs from the GNU MP library, plus many more.
+In case of problem, please read the @file{INSTALL} file carefully
+before reporting a bug, in particular section ``In case of problem''.
+Some problems are due to bad configuration on the user side (not
+specific to MPFR). Problems are also mentioned in the FAQ
+@url{http://www.mpfr.org/faq.html}.
 
-Please report other problems to @samp{mpfr@@loria.fr}.
+@comment Warning! Do not split "MPFR ... @url{...}" across several lines
+@comment as this needs to be updated with update-version.
+Please report problems to @samp{mpfr@@loria.fr}.
 @xref{Reporting Bugs}.
-Some bug fixes are available on the MPFR web page
-@url{http://www.mpfr.org/}.
+Some bug fixes are available on the
+MPFR 2.3.2 web page @url{http://www.mpfr.org/mpfr-2.3.2/}.
 
 @section Getting the Latest Version of MPFR
 
@@ -382,12 +418,15 @@ The latest version of MPFR is available from @url{http://www.mpfr.org/}.
 @chapter Reporting Bugs
 @cindex Reporting bugs
 
-If you think you have found a bug in the MPFR library, first have a look on the
-MPFR web page @url{http://www.mpfr.org/}: perhaps this bug is already known,
-in which case you may find there a workaround for it.
-Otherwise, please investigate
-and report it. We have made this library available to you, and it is not to ask
-too much from you, to ask you to report the bugs that you find.
+@comment Warning! Do not split "MPFR ... @url{...}" across several lines
+@comment as this needs to be updated with update-version.
+If you think you have found a bug in the MPFR library, first have a look
+on the MPFR 2.3.2 web page @url{http://www.mpfr.org/mpfr-2.3.2/} and the
+FAQ @url{http://www.mpfr.org/faq.html}:
+perhaps this bug is already known, in which case you may find there
+a workaround for it. Otherwise, please investigate and report it.
+We have made this library available to you, and it is not to ask too
+much from you, to ask you to report the bugs that you find.
 
 There are a few things you should think about when you put your bug report
 together.
@@ -416,14 +455,58 @@ the language needs to be improved, please send a note to the same address.
 @comment  node-name,  next,  previous,  up
 @chapter MPFR Basics
 
+@section Headers and Libraries
 
 @cindex @file{mpfr.h}
 All declarations needed to use MPFR are collected in the include file
 @file{mpfr.h}.  It is designed to work with both C and C++ compilers.
 You should include that file in any program using the MPFR library:
-@verbatim
+
+@example
 #include <mpfr.h>
-@end verbatim
+@end example
+
+@cindex @code{stdio.h}
+Note however that prototypes for MPFR functions with @code{FILE *} parameters
+are provided only if @code{<stdio.h>} is included too (before @file{mpfr.h}).
+
+@example
+#include <stdio.h>
+#include <mpfr.h>
+@end example
+
+You can avoid the use of MPFR macros encapsulating functions by defining
+the @samp{MPFR_USE_NO_MACRO} macro before @file{mpfr.h} is included.  In
+general this should not be necessary, but this can be useful when debugging
+user code: with some macros, the compiler may emit spurious warnings with
+some warning options, and macros can prevent some prototype checking.
+
+@cindex Libraries
+@cindex Linking
+@cindex @code{libmpfr}
+All programs using MPFR must link against both @file{libmpfr} and
+@file{libgmp} libraries.  On a typical Unix-like system this can be
+done with @samp{-lmpfr -lgmp} (in that order), for example
+
+@example
+gcc myprogram.c -lmpfr -lgmp
+@end example
+
+@cindex Libtool
+MPFR is built using Libtool and an application can use that to link if
+desired, @MPFRpxreftop{libtool, GNU Libtool}
+@c Note: Do not try the above cross reference without moving mpfr.info
+@c into some "safe" place first. Due to a poor design, "info" will not
+@c find the correct libtool info file because of the "libtool" script
+@c in MPFR's directory!
+
+If MPFR has been installed to a non-standard location, then it may be
+necessary to set up environment variables such as @samp{C_INCLUDE_PATH}
+and @samp{LIBRARY_PATH}, or use @samp{-I} and @samp{-L} compiler options,
+in order to point to the right directories. For a shared library, it may
+also be necessary to set up some sort of run-time library path (e.g.,
+@samp{LD_LIBRARY_PATH}) on some systems. Please read the @file{INSTALL}
+file for additional information.
 
 @section Nomenclature and Types
 
@@ -1150,7 +1233,7 @@ For more information about how it is done:
 @pxref{Custom Allocation,,, gmp,GNU MP}.
 @end ifnothtml
 @ifhtml
-see Custom Allocation (GNU MP).
+see section ``Custom Allocation'' in @cite{GNU MP}.
 @end ifhtml
 @end deftypefun
 
@@ -2223,7 +2306,7 @@ All operations are then performed with the default MPFR rounding mode,
 which can be reset with @code{mpfr_set_default_rounding_mode}.
 
 Warning: the @code{mpf_init} and @code{mpf_init2} functions initialize
-to zero, whereas the corresponding @code{mpfr} functions initialize to NaN:
+to zero, whereas the corresponding MPFR functions initialize to NaN:
 this is useful to detect uninitialized values, but is slightly incompatible
 with @code{mpf}.
 
@@ -2361,7 +2444,7 @@ See the test suite for examples.
 @section Internals
 
 The following types and
-functions were mainly designed for the implementation of @code{mpfr},
+functions were mainly designed for the implementation of MPFR,
 but may be useful for users too.
 However no upward compatibility is guaranteed.
 You may need to include @file{mpfr-impl.h} to use them.
