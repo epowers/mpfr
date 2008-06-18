@@ -22,13 +22,14 @@ MA 02110-1301, USA. */
 
 /* define TWO_ARGS for two-argument functions like mpfr_pow */
 
+/* The (void *) below is needed to avoid a warning with gcc 4.2+. */
 #define TGENERIC_FAIL(S, X, U)                                          \
   do                                                                    \
     {                                                                   \
       printf ("%s\nx = ", (S));                                         \
       mpfr_out_str (stdout, 2, 0, (X), GMP_RNDN);                       \
       printf ("\n");                                                    \
-      if (U)                                                            \
+      if (U != (void *) 0)                                              \
         {                                                               \
           printf ("u = ");                                              \
           mpfr_out_str (stdout, 2, 0, (U), GMP_RNDN);                   \
