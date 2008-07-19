@@ -1884,7 +1884,7 @@ Set @var{r} to the remainder of the division of @var{x} by @var{y}, with
 quotient rounded to the nearest integer (ties rounded to even), and
 @var{r} rounded according to the direction @var{rnd}.
 If @var{r} is zero, it has the sign of @var{x}.
-The return value is the inexact flag corresponding to @var{r}.
+The return value is the ternary value corresponding to @var{r}.
 Additionally, @code{mpfr_remquo} stores
 the low significant bits from the quotient in @var{*q}
 (more precisely the number of bits in a @code{long} minus one),
@@ -2541,17 +2541,8 @@ obsolete.
 @comment  node-name,  next,  previous,  up
 @unnumbered Contributors
 
-The main developers consist of Guillaume Hanrot, Vincent Lef@`evre,
-Patrick P@'elissier and Paul Zimmermann.
-
-We would like to thank Jean-Michel Muller and Joris van der Hoeven for very
-fruitful discussions at the beginning of that project, Torbj@"orn Granlund
-and Kevin Ryde for their help about design issues,
-and Nathalie Revol for her careful reading of a previous version of
-this documentation.
-Kevin Ryde did a tremendous job for the portability of MPFR,
-and integrating it into GMP 4.x;
-alas the GMP developers decided in January 2004 not to include MPFR any more.
+The main developers of MPFR are Guillaume Hanrot, Vincent Lef@`evre,
+Patrick P@'elissier, Philippe Th@'eveny and Paul Zimmermann.
 
 Sylvie Boldo from ENS-Lyon, France,
 contributed the functions @code{mpfr_agm} and @code{mpfr_log}.
@@ -2566,18 +2557,29 @@ and a previous version of @code{mpfr_gamma};
 David Daney contributed the hyperbolic and inverse hyperbolic functions,
 the base-2 exponential, and the factorial function. Fabrice Rouillier
 contributed the original version of @file{mul_ui.c}, the @file{gmp_op.c}
-file, and helped to the Windows porting.
+file, and helped to the Microsoft Windows porting.
 Jean-Luc R@'emy contributed the @code{mpfr_zeta} code.
 Ludovic Meunier helped in the design of the @code{mpfr_erf} code.
 Damien Stehl@'e contributed the @code{mpfr_get_ld_2exp} function.
 
-The development of the MPFR library would not have been possible without the
-continuous support of INRIA, and of the LORIA and LIP laboratories.
-In particular the main authors were or are members of the
-PolKA, Spaces, Cacao project-teams at LORIA (Nancy, France)
-and of the Arenaire project-team at LIP (Lyon, France).
+We would like to thank Jean-Michel Muller and Joris van der Hoeven for very
+fruitful discussions at the beginning of that project, Torbj@"orn Granlund
+and Kevin Ryde for their help about design issues,
+and Nathalie Revol for her careful reading of a previous version of
+this documentation.
+Kevin Ryde did a tremendous job for the portability of MPFR in 2002-2004.
+
+The development of the MPFR library would not have been possible without
+the continuous support of INRIA, and of the LORIA (Nancy, France) and LIP
+(Lyon, France) laboratories. In particular the main authors were or are
+members of the PolKA, Spaces, Cacao project-teams at LORIA and of the
+Arenaire project-team at LIP.
+This project was started during the Fiable (reliable in French) action
+supported by INRIA, and continued during the AOC action.
 The development of MPFR was also supported by a grant
-(202F0659 00 MPN 121) from the Conseil R@'egional de Lorraine in 2002.
+(202F0659 00 MPN 121) from the Conseil R@'egional de Lorraine in 2002,
+and from INRIA by an "associate engineer" grant (2003-2005)
+and an "op@'eration de d@'eveloppement logiciel" grant (2007-2009).
 
 @node References, GNU Free Documentation License, Contributors, Top
 @comment  node-name,  next,  previous,  up
@@ -2586,8 +2588,16 @@ The development of MPFR was also supported by a grant
 @itemize @bullet
 
 @item
+Laurent Fousse, Guillaume Hanrot, Vincent Lef@`evre,
+Patrick P@'elissier and Paul Zimmermann,
+"MPFR: A Multiple-Precision Binary Floating-Point Library With Correct Rounding",
+ACM Transactions on Mathematical Software,
+volume 33, issue 2, article 13, 15 pages, 2007,
+@url{http://doi.acm.org/10.1145/1236463.1236468}.
+
+@item
 Torbj@"orn Granlund, "GNU MP: The GNU Multiple Precision Arithmetic Library",
-  version 4.1.2, 2002.
+  version 4.2.2, 2007, @url{http://gmplib.org}.
 
 @item
 IEEE standard for binary floating-point arithmetic, Technical Report
@@ -2601,7 +2611,7 @@ Donald E. Knuth, "The Art of Computer Programming", vol 2,
 
 @item
 Jean-Michel Muller, "Elementary Functions, Algorithms and Implementation",
-Birkhauser, Boston, 1997.
+Birkhauser, Boston, 2nd edition, 2006.
 
 @end itemize
 
