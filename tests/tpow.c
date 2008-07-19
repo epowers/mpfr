@@ -385,7 +385,7 @@ pow_si_long_min (void)
   mpfr_t x, y, z;
   int inex;
 
-  mpfr_inits2 (sizeof(long) * CHAR_BIT + 32, x, y, z, (void *) 0);
+  mpfr_inits2 (sizeof(long) * CHAR_BIT + 32, x, y, z, (mpfr_ptr) 0);
   mpfr_set_si_2exp (x, 3, -1, GMP_RNDN);  /* 1.5 */
 
   inex = mpfr_set_si (y, LONG_MIN, GMP_RNDN);
@@ -405,7 +405,7 @@ pow_si_long_min (void)
       exit (1);
     }
 
-  mpfr_clears (x, y, z, (void *) 0);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
 static void
@@ -898,7 +898,7 @@ underflows (void)
     }
   mpfr_set_emin (emin);
 
-  mpfr_clears (x, y, z, (void *) 0);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
 static void
@@ -939,7 +939,7 @@ overflows2 (void)
   emax = mpfr_get_emax ();
   set_emin (-128);
 
-  mpfr_inits2 (16, x, y, z, (void *) 0);
+  mpfr_inits2 (16, x, y, z, (mpfr_ptr) 0);
 
   mpfr_set_si_2exp (x, 1, -64, GMP_RNDN);  /* 2^(-64) */
   mpfr_set_si_2exp (y, -1, -1, GMP_RNDN);  /* -0.5 */
@@ -962,7 +962,7 @@ overflows2 (void)
         }
     }
 
-  mpfr_clears (x, y, z, (void *) 0);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 
   set_emin (emin);
   set_emax (emax);
@@ -985,7 +985,7 @@ overflows3 (void)
       set_emin (MPFR_EMIN_MIN);
       set_emax (MPFR_EMAX_MAX);
 
-      mpfr_inits2 (16, x, y, z, (void *) 0);
+      mpfr_inits2 (16, x, y, z, (mpfr_ptr) 0);
 
       mpfr_set_si_2exp (x, 1, -2 * (MPFR_EMAX_MAX / 3), GMP_RNDN);
       mpfr_set_si_2exp (y, -3, -1, GMP_RNDN);
@@ -1003,7 +1003,7 @@ overflows3 (void)
           exit (1);
         }
 
-      mpfr_clears (x, y, z, (void *) 0);
+      mpfr_clears (x, y, z, (mpfr_ptr) 0);
 
       set_emin (emin);
       set_emax (emax);
@@ -1031,7 +1031,7 @@ x_near_one (void)
       mpfr_dump (z);
     }
 
-  mpfr_clears (x, y, z, (void *) 0);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
 static int
@@ -1059,7 +1059,7 @@ bug20071103 (void)
   mpfr_set_emin (-1000000);
   mpfr_set_emax ( 1000000);
 
-  mpfr_inits2 (64, x, y, z, (void *) 0);
+  mpfr_inits2 (64, x, y, z, (mpfr_ptr) 0);
   mpfr_set_si_2exp (x, -3, -1, GMP_RNDN);  /* x = -1.5 */
   mpfr_set_str (y, "-0.ffffffffffffffff", 16, GMP_RNDN);
   mpfr_set_exp (y, mpfr_get_emax ());
@@ -1067,7 +1067,7 @@ bug20071103 (void)
   mpfr_pow (z, x, y, GMP_RNDN);
   MPFR_ASSERTN (mpfr_zero_p (z) && MPFR_SIGN (z) > 0 &&
                 __gmpfr_flags == (MPFR_FLAGS_UNDERFLOW | MPFR_FLAGS_INEXACT));
-  mpfr_clears (x, y, z, (void *) 0);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 
   set_emin (emin);
   set_emax (emax);
@@ -1086,7 +1086,7 @@ bug20071104 (void)
   mpfr_set_emin (-1000000);
   mpfr_set_emax ( 1000000);
 
-  mpfr_inits2 (20, x, y, z, (void *) 0);
+  mpfr_inits2 (20, x, y, z, (mpfr_ptr) 0);
   mpfr_set_ui (x, 0, GMP_RNDN);
   mpfr_nextbelow (x);             /* x = -2^(emin-1) */
   mpfr_set_si (y, -2, GMP_RNDN);  /* y = -2 */
@@ -1108,7 +1108,7 @@ bug20071104 (void)
       printf ("Error in bug20071104: bad flags (%u)\n", __gmpfr_flags);
       exit (1);
     }
-  mpfr_clears (x, y, z, (void *) 0);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 
   set_emin (emin);
   set_emax (emax);
@@ -1206,7 +1206,7 @@ bug20071218 (void)
   mpfr_t x, y, z, t;
   int tern;
 
-  mpfr_inits2 (64, x, y, z, t, (void *) 0);
+  mpfr_inits2 (64, x, y, z, t, (mpfr_ptr) 0);
   mpfr_set_str (x, "0x.80000000000002P-1023", 0, GMP_RNDN);
   mpfr_set_str (y, "100000.000000002", 16, GMP_RNDN);
   mpfr_set_ui (t, 0, GMP_RNDN);
@@ -1240,7 +1240,7 @@ bug20071218 (void)
               " (%d instead of negative)\n", tern);
       exit (1);
     }
-  mpfr_clears (x, y, z, t, (void *) 0);
+  mpfr_clears (x, y, z, t, (mpfr_ptr) 0);
 }
 
 int

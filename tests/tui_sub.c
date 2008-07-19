@@ -146,7 +146,7 @@ check (unsigned long y, const char *xs, mp_rnd_t rnd_mode, const char *zs)
 {
   mpfr_t xx, zz;
 
-  mpfr_inits2 (53, xx, zz, (void *) 0);
+  mpfr_inits2 (53, xx, zz, (mpfr_ptr) 0);
   mpfr_set_str1 (xx, xs);
   mpfr_ui_sub (zz, y, xx, rnd_mode);
   if (mpfr_cmp_str1 (zz, zs) )
@@ -157,7 +157,7 @@ check (unsigned long y, const char *xs, mp_rnd_t rnd_mode, const char *zs)
               y, xs, mpfr_print_rnd_mode (rnd_mode));
       exit (1);
     }
-  mpfr_clears (xx, zz, (void *) 0);
+  mpfr_clears (xx, zz, (mpfr_ptr) 0);
 }
 
 /* if u = o(x-y), v = o(u-x), w = o(v+y), then x-y = u-w */
@@ -169,7 +169,7 @@ check_two_sum (mp_prec_t p)
   mp_rnd_t rnd;
   int inexact;
 
-  mpfr_inits2 (p, y, u, v, w, (void *) 0);
+  mpfr_inits2 (p, y, u, v, w, (mpfr_ptr) 0);
   do
     {
       x = randlimb ();
@@ -195,7 +195,7 @@ check_two_sum (mp_prec_t p)
       printf ("inexact = %d\n", inexact);
       exit (1);
     }
-  mpfr_clears (y, u, v, w, (void *) 0);
+  mpfr_clears (y, u, v, w, (mpfr_ptr) 0);
 }
 
 static void
