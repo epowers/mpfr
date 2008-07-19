@@ -22,7 +22,6 @@ MA 02110-1301, USA. */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <limits.h>
 
 #include "mpfr-test.h"
@@ -100,7 +99,6 @@ main (void)
   mp_exp_t e;
   int inex;
 
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   mpfr_init (y);
