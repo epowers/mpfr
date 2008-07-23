@@ -154,6 +154,172 @@ is_odd (mpfr_srcptr y)
   return 1;
 }
 
+/* Assumes that the exponent range has already been extended
+   and if y is an integer, then the result is not exact. */
+int
+mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
+                  mp_rnd_t rnd_mode, int y_is_integer, mpfr_save_expo_t *expo)
+{
+  mpfr_t t, u, k, absx;
+  int k_non_zero = 0;
+  int check_exact_case = 0;
+  int inexact;
+  /* Declaration of the size variable */
+  mp_prec_t Nz = MPFR_PREC(z);               /* target precision */
+  mp_prec_t Nt;                              /* working precision */
+  mp_exp_t err, exp_te;                      /* error */
+  MPFR_ZIV_DECL (ziv_loop);
+
+  /* We put the absolute value of x in absx, pointing to the significand
+     of x to avoid allocating memory for the significand of absx. */
+  MPFR_ALIAS(absx, x, /*sign=*/ 1, /*EXP=*/ MPFR_EXP(x));
+
+  /* We will compute the absolute value of the result. So, let's
+     invert the rounding mode if the result is negative. */
+  if (MPFR_IS_NEG (x) && is_odd (y))
+    rnd_mode = MPFR_INVERT_RND (rnd_mode);
+
+  /* compute the precision of intermediary variable */
+  /* the optimal number of bits : see algorithms.tex */
+  Nt = Nz + 5 + MPFR_INT_CEIL_LOG2 (Nz);
+
+  /* initialise of intermediary variable */
+  mpfr_init2 (t, Nt);
+
+  MPFR_ZIV_INIT (ziv_loop, Nt);
+  for (;;)
+    {
+      MPFR_BLOCK_DECL (flags1);
+
+      /* compute exp(y*ln|x|), using GMP_RNDU to get an upper bound, so
+         that we can detect underflows. */
+      mpfr_log (t, absx, GMP_RNDU);            /* ln|x| */
+      mpfr_mul (t, y, t, GMP_RNDU);            /* y*ln|x| */
+      if (k_non_zero)
+        {
+          mpfr_const_log2 (u, GMP_RNDD);
+          mpfr_mul (u, u, k, GMP_RNDD);
+          /* Error on u = k * log(2): < k * 2^(-Nt) < 1. */
+          mpfr_sub (t, t, u, GMP_RNDU);
+        }
+      exp_te = MPFR_GET_EXP (t);               /* FIXME: May overflow */
+      MPFR_BLOCK (flags1, mpfr_exp (t, t, GMP_RNDN));  /* exp(y*ln|x|)*/
+      /* We need to test */
+      if (MPFR_UNLIKELY (MPFR_IS_SINGULAR (t) || MPFR_UNDERFLOW (flags1)))
+        {
+          mp_prec_t Ntmin;
+          MPFR_BLOCK_DECL (flags2);
+
+          MPFR_ASSERTN (!k_non_zero);
+          MPFR_ASSERTN (!MPFR_IS_NAN (t));
+          if (MPFR_IS_ZERO (t))
+            {
+              /* Underflow. We computed rndn(exp(t)), where t >= y*ln|x|.
+                 Therefore rndn(|x|^y) = 0, and we have a real underflow on
+                 |x|^y. */
+              inexact = mpfr_underflow (z, rnd_mode == GMP_RNDN ? GMP_RNDZ
+                                        : rnd_mode, MPFR_SIGN_POS);
+              if (expo != NULL)
+                MPFR_SAVE_EXPO_UPDATE_FLAGS (*expo, MPFR_FLAGS_INEXACT
+                                             | MPFR_FLAGS_UNDERFLOW);
+              break;
+            }
+
+          /* Overflow. */
+          /* Note: we can probably use a low precision for this test. */
+          mpfr_log (t, absx, GMP_RNDD);            /* ln|x| */
+          mpfr_mul (t, y, t, GMP_RNDD);            /* y*ln|x| */
+          MPFR_BLOCK (flags2, mpfr_exp (t, t, GMP_RNDD));  /* exp(y*ln|x|)*/
+          if (MPFR_OVERFLOW (flags2))
+            {
+              /* We have computed a lower bound on |x|^y, and it overflowed.
+                 Therefore we have a real overflow on |x|^y. */
+              inexact = mpfr_overflow (z, rnd_mode, MPFR_SIGN_POS);
+              if (expo != NULL)
+                MPFR_SAVE_EXPO_UPDATE_FLAGS (*expo, MPFR_FLAGS_INEXACT
+                                             | MPFR_FLAGS_OVERFLOW);
+              break;
+            }
+
+          k_non_zero = 1;
+          Ntmin = sizeof(mp_exp_t) * CHAR_BIT;
+          if (Ntmin > Nt)
+            {
+              Nt = Ntmin;
+              mpfr_set_prec (t, Nt);
+            }
+          mpfr_init2 (u, Nt);
+          mpfr_init2 (k, Ntmin);
+          mpfr_log2 (k, absx, GMP_RNDN);
+          mpfr_mul (k, y, k, GMP_RNDN);
+          mpfr_round (k, k);
+          /* |y| < 2^Ntmin, therefore |k| < 2^Nt. */
+          continue;
+        }
+      /* estimate of the error -- see pow function in algorithms.tex.
+         The error on t is at most 1/2 + 3*2^(exp_te+1) ulps, which is
+         <= 2^(exp_te+3) for exp_te >= -1, and <= 2 ulps for exp_te <= -2.
+         Additional error if k_no_zero: treal = t * errk, with
+         1 - |k| * 2^(-Nt) <= exp(-|k| * 2^(-Nt)) <= errk <= 1,
+         i.e., additional absolute error <= 2^(EXP(k)+EXP(t)-Nt).
+         Total error <= 2^err1 + 2^err2 <= 2^(max(err1,err2)+1). */
+      err = exp_te >= -1 ? exp_te + 3 : 1;
+      if (k_non_zero)
+        {
+          if (MPFR_GET_EXP (k) > err)
+            err = MPFR_GET_EXP (k);
+          err++;
+        }
+      if (MPFR_LIKELY (MPFR_CAN_ROUND (t, Nt - err, Nz, rnd_mode)))
+        {
+          inexact = mpfr_set (z, t, rnd_mode);
+          break;
+        }
+
+      /* check exact power, except when y is an integer (since the
+         exact cases for y integer have already been filtered out) */
+      if (check_exact_case == 0 && ! y_is_integer)
+        {
+          if (mpfr_pow_is_exact (z, absx, y, rnd_mode, &inexact))
+            break;
+          check_exact_case = 1;
+        }
+
+      /* reactualisation of the precision */
+      MPFR_ZIV_NEXT (ziv_loop, Nt);
+      mpfr_set_prec (t, Nt);
+      if (k_non_zero)
+        mpfr_set_prec (u, Nt);
+    }
+  MPFR_ZIV_FREE (ziv_loop);
+
+  if (k_non_zero)
+    {
+      int inex2;
+
+      MPFR_ASSERTN (MPFR_EMAX_MAX <= LONG_MAX);
+      mpfr_clear_flags ();
+      inex2 = mpfr_mul_2si (z, z, mpfr_get_si (k, GMP_RNDN), rnd_mode);
+      if (inex2)  /* underflow or overflow */
+        {
+          inexact = inex2;
+          if (expo != NULL)
+            MPFR_SAVE_EXPO_UPDATE_FLAGS (*expo, __gmpfr_flags);
+        }
+      mpfr_clears (u, k, (mpfr_ptr) 0);
+    }
+  mpfr_clear (t);
+
+  /* update the sign of the result if x was negative */
+  if (MPFR_IS_NEG (x) && is_odd (y))
+    {
+      MPFR_SET_NEG(z);
+      inexact = -inexact;
+    }
+
+  return inexact;
+}
+
 /* The computation of z = pow(x,y) is done by
    z = exp(y * log(x)) = x^y
    For the special cases, see Section F.9.4.4 of the C standard:
@@ -444,161 +610,7 @@ mpfr_pow (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
   }
 
   /* General case */
-  {
-    /* Declaration of the intermediary variable */
-    mpfr_t t, u, k, absx;
-    int k_non_zero = 0;
-    int check_exact_case = 0;
-    /* Declaration of the size variable */
-    mp_prec_t Nz = MPFR_PREC(z);               /* target precision */
-    mp_prec_t Nt;                              /* working precision */
-    mp_exp_t err, exp_te;                      /* error */
-    MPFR_ZIV_DECL (ziv_loop);
-
-    /* We put the absolute value of x in absx, pointing to the significand
-       of x to avoid allocating memory for the significand of absx. */
-    MPFR_ALIAS(absx, x, /*sign=*/ 1, /*EXP=*/ MPFR_EXP(x));
-
-    /* We will compute the absolute value of the result. So, let's
-       invert the rounding mode if the result is negative. */
-    if (MPFR_IS_NEG (x) && is_odd (y))
-      rnd_mode = MPFR_INVERT_RND (rnd_mode);
-
-    /* compute the precision of intermediary variable */
-    /* the optimal number of bits : see algorithms.tex */
-    Nt = Nz + 5 + MPFR_INT_CEIL_LOG2 (Nz);
-
-    /* initialise of intermediary variable */
-    mpfr_init2 (t, Nt);
-
-    MPFR_ZIV_INIT (ziv_loop, Nt);
-    for (;;)
-      {
-        MPFR_BLOCK_DECL (flags1);
-
-        /* compute exp(y*ln|x|), using GMP_RNDU to get an upper bound, so
-           that we can detect underflows. */
-        mpfr_log (t, absx, GMP_RNDU);            /* ln|x| */
-        mpfr_mul (t, y, t, GMP_RNDU);            /* y*ln|x| */
-        if (k_non_zero)
-          {
-            mpfr_const_log2 (u, GMP_RNDD);
-            mpfr_mul (u, u, k, GMP_RNDD);
-            /* Error on u = k * log(2): < k * 2^(-Nt) < 1. */
-            mpfr_sub (t, t, u, GMP_RNDU);
-          }
-        exp_te = MPFR_GET_EXP (t);               /* FIXME: May overflow */
-        MPFR_BLOCK (flags1, mpfr_exp (t, t, GMP_RNDN));  /* exp(y*ln|x|)*/
-        /* We need to test */
-        if (MPFR_UNLIKELY (MPFR_IS_SINGULAR (t) || MPFR_UNDERFLOW (flags1)))
-          {
-            mp_prec_t Ntmin;
-            MPFR_BLOCK_DECL (flags2);
-
-            MPFR_ASSERTN (!k_non_zero);
-            MPFR_ASSERTN (!MPFR_IS_NAN (t));
-            if (MPFR_IS_ZERO (t))
-              {
-                /* Underflow. We computed rndn(exp(t)), where t >= y*ln|x|.
-                   Therefore rndn(|x|^y) = 0, and we have a real underflow on
-                   |x|^y. */
-                inexact = mpfr_underflow (z, rnd_mode == GMP_RNDN ? GMP_RNDZ
-                                          : rnd_mode, MPFR_SIGN_POS);
-                MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_INEXACT
-                                             | MPFR_FLAGS_UNDERFLOW);
-                break;
-              }
-
-            /* Overflow. */
-            /* Note: we can probably use a low precision for this test. */
-            mpfr_log (t, absx, GMP_RNDD);            /* ln|x| */
-            mpfr_mul (t, y, t, GMP_RNDD);            /* y*ln|x| */
-            MPFR_BLOCK (flags2, mpfr_exp (t, t, GMP_RNDD));  /* exp(y*ln|x|)*/
-            if (MPFR_OVERFLOW (flags2))
-              {
-                /* We have computed a lower bound on |x|^y, and it overflowed.
-                   Therefore we have a real overflow on |x|^y. */
-                inexact = mpfr_overflow (z, rnd_mode, MPFR_SIGN_POS);
-                MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_INEXACT
-                                             | MPFR_FLAGS_OVERFLOW);
-                break;
-              }
-
-            k_non_zero = 1;
-            Ntmin = sizeof(mp_exp_t) * CHAR_BIT;
-            if (Ntmin > Nt)
-              {
-                Nt = Ntmin;
-                mpfr_set_prec (t, Nt);
-              }
-            mpfr_init2 (u, Nt);
-            mpfr_init2 (k, Ntmin);
-            mpfr_log2 (k, absx, GMP_RNDN);
-            mpfr_mul (k, y, k, GMP_RNDN);
-            mpfr_round (k, k);
-            /* |y| < 2^Ntmin, therefore |k| < 2^Nt. */
-            continue;
-          }
-        /* estimate of the error -- see pow function in algorithms.tex.
-           The error on t is at most 1/2 + 3*2^(exp_te+1) ulps, which is
-           <= 2^(exp_te+3) for exp_te >= -1, and <= 2 ulps for exp_te <= -2.
-           Additional error if k_no_zero: treal = t * errk, with
-           1 - |k| * 2^(-Nt) <= exp(-|k| * 2^(-Nt)) <= errk <= 1,
-           i.e., additional absolute error <= 2^(EXP(k)+EXP(t)-Nt).
-           Total error <= 2^err1 + 2^err2 <= 2^(max(err1,err2)+1). */
-        err = exp_te >= -1 ? exp_te + 3 : 1;
-        if (k_non_zero)
-          {
-            if (MPFR_GET_EXP (k) > err)
-              err = MPFR_GET_EXP (k);
-            err++;
-          }
-        if (MPFR_LIKELY (MPFR_CAN_ROUND (t, Nt - err, Nz, rnd_mode)))
-          {
-            inexact = mpfr_set (z, t, rnd_mode);
-            break;
-          }
-
-        /* check exact power, except when y is an integer (since the
-           exact cases for y integer have already been filtered out) */
-        if (check_exact_case == 0 && !y_is_integer)
-          {
-            if (mpfr_pow_is_exact (z, absx, y, rnd_mode, &inexact))
-              break;
-            check_exact_case = 1;
-          }
-
-        /* reactualisation of the precision */
-        MPFR_ZIV_NEXT (ziv_loop, Nt);
-        mpfr_set_prec (t, Nt);
-        if (k_non_zero)
-          mpfr_set_prec (u, Nt);
-      }
-    MPFR_ZIV_FREE (ziv_loop);
-
-    if (k_non_zero)
-      {
-        int inex2;
-
-        MPFR_ASSERTN (MPFR_EMAX_MAX <= LONG_MAX);
-        mpfr_clear_flags ();
-        inex2 = mpfr_mul_2si (z, z, mpfr_get_si (k, GMP_RNDN), rnd_mode);
-        if (inex2)  /* underflow or overflow */
-          {
-            inexact = inex2;
-            MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, __gmpfr_flags);
-          }
-        mpfr_clears (u, k, (mpfr_ptr) 0);
-      }
-    mpfr_clear (t);
-  }
-
-  /* update the sign of the result if x was negative */
-  if (MPFR_IS_NEG (x) && is_odd (y))
-    {
-      MPFR_SET_NEG(z);
-      inexact = -inexact;
-    }
+  inexact = mpfr_pow_general (z, x, y, rnd_mode, y_is_integer, &expo);
 
   MPFR_SAVE_EXPO_FREE (expo);
   return mpfr_check_range (z, inexact, rnd_mode);

@@ -101,9 +101,36 @@ mpfr_pow_pos_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd, int cr)
                              MPFR_SIGN (x) : MPFR_SIGN_POS);
   /* Check Underflow */
   else if (MPFR_UNDERFLOW (flags))
-    inexact = mpfr_underflow (y, rnd == GMP_RNDN ? GMP_RNDZ : rnd,
-                              mpz_odd_p (absz) ? MPFR_SIGN (x) :
-                              MPFR_SIGN_POS);
+    {
+      if (rnd == GMP_RNDN)
+        {
+          mpfr_t y2, zz;
+
+          /* We cannot decide now whether the result should be rounded
+             toward zero or +Inf. So, let's use the general case of
+             mpfr_pow, which can do that. But the problem is that the
+             result can be exact! However, it is sufficient to try to
+             round on 2 bits (the precision does not matter in case of
+             underflow, since MPFR does not have subnormals), in which
+             case, the result cannot be exact due to previous filtering
+             of trivial cases. */
+          MPFR_ASSERTD (mpfr_cmp_si_2exp (x, MPFR_SIGN (x),
+                                          MPFR_EXP (x) - 1) != 0);
+          mpfr_init2 (y2, 2);
+          mpfr_init2 (zz, ABS (SIZ (z)) * BITS_PER_MP_LIMB);
+          inexact = mpfr_set_z  (zz, z, GMP_RNDN);
+          MPFR_ASSERTN (inexact == 0);
+          inexact = mpfr_pow_general (y2, x, zz, rnd, 1,
+                                      (mpfr_save_expo_t *) NULL);
+          mpfr_clear (zz);
+          mpfr_set (y, y2, GMP_RNDN);
+          mpfr_clear (y2);
+          __gmpfr_flags = MPFR_FLAGS_INEXACT | MPFR_FLAGS_UNDERFLOW;
+        }
+      else
+        inexact = mpfr_underflow (y, rnd, mpz_odd_p (absz) ?
+                                  MPFR_SIGN (x) : MPFR_SIGN_POS);
+    }
   else
     inexact = mpfr_set (y, res, rnd);
 
@@ -173,7 +200,8 @@ mpfr_pow_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd)
     }
 
   /* detect exact powers: x^-n is exact iff x is a power of 2
-     Do it if n > 0 too (faster). */
+     Do it if n > 0 too as this is faster and this filtering is
+     needed in case of underflow. */
   if (MPFR_UNLIKELY (mpfr_cmp_si_2exp (x, MPFR_SIGN (x),
                                        MPFR_EXP (x) - 1) == 0))
     {
