@@ -1,6 +1,7 @@
 /* Exception flags and utilities.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
@@ -214,7 +215,7 @@ mpfr_check_range (mpfr_ptr x, int t, mp_rnd_t rnd_mode)
       if (MPFR_UNLIKELY( exp > __gmpfr_emax) )
         return mpfr_overflow(x, rnd_mode, MPFR_SIGN(x));
     }
-  return t;  /* propagate inexact ternary value, unlike most functions */
+  MPFR_RET (t);  /* propagate inexact ternary value, unlike most functions */
 }
 
 #undef mpfr_underflow_p

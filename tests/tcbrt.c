@@ -1,6 +1,7 @@
 /* Test file for mpfr_cbrt.
 
-Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -128,6 +129,18 @@ special (void)
       exit (1);
     }
 
+  /* Bug (in the compiler?) found on Linux/m68k with gcc 4.0.2 */
+  mpfr_set_prec (x, 5);
+  mpfr_set_prec (y, 5);
+  mpfr_set_str_binary (x, "1.1000E-2");
+  mpfr_cbrt (y, x, GMP_RNDN);
+  mpfr_set_str_binary (x, "1.0111E-1");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error in cbrt (6)\n");
+      exit (1);
+    }
+
   mpfr_clear (x);
   mpfr_clear (y);
 }
@@ -142,7 +155,6 @@ main (void)
   int r;
   mp_prec_t p;
 
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   special ();
@@ -199,6 +211,8 @@ main (void)
   mpfr_clear (x);
 
   test_generic (2, 200, 10);
+
+  data_check ("data/cbrt", mpfr_cbrt, "mpfr_cbrt");
 
   tests_end_mpfr ();
   return 0;

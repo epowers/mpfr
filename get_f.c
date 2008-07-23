@@ -1,6 +1,7 @@
 /* mpfr_get_f -- convert a MPFR number to a GNU MPF number
 
-Copyright 2005 Free Software Foundation, Inc.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
@@ -27,8 +28,10 @@ MA 02110-1301, USA. */
 int
 mpfr_get_f (mpf_ptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
 {
-  unsigned long sx, sy, precx, precy, sh;
-  mp_exp_t ey;
+  mp_size_t sx, sy;
+  mp_prec_t precx, precy;
+  mp_limb_t *xp;
+  int sh;
 
   if (MPFR_UNLIKELY(MPFR_IS_SINGULAR(y)))
     {
@@ -44,46 +47,65 @@ mpfr_get_f (mpf_ptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
   sx = PREC(x); /* number of limbs of the mantissa of x */
 
   precy = MPFR_PREC(y);
-  precx = sx * BITS_PER_MP_LIMB;
-  sy = 1 + (MPFR_PREC(y) - 1) / BITS_PER_MP_LIMB;
+  precx = (mp_prec_t) sx * BITS_PER_MP_LIMB;
+  sy = MPFR_LIMB_SIZE (y);
+
+  xp = PTR (x);
 
   /* since mpf numbers are represented in base 2^BITS_PER_MP_LIMB,
      we loose -EXP(y) % BITS_PER_MP_LIMB bits in the most significant limb */
-  ey = MPFR_GET_EXP(y) % BITS_PER_MP_LIMB;
-  if (ey <= 0)
-    sh = (unsigned long) (-ey);
-  else /* 0 < ey < BITS_PER_MP_LIMB */
-    sh = BITS_PER_MP_LIMB - (unsigned long) ey;
+  sh = MPFR_GET_EXP(y) % BITS_PER_MP_LIMB;
+  sh = sh <= 0 ? - sh : BITS_PER_MP_LIMB - sh;
+  MPFR_ASSERTD (sh >= 0);
   if (precy + sh <= precx) /* we can copy directly */
     {
-      /* necessarily sy <= sx */
-      if (sh)
-        mpn_rshift (PTR(x) + sx - sy, MPFR_MANT(y), sy, sh);
+      mp_size_t ds;
+
+      MPFR_ASSERTN (sx >= sy);
+      ds = sx - sy;
+
+      if (sh != 0)
+        {
+          mp_limb_t out;
+          out = mpn_rshift (xp + ds, MPFR_MANT(y), sy, sh);
+          MPFR_ASSERTN (ds > 0 || out == 0);
+          if (ds > 0)
+            xp[--ds] = out;
+        }
       else
-        MPN_COPY (PTR(x) + sx - sy, MPFR_MANT(y), sy);
-      if (sx > sy)
-        MPN_ZERO (PTR(x), sx - sy);
+        MPN_COPY (xp + ds, MPFR_MANT (y), sy);
+      if (ds > 0)
+        MPN_ZERO (xp, ds);
       EXP(x) = (MPFR_GET_EXP(y) + sh) / BITS_PER_MP_LIMB;
     }
   else /* we have to round to precx - sh bits */
     {
       mpfr_t z;
-      unsigned long sz;
+      mp_size_t sz, ds;
 
+      /* Recall that precx = (mp_prec_t) sx * BITS_PER_MP_LIMB */
       mpfr_init2 (z, precx - sh);
-      sz = 1 + (MPFR_PREC(z) - 1) / BITS_PER_MP_LIMB;
+      sz = MPFR_LIMB_SIZE (z);
       mpfr_set (z, y, rnd_mode);
       /* warning, sh may change due to rounding, but then z is a power of two,
          thus we can safely ignore its last bit which is 0 */
-      ey = MPFR_GET_EXP(z) % BITS_PER_MP_LIMB;
-      sh = (ey <= 0) ? (unsigned long) (-ey)
-        : BITS_PER_MP_LIMB - (unsigned long) ey;
-      if (sh)
-        mpn_rshift (PTR(x) + sx - sz, MPFR_MANT(z), sz, sh);
+      sh = MPFR_GET_EXP(z) % BITS_PER_MP_LIMB;
+      sh = sh <= 0 ? - sh : BITS_PER_MP_LIMB - sh;
+      MPFR_ASSERTD (sx >= sz);
+      ds = sx - sz;
+      MPFR_ASSERTD (sh >= 0 && ds <= 1);
+      if (sh != 0)
+        {
+          mp_limb_t out;
+          out = mpn_rshift (xp + ds, MPFR_MANT(z), sz, sh);
+          /* If sh hasn't changed, it is the number of the non-significant
+             bits in the lowest limb of z. Therefore out == 0. */
+          MPFR_ASSERTD (out == 0);
+        }
       else
-        MPN_COPY (PTR(x) + sx - sz, MPFR_MANT(z), sz);
-      if (sx > sz)
-        MPN_ZERO (PTR(x), sx - sz);
+        MPN_COPY (xp + ds, MPFR_MANT(z), sz);
+      if (ds != 0)
+        xp[0] = 0;
       EXP(x) = (MPFR_GET_EXP(z) + sh) / BITS_PER_MP_LIMB;
       mpfr_clear (z);
     }

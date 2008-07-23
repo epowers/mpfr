@@ -1,7 +1,7 @@
 /* tsgn -- Test for the sign of a floating point number.
 
-Copyright 2003 Free Software Foundation.
-Contributed by the Spaces project, INRIA Lorraine.
+Copyright 2003, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -26,35 +26,48 @@ MA 02110-1301, USA. */
 #include "mpfr-test.h"
 
 static void
-check_special(void)
+check_special (void)
 {
   mpfr_t x;
   int ret = 0;
 
-  mpfr_init(x);
-  MPFR_SET_ZERO(x);
-  if ((mpfr_sgn) (x) != 0)
+  mpfr_init (x);
+  MPFR_SET_ZERO (x);
+  if ((mpfr_sgn) (x) != 0 || mpfr_sgn (x) != 0)
     {
       printf("Sgn error for 0.\n");
       ret = 1;
     }
-  MPFR_SET_INF(x);
-  MPFR_SET_POS(x);
-  if ((mpfr_sgn) (x) != 1)
+  MPFR_SET_INF (x);
+  MPFR_SET_POS (x);
+  if ((mpfr_sgn) (x) != 1 || mpfr_sgn (x) != 1)
     {
       printf("Sgn error for +Inf.\n");
       ret = 1;
     }
-  MPFR_SET_INF(x);
-  MPFR_SET_NEG(x);
-  if ((mpfr_sgn) (x) != -1)
+  MPFR_SET_INF (x);
+  MPFR_SET_NEG (x);
+  if ((mpfr_sgn) (x) != -1 || mpfr_sgn (x) != -1)
     {
       printf("Sgn error for -Inf.\n");
       ret = 1;
     }
-  mpfr_clear(x);
+  MPFR_SET_NAN (x);
+  mpfr_clear_flags ();
+  if ((mpfr_sgn) (x) != 0 || !mpfr_erangeflag_p ())
+    {
+      printf("Sgn error for NaN.\n");
+      ret = 1;
+    }
+  mpfr_clear_flags ();
+  if (mpfr_sgn (x) != 0 || !mpfr_erangeflag_p ())
+    {
+      printf("Sgn error for NaN.\n");
+      ret = 1;
+    }
+  mpfr_clear (x);
   if (ret)
-    exit(ret);
+    exit (ret);
 }
 
 static void

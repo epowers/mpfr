@@ -1,6 +1,7 @@
 /* Test file for mpfr_sub.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -436,14 +437,14 @@ check_inexact (void)
                 : MPFR_EXP(u) - MPFR_EXP(x);
               pz = pz + MAX(MPFR_PREC(x), MPFR_PREC(u));
               mpfr_set_prec (z, pz);
-              rnd = (mp_rnd_t) RND_RAND();
+              rnd = RND_RAND ();
               if (test_sub (z, x, u, rnd))
                 {
                   printf ("z <- x - u should be exact\n");
                   exit (1);
                 }
                 {
-                  rnd = (mp_rnd_t) RND_RAND ();
+                  rnd = RND_RAND ();
                   inexact = test_sub (y, x, u, rnd);
                   cmp = mpfr_cmp (y, z);
                   if (((inexact == 0) && (cmp != 0)) ||
@@ -481,7 +482,6 @@ main (void)
   mp_prec_t p;
   unsigned int i;
 
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   check_diverse ();

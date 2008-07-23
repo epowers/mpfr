@@ -1,6 +1,7 @@
 /* Test file for mpfr_csch.
 
-Copyright 2005 Free Software Foundation, Inc.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -25,6 +26,7 @@ MA 02110-1301, USA. */
 #include "mpfr-test.h"
 
 #define TEST_FUNCTION mpfr_csch
+#define TEST_RANDOM_EMAX 63
 #include "tgeneric.c"
 
 static void
@@ -72,6 +74,22 @@ check_specials (void)
   if (! (mpfr_inf_p (y) && mpfr_sgn (y) < 0))
     {
       printf ("Error: csch(-0) != -Inf\n");
+      exit (1);
+    }
+
+  /* check huge x */
+  mpfr_set_str (x, "8e8", 10, GMP_RNDN);
+  mpfr_csch (y, x, GMP_RNDN);
+  if (! (mpfr_zero_p (y) && MPFR_SIGN (y) > 0))
+    {
+      printf ("Error: csch(8e8) != +0\n");
+      exit (1);
+    }
+  mpfr_set_str (x, "-8e8", 10, GMP_RNDN);
+  mpfr_csch (y, x, GMP_RNDN);
+  if (! (mpfr_zero_p (y) && MPFR_SIGN (y) < 0))
+    {
+      printf ("Error: csch(-8e8) != -0\n");
       exit (1);
     }
 

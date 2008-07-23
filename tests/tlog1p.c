@@ -1,7 +1,7 @@
 /* Test file for mpfr_log1p.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
-Adapted from tsinh.c.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -49,43 +49,72 @@ test_log1p (mpfr_ptr a, mpfr_srcptr b, mp_rnd_t rnd_mode)
 #endif
 
 #define TEST_FUNCTION test_log1p
+#define TEST_RANDOM_EMAX 80
 #include "tgeneric.c"
 
 static void
 special (void)
 {
   mpfr_t x;
+  int inex;
 
   mpfr_init (x);
 
   mpfr_set_nan (x);
-  test_log1p (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_nan_p (x));
+  inex = test_log1p (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_nan_p (x) && inex == 0);
 
   mpfr_set_inf (x, -1);
-  test_log1p (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_nan_p (x));
+  inex = test_log1p (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_nan_p (x) && inex == 0);
 
   mpfr_set_inf (x, 1);
-  test_log1p (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) > 0);
+  inex = test_log1p (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_inf_p (x) && mpfr_sgn (x) > 0 && inex == 0);
 
   mpfr_set_ui (x, 0, GMP_RNDN);
-  test_log1p (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS (x));
+  inex = test_log1p (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS (x) && inex == 0);
   mpfr_neg (x, x, GMP_RNDN);
-  test_log1p (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_NEG (x));
+  inex = test_log1p (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_NEG (x) && inex == 0);
 
   mpfr_set_si (x, -1, GMP_RNDN);
-  test_log1p (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) < 0);
+  inex = test_log1p (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_inf_p (x) && mpfr_sgn (x) < 0 && inex == 0);
 
   mpfr_set_si (x, -2, GMP_RNDN);
-  test_log1p (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_nan_p (x));
+  inex = test_log1p (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_nan_p (x) && inex == 0);
 
   mpfr_clear (x);
+}
+
+static void
+other (void)
+{
+  mpfr_t x, y;
+
+  /* Bug reported by Guillaume Melquiond on 2006-08-14. */
+  mpfr_init2 (x, 53);
+  mpfr_set_str (x, "-1.5e4f72873ed9a@-100", 16, GMP_RNDN);
+  mpfr_init2 (y, 57);
+  mpfr_log1p (y, x, GMP_RNDU);
+  if (mpfr_cmp (x, y) != 0)
+    {
+      printf ("Error in tlog1p for x = ");
+      mpfr_out_str (stdout, 16, 0, x, GMP_RNDN);
+      printf (", rnd = GMP_RNDU\nExpected ");
+      mpfr_out_str (stdout, 16, 15, x, GMP_RNDN);
+      printf ("\nGot      ");
+      mpfr_out_str (stdout, 16, 15, y, GMP_RNDN);
+      printf ("\n");
+      exit (1);
+    }
+
+  mpfr_clear (y);
+  mpfr_clear (x);
+  return;
 }
 
 int
@@ -94,8 +123,13 @@ main (int argc, char *argv[])
   tests_start_mpfr ();
 
   special ();
+  other ();
 
   test_generic (2, 100, 50);
+
+  data_check ("data/log1p", mpfr_log1p, "mpfr_log1p");
+  bad_cases (mpfr_log1p, mpfr_expm1, "mpfr_log1p", 256, -64, 40,
+             4, 128, 800, 40);
 
   tests_end_mpfr ();
   return 0;

@@ -1,7 +1,7 @@
 /* Test file for mpfr_atan.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
-Written by Paul Zimmermann, INRIA Lorraine.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -219,6 +219,10 @@ static void
 special_overflow (void)
 {
   mpfr_t x, y;
+  mp_exp_t emin, emax;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   set_emin (-125);
   set_emax (128);
@@ -235,8 +239,8 @@ special_overflow (void)
     }
   mpfr_clear (y);
   mpfr_clear (x);
-  set_emin (MPFR_EMIN_MIN);
-  set_emax (MPFR_EMAX_MAX);
+  set_emin (emin);
+  set_emax (emax);
 }
 
 static void
@@ -244,7 +248,7 @@ special_atan2 (void)
 {
   mpfr_t x, y, z;
 
-  mpfr_inits2 (4, x, y, z, NULL);
+  mpfr_inits2 (4, x, y, z, (mpfr_ptr) 0);
 
   /* Anything with NAN should be set to NAN */
   mpfr_set_ui (y, 0, GMP_RNDN);
@@ -345,7 +349,94 @@ special_atan2 (void)
   mpfr_atan2 (z, y, x, GMP_RNDN);
   MPFR_ASSERTN (mpfr_cmp_str (z, "-2.356194490192344928", 10, GMP_RNDN) == 0);
 
-  mpfr_clears (x, y, z, NULL);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
+}
+
+/* from Christopher Creutzig, 18 Jul 2007 */
+static void
+smallvals_atan2 (void)
+{
+  mpfr_t a, x, y;
+  mp_exp_t old_emin;
+
+  mpfr_inits (a, x, y, (mpfr_ptr) 0);
+  mpfr_set_ui (y, 0, GMP_RNDN);
+  mpfr_nextbelow (y);
+  mpfr_set_ui (x, 1, GMP_RNDN);
+  /* y=-2^(-emin-1), x=1 */
+
+  mpfr_atan2 (a, y, x, GMP_RNDD);
+  MPFR_ASSERTN (mpfr_equal_p (a, y));
+
+  mpfr_atan2 (a, y, x, GMP_RNDU);
+  MPFR_ASSERTN (mpfr_zero_p (a) && MPFR_IS_NEG(a));
+
+  mpfr_set_prec (x, 8);
+  mpfr_set_prec (y, 8);
+  mpfr_set_prec (a, 8);
+  old_emin = mpfr_get_emin ();
+  mpfr_set_emin (MPFR_EMIN_MIN);
+
+  mpfr_set_si (y, 3, GMP_RNDN);
+  mpfr_set_exp (y, mpfr_get_emin ());
+  mpfr_set_str_binary (x, "1.1");
+  mpfr_atan2 (a, y, x, GMP_RNDU);
+  mpfr_set_si (y, 1, GMP_RNDN);
+  mpfr_set_exp (y, mpfr_get_emin ());
+  MPFR_ASSERTN (mpfr_equal_p (a, y));
+
+  /* From a bug reported by Christopher Creutzig on 2007-08-28.
+     Added test in each rounding mode.
+     Segmentation fault or assertion failure due to an infinite Ziv loop. */
+  mpfr_set_si (y, 1, GMP_RNDN);
+  mpfr_set_exp (y, mpfr_get_emin ());
+  mpfr_set_str_binary (x, "1.01");
+  mpfr_atan2 (a, y, x, GMP_RNDZ);
+  MPFR_ASSERTN (mpfr_zero_p (a));
+  mpfr_atan2 (a, y, x, GMP_RNDD);
+  MPFR_ASSERTN (mpfr_zero_p (a));
+  mpfr_atan2 (a, y, x, GMP_RNDU);
+  MPFR_ASSERTN (mpfr_equal_p (a, y));
+  mpfr_atan2 (a, y, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_equal_p (a, y));
+
+  mpfr_set_emin (old_emin);
+
+  mpfr_clears (a, x, y, (mpfr_ptr) 0);
+}
+
+/* Bug found by Robert Bajema (regression in MPFR 2.3.0).
+   The cause is the underflow flag set before the mpfr_atan2 call. */
+static void
+atan2_bug_20071003 (void)
+{
+  mpfr_t a, x, y, z;
+
+  mpfr_inits (a, x, y, z, (mpfr_ptr) 0);
+
+  mpfr_set_underflow ();
+  mpfr_set_str_binary (y,
+    "-0.10100110110100110111010110111111100110100010001110110E2");
+  mpfr_set_str_binary (x,
+    "0.10100101010110010100010010111000110110011110001011110E3");
+  mpfr_set_str_binary (z,
+    "-0.11101111001101101100111011001101000010010111101110110E-1");
+  mpfr_atan2 (a, y, x, GMP_RNDN);
+  if (! mpfr_equal_p (a, z))
+    {
+      printf ("mpfr_atan2 fails on:\n");
+      printf ("  y = ");
+      mpfr_dump (y);
+      printf ("  x = ");
+      mpfr_dump (x);
+      printf ("Expected ");
+      mpfr_dump (z);
+      printf ("Got      ");
+      mpfr_dump (a);
+      exit (1);
+    }
+
+  mpfr_clears (a, x, y, z, (mpfr_ptr) 0);
 }
 
 int
@@ -356,10 +447,15 @@ main (int argc, char *argv[])
   special_overflow ();
   special ();
   special_atan2 ();
+  smallvals_atan2 ();
+  atan2_bug_20071003 ();
 
   test_generic_atan  (2, 200, 17);
   test_generic_atan2 (2, 200, 17);
   test_generic_atan2_neg (2, 200, 17);
+
+  data_check ("data/atan", mpfr_atan, "mpfr_atan");
+  bad_cases (mpfr_atan, mpfr_tan, "mpfr_atan", 256, -40, 1, 4, 128, 800, 40);
 
   tests_end_mpfr ();
   return 0;

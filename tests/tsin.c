@@ -1,6 +1,7 @@
 /* Test file for mpfr_sin.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -62,9 +63,31 @@ check53 (const char *xs, const char *sin_xs, mp_rnd_t rnd_mode)
       printf ("mpfr_sin failed for x=%s, rnd=%s\n",
               xs, mpfr_print_rnd_mode (rnd_mode));
       printf ("mpfr_sin gives sin(x)=");
-      mpfr_out_str(stdout, 10, 0, s, GMP_RNDN);
-      printf(", expected %s\n", sin_xs);
-      exit(1);
+      mpfr_out_str (stdout, 10, 0, s, GMP_RNDN);
+      printf (", expected %s\n", sin_xs);
+      exit (1);
+    }
+  mpfr_clear (xx);
+  mpfr_clear (s);
+}
+
+static void
+check53b (const char *xs, const char *sin_xs, mp_rnd_t rnd_mode)
+{
+  mpfr_t xx, s;
+
+  mpfr_init2 (xx, 53);
+  mpfr_init2 (s, 53);
+  mpfr_set_str (xx, xs, 2, GMP_RNDN); /* should be exact */
+  test_sin (s, xx, rnd_mode);
+  if (mpfr_cmp_str (s, sin_xs, 2, GMP_RNDN))
+    {
+      printf ("mpfr_sin failed in rounding mode %s for\n     x = %s\n",
+              mpfr_print_rnd_mode (rnd_mode), xs);
+      printf ("     got ");
+      mpfr_out_str (stdout, 2, 0, s, GMP_RNDN);
+      printf ("\nexpected %s\n", sin_xs);
+      exit (1);
     }
   mpfr_clear (xx);
   mpfr_clear (s);
@@ -175,6 +198,7 @@ check_nans (void)
 }
 
 #define TEST_FUNCTION test_sin
+#define REDUCE_EMAX 262143 /* otherwise arg. reduction is too expensive */
 #include "tgeneric.c"
 
 const char xs[] = "0.111011111110110000111000001100000111110E-1";
@@ -187,7 +211,7 @@ check_regression ()
   int i;
 
   p = strlen (xs) - 2 - 3;
-  mpfr_inits2 (p, x, y, NULL);
+  mpfr_inits2 (p, x, y, (mpfr_ptr) 0);
 
   mpfr_set_str (x, xs, 2, GMP_RNDN);
   i = mpfr_sin (y, x, GMP_RNDN);
@@ -199,7 +223,53 @@ check_regression ()
       mpfr_dump (y);
       exit (1);
     }
-  mpfr_clears (x, y, NULL);
+  mpfr_clears (x, y, (mpfr_ptr) 0);
+}
+
+/* Test provided by Christopher Creutzig, 2007-05-21. */
+static void
+check_tiny (void)
+{
+  mpfr_t x, y;
+
+  mpfr_init2 (x, 53);
+  mpfr_init2 (y, 53);
+
+  mpfr_set_ui (x, 1, GMP_RNDN);
+  mpfr_set_exp (x, mpfr_get_emin ());
+  mpfr_sin (y, x, GMP_RNDD);
+  if (mpfr_cmp (x, y) < 0)
+    {
+      printf ("Error in check_tiny: got sin(x) > x for x = 2^(emin-1)\n");
+      exit (1);
+    }
+
+  mpfr_sin (y, x, GMP_RNDU);
+  mpfr_mul_2ui (y, y, 1, GMP_RNDU);
+  if (mpfr_cmp (x, y) > 0)
+    {
+      printf ("Error in check_tiny: got sin(x) < x/2 for x = 2^(emin-1)\n");
+      exit (1);
+    }
+
+  mpfr_neg (x, x, GMP_RNDN);
+  mpfr_sin (y, x, GMP_RNDU);
+  if (mpfr_cmp (x, y) > 0)
+    {
+      printf ("Error in check_tiny: got sin(x) < x for x = -2^(emin-1)\n");
+      exit (1);
+    }
+
+  mpfr_sin (y, x, GMP_RNDD);
+  mpfr_mul_2ui (y, y, 1, GMP_RNDD);
+  if (mpfr_cmp (x, y) < 0)
+    {
+      printf ("Error in check_tiny: got sin(x) > x/2 for x = -2^(emin-1)\n");
+      exit (1);
+    }
+
+  mpfr_clear (y);
+  mpfr_clear (x);
 }
 
 int
@@ -222,7 +292,13 @@ main (int argc, char *argv[])
   check53 ("1.00288304857059840103",  "8.430252033025980029e-1", GMP_RNDZ);
   check53 ("1.00591265847407274059",  "8.446508805292128885e-1", GMP_RNDN);
 
-  check53 ("1.00591265847407274059",  "8.446508805292128885e-1", GMP_RNDN);
+  /* Other worst cases showing a bug introduced on 2005-01-29 in rev 3248 */
+  check53b ("1.0111001111010111010111111000010011010001110001111011e-21",
+            "1.0111001111010111010111111000010011010001101001110001e-21",
+            GMP_RNDU);
+  check53b ("1.1011101111111010000001010111000010000111100100101101",
+            "1.1111100100101100001111100000110011110011010001010101e-1",
+            GMP_RNDU);
 
   mpfr_init2 (x, 2);
 
@@ -267,7 +343,7 @@ main (int argc, char *argv[])
 
   mpfr_set_str_binary (x, "1.1001001000011111101101010100010001000010110100010011");
   test_sin (x, x, GMP_RNDZ);
-  if (mpfr_cmp_str (x, "1.1111111111111111111111111111111111111111111111111111e-1", 2, 0))
+  if (mpfr_cmp_str (x, "1.1111111111111111111111111111111111111111111111111111e-1", 2, GMP_RNDN))
     {
       printf ("Error for x= 1.1001001000011111101101010100010001000010110100010011\nGot ");
       mpfr_dump (x);
@@ -280,8 +356,12 @@ main (int argc, char *argv[])
   mpfr_clear (c);
   mpfr_clear (x);
 
-  test_generic (2, 100, 20);
+  test_generic (2, 100, 15);
   test_sign ();
+  check_tiny ();
+
+  data_check ("data/sin", mpfr_sin, "mpfr_sin");
+  bad_cases (mpfr_sin, mpfr_asin, "mpfr_sin", 256, -40, 0, 4, 128, 800, 50);
 
   tests_end_mpfr ();
   return 0;

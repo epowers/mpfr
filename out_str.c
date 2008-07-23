@@ -1,6 +1,7 @@
 /* mpfr_out_str -- output a floating-point number to a stream
 
-Copyright 1999, 2001, 2002, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,13 +17,10 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
-#include <stdio.h>
 #include <string.h>
-#include <limits.h>
-#include <locale.h>
 
 #include "mpfr-impl.h"
 
@@ -84,7 +82,7 @@ mpfr_out_str (FILE *stream, int base, size_t n_digits, mpfr_srcptr op,
 
   /* outputs mantissa */
   fputc (*s++, stream); e--; /* leading digit */
-  fputc (MPFR_DECIMAL_POINT, stream);
+  fputc ((unsigned char) MPFR_DECIMAL_POINT, stream);
   fputs (s, stream);         /* rest of mantissa */
   (*__gmp_free_func) (s0, l);
 

@@ -1,6 +1,7 @@
 /* mpfr_sqr -- Floating square
 
-Copyright 2004, 2005 Free Software Foundation, Inc.
+Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -19,7 +20,7 @@ License for more details.
 You should have received a copy of the GNU Lesser
 General Public License along with the MPFR Library; see
 the file COPYING.LIB.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
@@ -58,7 +59,7 @@ mpfr_sqr (mpfr_ptr a, mpfr_srcptr b, mp_rnd_t rnd_mode)
 
   bn = MPFR_LIMB_SIZE(b); /* number of limbs of b */
   tn = 1 + (2 * bq - 1) / BITS_PER_MP_LIMB; /* number of limbs of square,
-					       2*bn or 2*bn-1 */
+                                               2*bn or 2*bn-1 */
 
   MPFR_TMP_MARK(marker);
   tmp = (mp_limb_t *) MPFR_TMP_ALLOC((size_t) 2 * bn * BYTES_PER_MP_LIMB);
@@ -103,5 +104,5 @@ mpfr_sqr (mpfr_ptr a, mpfr_srcptr b, mp_rnd_t rnd_mode)
     MPFR_SET_EXP (a, ax2);
     MPFR_SET_POS (a);
   }
-  return inexact;
+  MPFR_RET (inexact);
 }

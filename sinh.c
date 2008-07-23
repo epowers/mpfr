@@ -1,6 +1,7 @@
 /* mpfr_sinh -- hyperbolic sine
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -57,7 +58,8 @@ mpfr_sinh (mpfr_ptr y, mpfr_srcptr xt, mp_rnd_t rnd_mode)
     }
 
   /* sinh(x) = x + x^3/6 + ... so the error is < 2^(3*EXP(x)-2) */
-  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, xt, -2*MPFR_GET_EXP(xt)+2,1,rnd_mode, );
+  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, xt, -2 * MPFR_GET_EXP(xt), 2, 1,
+                                    rnd_mode, {});
 
   MPFR_TMP_INIT_ABS (x, xt);
 
@@ -85,47 +87,96 @@ mpfr_sinh (mpfr_ptr y, mpfr_srcptr xt, mp_rnd_t rnd_mode)
 
     /* First computation of sinh */
     MPFR_ZIV_INIT (loop, Nt);
-    for (;;) {
-      /* compute sinh */
-      mpfr_clear_flags ();
-      mpfr_exp (t, x, GMP_RNDD);        /* exp(x) */
-      /* exp(x) can overflow! */
-      /* BUG/TODO/FIXME: exp can overflow but sinh may be representable! */
-      if (MPFR_UNLIKELY (mpfr_overflow_p ())) {
-        inexact = mpfr_overflow (y, rnd_mode, MPFR_SIGN (xt));
-        MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_OVERFLOW);
-        break;
-      }
-      d = MPFR_GET_EXP (t);
-      mpfr_ui_div (ti, 1, t, GMP_RNDU); /* 1/exp(x) */
-      mpfr_sub (t, t, ti, GMP_RNDN);    /* exp(x) - 1/exp(x) */
-      mpfr_div_2ui (t, t, 1, GMP_RNDN);  /* 1/2(exp(x) - 1/exp(x)) */
+    for (;;)
+      {
+        MPFR_BLOCK_DECL (flags);
 
-      /* it may be that t is zero (in fact, it can only occur when te=1,
-         and thus ti=1 too) */
-      if (MPFR_IS_ZERO (t))
-        err = Nt; /* double the precision */
-      else
-        {
-          /* calculation of the error */
-          d = d - MPFR_GET_EXP (t) + 2;
-          /* error estimate: err = Nt-(__gmpfr_ceil_log2(1+pow(2,d)));*/
-          err = Nt - (MAX (d, 0) + 1);
-          if (MPFR_LIKELY (MPFR_CAN_ROUND (t, err, MPFR_PREC (y), rnd_mode)))
-            {
-              inexact = mpfr_set4 (y, t, rnd_mode, MPFR_SIGN (xt));
-              break;
-            }
-        }
-      /* actualisation of the precision */
-      Nt += err;
-      MPFR_ZIV_NEXT (loop, Nt);
-      MPFR_GROUP_REPREC_2 (group, Nt, t, ti);
-    }
+        /* compute sinh */
+        MPFR_BLOCK (flags, mpfr_exp (t, x, GMP_RNDD));
+        if (MPFR_OVERFLOW (flags))
+          /* exp(x) does overflow */
+          {
+            /* sinh(x) = 2 * sinh(x/2) * cosh(x/2) */
+            mpfr_div_2ui (ti, x, 1, GMP_RNDD); /* exact */
+
+            /* t <- cosh(x/2): error(t) <= 1 ulp(t) */
+            MPFR_BLOCK (flags, mpfr_cosh (t, ti, GMP_RNDD));
+            if (MPFR_OVERFLOW (flags))
+              /* when x>1 we have |sinh(x)| >= cosh(x/2), so sinh(x)
+                 overflows too */
+              {
+                inexact = mpfr_overflow (y, rnd_mode, MPFR_SIGN (xt));
+                MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_OVERFLOW);
+                break;
+              }
+
+            /* ti <- sinh(x/2): , error(ti) <= 1 ulp(ti)
+               cannot overflow because 0 < sinh(x) < cosh(x) when x > 0 */
+            mpfr_sinh (ti, ti, GMP_RNDD);
+
+            /* multiplication below, error(t) <= 5 ulp(t) */
+            MPFR_BLOCK (flags, mpfr_mul (t, t, ti, GMP_RNDD));
+            if (MPFR_OVERFLOW (flags))
+              {
+                inexact = mpfr_overflow (y, rnd_mode, MPFR_SIGN (xt));
+                MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_OVERFLOW);
+                break;
+              }
+
+            /* doubling below, exact */
+            MPFR_BLOCK (flags, mpfr_mul_2ui (t, t, 1, GMP_RNDN));
+            if (MPFR_OVERFLOW (flags))
+              {
+                inexact = mpfr_overflow (y, rnd_mode, MPFR_SIGN (xt));
+                MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_OVERFLOW);
+                break;
+              }
+
+            /* we have lost at most 3 bits of precision */
+            err = Nt - 3;
+            if (MPFR_LIKELY (MPFR_CAN_ROUND (t, err, MPFR_PREC (y),
+                                             rnd_mode)))
+              {
+                inexact = mpfr_set4 (y, t, rnd_mode, MPFR_SIGN (xt));
+                break;
+              }
+            err = Nt; /* double the precision */
+          }
+        else
+          {
+            d = MPFR_GET_EXP (t);
+            mpfr_ui_div (ti, 1, t, GMP_RNDU); /* 1/exp(x) */
+            mpfr_sub (t, t, ti, GMP_RNDN);    /* exp(x) - 1/exp(x) */
+            mpfr_div_2ui (t, t, 1, GMP_RNDN);  /* 1/2(exp(x) - 1/exp(x)) */
+
+            /* it may be that t is zero (in fact, it can only occur when te=1,
+               and thus ti=1 too) */
+            if (MPFR_IS_ZERO (t))
+              err = Nt; /* double the precision */
+            else
+              {
+                /* calculation of the error */
+                d = d - MPFR_GET_EXP (t) + 2;
+                /* error estimate: err = Nt-(__gmpfr_ceil_log2(1+pow(2,d)));*/
+                err = Nt - (MAX (d, 0) + 1);
+                if (MPFR_LIKELY (MPFR_CAN_ROUND (t, err, MPFR_PREC (y),
+                                                 rnd_mode)))
+                  {
+                    inexact = mpfr_set4 (y, t, rnd_mode, MPFR_SIGN (xt));
+                    break;
+                  }
+              }
+          }
+
+        /* actualisation of the precision */
+        Nt += err;
+        MPFR_ZIV_NEXT (loop, Nt);
+        MPFR_GROUP_REPREC_2 (group, Nt, t, ti);
+      }
     MPFR_ZIV_FREE (loop);
     MPFR_GROUP_CLEAR (group);
     MPFR_SAVE_EXPO_FREE (expo);
   }
 
-  MPFR_RET (mpfr_check_range (y, inexact, rnd_mode));
+  return mpfr_check_range (y, inexact, rnd_mode);
 }

@@ -1,6 +1,7 @@
 /* Test file for mpfr_div.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,12 +17,11 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "mpfr-test.h"
 
@@ -70,7 +70,7 @@ check4 (const char *Ns, const char *Ds, mp_rnd_t rnd_mode, int p,
 {
   mpfr_t q, n, d;
 
-  mpfr_inits2 (p, q, n, d, NULL);
+  mpfr_inits2 (p, q, n, d, (mpfr_ptr) 0);
   mpfr_set_str1 (n, Ns);
   mpfr_set_str1 (d, Ds);
   test_div(q, n, d, rnd_mode);
@@ -84,7 +84,7 @@ check4 (const char *Ns, const char *Ds, mp_rnd_t rnd_mode, int p,
       putchar('\n');
       exit (1);
     }
-  mpfr_clears (q, n, d, NULL);
+  mpfr_clears (q, n, d, (mpfr_ptr) 0);
 }
 
 static void
@@ -92,7 +92,7 @@ check24 (const char *Ns, const char *Ds, mp_rnd_t rnd_mode, const char *Qs)
 {
   mpfr_t q, n, d;
 
-  mpfr_inits2(24, q, n, d, NULL);
+  mpfr_inits2 (24, q, n, d, (mpfr_ptr) 0);
 
   mpfr_set_str1 (n, Ns);
   mpfr_set_str1 (d, Ds);
@@ -105,7 +105,7 @@ check24 (const char *Ns, const char *Ds, mp_rnd_t rnd_mode, const char *Qs)
       mpfr_out_str(stdout,10,0,q, GMP_RNDN); putchar('\n');
       exit (1);
     }
-  mpfr_clears(q,n,d,NULL);
+  mpfr_clears (q, n, d, (mpfr_ptr) 0);
 }
 
 /* the following examples come from the paper "Number-theoretic Test
@@ -195,7 +195,7 @@ check_64(void)
 {
   mpfr_t x,y,z;
 
-  mpfr_inits2 (64, x, y, z, NULL);
+  mpfr_inits2 (64, x, y, z, (mpfr_ptr) 0);
 
   mpfr_set_str_binary(x, "1.00100100110110101001010010101111000001011100100101010000000000E54");
   mpfr_set_str_binary(y, "1.00000000000000000000000000000000000000000000000000000000000000E584");
@@ -212,7 +212,7 @@ check_64(void)
       exit(1);
     }
 
-  mpfr_clears(x, y, z, NULL);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
 static void
@@ -589,7 +589,7 @@ check_inexact (void)
               mpfr_set_prec (y, py);
               mpfr_set_prec (z, py + pu);
                 {
-                  rnd = (mp_rnd_t) RND_RAND ();
+                  rnd = RND_RAND ();
                   inexact = test_div (y, x, u, rnd);
                   if (mpfr_mul (z, y, u, rnd))
                     {
@@ -730,6 +730,141 @@ check_nan (void)
   mpfr_clear (q);
 }
 
+static void
+consistency (void)
+{
+  mpfr_t x, y, z1, z2;
+  int i;
+
+  mpfr_inits (x, y, z1, z2, (mpfr_ptr) 0);
+
+  for (i = 0; i < 10000; i++)
+    {
+      mp_rnd_t rnd;
+      mp_prec_t px, py, pz, p;
+      int inex1, inex2;
+
+      rnd = RND_RAND ();
+      px = (randlimb () % 256) + 2;
+      py = (randlimb () % 128) + 2;
+      pz = (randlimb () % 256) + 2;
+      mpfr_set_prec (x, px);
+      mpfr_set_prec (y, py);
+      mpfr_set_prec (z1, pz);
+      mpfr_set_prec (z2, pz);
+      mpfr_random (x);
+      do
+        mpfr_random (y);
+      while (mpfr_zero_p (y));
+      inex1 = mpfr_div (z1, x, y, rnd);
+      MPFR_ASSERTN (!MPFR_IS_NAN (z1));
+      p = MAX (MAX (px, py), pz);
+      if (mpfr_prec_round (x, p, GMP_RNDN) != 0 ||
+          mpfr_prec_round (y, p, GMP_RNDN) != 0)
+        {
+          printf ("mpfr_prec_round error for i = %d\n", i);
+          exit (1);
+        }
+      inex2 = mpfr_div (z2, x, y, rnd);
+      MPFR_ASSERTN (!MPFR_IS_NAN (z2));
+      if (inex1 != inex2 || mpfr_cmp (z1, z2) != 0)
+        {
+          printf ("Consistency error for i = %d\n", i);
+          exit (1);
+        }
+    }
+
+  mpfr_clears (x, y, z1, z2, (mpfr_ptr) 0);
+}
+
+/* Reported by Carl Witty on 2007-06-03 */
+static void
+test_20070603 (void)
+{
+  mpfr_t n, d, q, c;
+
+  mpfr_init2 (n, 128);
+  mpfr_init2 (d, 128);
+  mpfr_init2 (q, 31);
+  mpfr_init2 (c, 31);
+
+  mpfr_set_str (n, "10384593717069655257060992206846485", 10, GMP_RNDN);
+  mpfr_set_str (d, "10384593717069655257060992206847132", 10, GMP_RNDN);
+  mpfr_div (q, n, d, GMP_RNDU);
+
+  mpfr_set_ui (c, 1, GMP_RNDN);
+  if (mpfr_cmp (q, c) != 0)
+    {
+      printf ("Error in test_20070603\nGot        ");
+      mpfr_dump (q);
+      printf ("instead of ");
+      mpfr_dump (c);
+      exit (1);
+    }
+
+  /* same for 64-bit machines */
+  mpfr_set_prec (n, 256);
+  mpfr_set_prec (d, 256);
+  mpfr_set_prec (q, 63);
+  mpfr_set_str (n, "822752278660603021077484591278675252491367930877209729029898240", 10, GMP_RNDN);
+  mpfr_set_str (d, "822752278660603021077484591278675252491367930877212507873738752", 10, GMP_RNDN);
+  mpfr_div (q, n, d, GMP_RNDU);
+  if (mpfr_cmp (q, c) != 0)
+    {
+      printf ("Error in test_20070603\nGot        ");
+      mpfr_dump (q);
+      printf ("instead of ");
+      mpfr_dump (c);
+      exit (1);
+    }
+
+  mpfr_clear (n);
+  mpfr_clear (d);
+  mpfr_clear (q);
+  mpfr_clear (c);
+}
+
+/* Bug found while adding tests for mpfr_cot */
+static void
+test_20070628 (void)
+{
+  mp_exp_t old_emax;
+  mpfr_t x, y;
+  int inex, err = 0;
+
+  old_emax = mpfr_get_emax ();
+
+  if (mpfr_set_emax (256))
+    {
+      printf ("Can't change exponent range\n");
+      exit (1);
+    }
+
+  mpfr_inits2 (53, x, y, (mpfr_ptr) 0);
+  mpfr_set_si (x, -1, GMP_RNDN);
+  mpfr_set_si_2exp (y, 1, -256, GMP_RNDN);
+  mpfr_clear_flags ();
+  inex = mpfr_div (x, x, y, GMP_RNDD);
+  if (MPFR_SIGN (x) >= 0 || ! mpfr_inf_p (x))
+    {
+      printf ("Error in test_20070628: expected -Inf, got\n");
+      mpfr_dump (x);
+      err++;
+    }
+  if (inex >= 0)
+    {
+      printf ("Error in test_20070628: expected inex < 0, got %d\n", inex);
+      err++;
+    }
+  if (! mpfr_overflow_p ())
+    {
+      printf ("Error in test_20070628: overflow flag is not set\n");
+      err++;
+    }
+  mpfr_clears (x, y, (mpfr_ptr) 0);
+  mpfr_set_emax (old_emax);
+}
+
 #define TEST_FUNCTION test_div
 #define TWO_ARGS
 #define RAND_FUNCTION(x) mpfr_random2(x, MPFR_LIMB_SIZE (x), randlimb () % 100)
@@ -738,17 +873,16 @@ check_nan (void)
 int
 main (int argc, char *argv[])
 {
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   check_inexact ();
   check_hard ();
   check_nan ();
-  check_lowr();
-  check_float(); /* checks single precision */
-  check_double();
-  check_convergence();
-  check_64();
+  check_lowr ();
+  check_float (); /* checks single precision */
+  check_double ();
+  check_convergence ();
+  check_64 ();
 
   check4("4.0","4.503599627370496e15", GMP_RNDZ, 62,
    "0.10000000000000000000000000000000000000000000000000000000000000E-49");
@@ -758,6 +892,9 @@ main (int argc, char *argv[])
          65,
   "0.11010011111001101011111001100111110100000001101001111100111000000E-1119");
 
+  consistency ();
+  test_20070603 ();
+  test_20070628 ();
   test_generic (2, 800, 50);
 
   tests_end_mpfr ();

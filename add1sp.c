@@ -1,8 +1,8 @@
 /* mpfr_add1sp -- internal function to perform a "real" addition
    All the op must have the same precision
 
-Copyright 2004, 2005 Free Software Foundation.
-Contributed by the Spaces project, INRIA Lorraine.
+Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -18,7 +18,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -64,7 +64,7 @@ int mpfr_add1sp (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
                inexact, inexact2);
       MPFR_ASSERTN (0);
     }
-  mpfr_clears (tmpa, tmpb, tmpc, NULL);
+  mpfr_clears (tmpa, tmpb, tmpc, (mpfr_ptr) 0);
   return inexact;
 }
 #  define mpfr_add1sp mpfr_add1sp2
@@ -375,5 +375,5 @@ mpfr_add1sp (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
   MPFR_SET_SAME_SIGN(a,b);
 
   MPFR_TMP_FREE(marker);
-  return inexact*MPFR_INT_SIGN(a);
+  MPFR_RET (inexact * MPFR_INT_SIGN (a));
 }

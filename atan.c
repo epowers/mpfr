@@ -1,6 +1,7 @@
 /* mpfr_atan -- arc-tangent of a floating-point number
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library, and was contributed by Mathieu Dutour.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -46,11 +47,17 @@ mpfr_atan_aux (mpfr_ptr y, mpz_ptr p, long r, int m, mpz_t *tab)
   mpz_t *S, *Q, *ptoj;
   unsigned long n, i, k, j, l;
   mp_exp_t diff, expo;
-  int im, *mult, *log2_nb_terms, *accu, done;
+  int im, done;
+  mp_prec_t mult, *accu, *log2_nb_terms;
   mp_prec_t precy = MPFR_PREC(y);
 
-  mult = (int*) (*__gmp_allocate_func) ((3 * m + 3) * sizeof (int));
-  accu = mult + m + 1;
+  if (mpz_cmp_ui (p, 0) == 0)
+    {
+      mpfr_set_ui (y, 1, GMP_RNDN); /* limit(atan(x)/x, x=0) */
+      return;
+    }
+
+  accu = (mp_prec_t*) (*__gmp_allocate_func) ((2 * m + 2) * sizeof (mp_prec_t));
   log2_nb_terms = accu + m + 1;
 
   /* Set Tables */
@@ -84,69 +91,71 @@ mpfr_atan_aux (mpfr_ptr y, mpz_ptr p, long r, int m, mpz_t *tab)
     The factor 2^(r*(b-a)) in Q(a,b) is implicit, thus we have to take it
     into account when we compute with Q.
   */
-  mult[0] = 0; /* number of bits of X^(-i) */
-  accu[0] = 0; /* accu[k] = mult[0] + ... + mult[k] */
+  accu[0] = 0; /* accu[k] = Mult[0] + ... + Mult[k], where Mult[j] is the
+                  number of bits of the corresponding term S[j]/Q[j] */
   if (mpz_cmp_ui (p, 1) != 0)
     {
       /* p <> 1: precompute ptoj table */
       mpz_set (ptoj[0], p);
-      for (im = 1 ; im < m ; im ++)
-	mpz_mul (ptoj[im], ptoj[im - 1], ptoj[im - 1]);
+      for (im = 1 ; im <= m ; im ++)
+        mpz_mul (ptoj[im], ptoj[im - 1], ptoj[im - 1]);
       /* main loop */
       n = 1UL << m;
       /* the ith term being X^i/(2i+1) with X=p/2^r, we can stop when
          p^i/2^(r*i) < 2^(-precy), i.e. r*i > precy + log2(p^i) */
       for (i = k = done = 0; (i < n) && (done == 0); i += 2, k ++)
-	{
+        {
           /* initialize both S[k],Q[k] and S[k+1],Q[k+1] */
-	  mpz_set_ui (Q[k+1], 2 * i + 3); /* Q(i+1,i+2) */
-	  mpz_mul_ui (S[k+1], p, 2 * i + 1); /* S(i+1,i+2) */
-	  mpz_mul_2exp (S[k], Q[k+1], r);
-	  mpz_sub (S[k], S[k], S[k+1]); /* S(i,i+2) */
-	  mpz_mul_ui (Q[k], Q[k+1], 2 * i + 1); /* Q(i,i+2) */
+          mpz_set_ui (Q[k+1], 2 * i + 3); /* Q(i+1,i+2) */
+          mpz_mul_ui (S[k+1], p, 2 * i + 1); /* S(i+1,i+2) */
+          mpz_mul_2exp (S[k], Q[k+1], r);
+          mpz_sub (S[k], S[k], S[k+1]); /* S(i,i+2) */
+          mpz_mul_ui (Q[k], Q[k+1], 2 * i + 1); /* Q(i,i+2) */
           log2_nb_terms[k] = 1; /* S[k]/Q[k] corresponds to 2 terms */
-	  for (j = (i + 2) >> 1, l = 1; (j & 1) == 0; l ++, j >>= 1, k --)
-	    {
+          for (j = (i + 2) >> 1, l = 1; (j & 1) == 0; l ++, j >>= 1, k --)
+            {
               /* invariant: S[k-1]/Q[k-1] and S[k]/Q[k] correspond
                  to 2^l terms each. We combine them into S[k-1]/Q[k-1] */
-	      MPFR_ASSERTD (k > 0);
-	      mpz_mul (S[k], S[k], Q[k-1]);
-	      mpz_mul (S[k], S[k], ptoj[l]);
-	      mpz_mul (S[k-1], S[k-1], Q[k]);
-	      mpz_mul_2exp (S[k-1], S[k-1], r << l);
-	      mpz_add (S[k-1], S[k-1], S[k]);
-	      mpz_mul (Q[k-1], Q[k-1], Q[k]);
+              MPFR_ASSERTD (k > 0);
+              mpz_mul (S[k], S[k], Q[k-1]);
+              mpz_mul (S[k], S[k], ptoj[l]);
+              mpz_mul (S[k-1], S[k-1], Q[k]);
+              mpz_mul_2exp (S[k-1], S[k-1], r << l);
+              mpz_add (S[k-1], S[k-1], S[k]);
+              mpz_mul (Q[k-1], Q[k-1], Q[k]);
               log2_nb_terms[k-1] = l + 1;
               /* now S[k-1]/Q[k-1] corresponds to 2^(l+1) terms */
-              mult[k-1] = (r << (l + 1)) - mpz_sizeinbase (ptoj[l+1], 2) - 1;
-              accu[k-1] = (k == 1) ? mult[k-1] : accu[k-2] + mult[k-1];
+              MPFR_MPZ_SIZEINBASE2(mult, ptoj[l+1]);
+              /* FIXME: precompute bits(ptoj[l+1]) outside the loop? */
+              mult = (r << (l + 1)) - mult - 1;
+              accu[k-1] = (k == 1) ? mult : accu[k-2] + mult;
               if (accu[k-1] > precy)
                 done = 1;
-	    }
-	}
+            }
+        }
     }
   else /* special case p=1: the ith term being X^i/(2i+1) with X=1/2^r,
           we can stop when r*i > precy i.e. i > precy/r */
     {
       n = 1UL << m;
       for (i = k = 0; (i < n) && (i <= precy / r); i += 2, k ++)
-	{
-	  mpz_set_ui (Q[k + 1], 2 * i + 3);
-	  mpz_mul_2exp (S[k], Q[k+1], r);
-	  mpz_sub_ui (S[k], S[k], 1 + 2 * i);
-	  mpz_mul_ui (Q[k], Q[k + 1], 1 + 2 * i);
+        {
+          mpz_set_ui (Q[k + 1], 2 * i + 3);
+          mpz_mul_2exp (S[k], Q[k+1], r);
+          mpz_sub_ui (S[k], S[k], 1 + 2 * i);
+          mpz_mul_ui (Q[k], Q[k + 1], 1 + 2 * i);
           log2_nb_terms[k] = 1; /* S[k]/Q[k] corresponds to 2 terms */
-	  for (j = (i + 2) >> 1, l = 1; (j & 1) == 0; l++, j >>= 1, k --)
-	    {
-	      MPFR_ASSERTD (k > 0);
-	      mpz_mul (S[k], S[k], Q[k-1]);
-	      mpz_mul (S[k-1], S[k-1], Q[k]);
-	      mpz_mul_2exp (S[k-1], S[k-1], r << l);
-	      mpz_add (S[k-1], S[k-1], S[k]);
-	      mpz_mul (Q[k-1], Q[k-1], Q[k]);
+          for (j = (i + 2) >> 1, l = 1; (j & 1) == 0; l++, j >>= 1, k --)
+            {
+              MPFR_ASSERTD (k > 0);
+              mpz_mul (S[k], S[k], Q[k-1]);
+              mpz_mul (S[k-1], S[k-1], Q[k]);
+              mpz_mul_2exp (S[k-1], S[k-1], r << l);
+              mpz_add (S[k-1], S[k-1], S[k]);
+              mpz_mul (Q[k-1], Q[k-1], Q[k]);
               log2_nb_terms[k-1] = l + 1;
-	    }
-	}
+            }
+        }
     }
 
   /* we need to combine S[0]/Q[0]...S[k-1]/Q[k-1] */
@@ -165,7 +174,7 @@ mpfr_atan_aux (mpfr_ptr y, mpz_ptr p, long r, int m, mpz_t *tab)
       mpz_add (S[k-1], S[k-1], S[k]);
       mpz_mul (Q[k-1], Q[k-1], Q[k]);
     }
-  (*__gmp_free_func) (mult, (3 * m + 3) * sizeof (int));
+  (*__gmp_free_func) (accu, (2 * m + 2) * sizeof (mp_prec_t));
 
   MPFR_MPZ_SIZEINBASE2 (diff, S[0]);
   diff -= 2 * precy;
@@ -241,12 +250,13 @@ mpfr_atan (mpfr_ptr atan, mpfr_srcptr x, mp_rnd_t rnd_mode)
   /* atan(x) = x - x^3/3 + x^5/5...
      so the error is < 2^(3*EXP(x)-1)
      so `EXP(x)-(3*EXP(x)-1)` = -2*EXP(x)+1 */
-  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (atan,x, -2*MPFR_GET_EXP (x)+1,0,rnd_mode,);
+  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (atan, x, -2 * MPFR_GET_EXP (x), 1, 0,
+                                    rnd_mode, {});
 
   /* Set x_p=|x| */
   MPFR_TMP_INIT_ABS (xp, x);
 
-  /* Other simple case arctang(-+1)=-+pi/4 */
+  /* Other simple case arctan(-+1)=-+pi/4 */
   comparaison = mpfr_cmp_ui (xp, 1);
   if (MPFR_UNLIKELY (comparaison == 0))
     {

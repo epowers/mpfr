@@ -1,6 +1,7 @@
 /* Test file for mpfr_add and mpfr_sub.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define NUM 30000
@@ -98,7 +99,7 @@ pcheck (const char *xs, const char *ys, const char *zs, mp_rnd_t rnd_mode,
               xs, ys, mpfr_print_rnd_mode (rnd_mode));
       exit (1);
     }
-  mpfr_clears (xx, yy, zz, NULL);
+  mpfr_clears (xx, yy, zz, (mpfr_ptr) 0);
 }
 
 static void
@@ -531,7 +532,7 @@ check_inexact (void)
                  abs(EXP(x)-EXP(u)) + max(prec(x), prec(u)) + 1 */
               pz = pz + MAX(MPFR_PREC(x), MPFR_PREC(u)) + 1;
               mpfr_set_prec (z, pz);
-              rnd = (mp_rnd_t) RND_RAND();
+              rnd = RND_RAND ();
               if (test_add (z, x, u, rnd))
                 {
                   printf ("z <- x + u should be exact\n");
@@ -541,7 +542,7 @@ check_inexact (void)
                   exit (1);
                 }
                 {
-                  rnd = (mp_rnd_t) RND_RAND();
+                  rnd = RND_RAND ();
                   inexact = test_add (y, x, u, rnd);
                   cmp = mpfr_cmp (y, z);
                   if (((inexact == 0) && (cmp != 0)) ||
@@ -717,7 +718,7 @@ check_1111 (void)
       test_add (c, c, one, GMP_RNDN);
       diff = (randlimb () % (2*m)) - m;
       mpfr_mul_2si (c, c, diff, GMP_RNDN);
-      rnd_mode = (mp_rnd_t) RND_RAND ();
+      rnd_mode = RND_RAND ();
       inex_a = test_add (a, b, c, rnd_mode);
       mpfr_init2 (s, MPFR_PREC_MIN + 2*m);
       inex_s = test_add (s, b, c, GMP_RNDN); /* exact */
@@ -1075,9 +1076,7 @@ tests (void)
 int
 main (int argc, char *argv[])
 {
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
-  /* mpfr_test_init (); */
 
   usesp = 0;
   tests ();

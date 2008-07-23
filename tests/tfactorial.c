@@ -1,6 +1,7 @@
 /* Test file for mpfr_factorial.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -116,6 +117,77 @@ test_int (void)
   mpfr_clear (y);
 }
 
+static void
+overflowed_fac0 (void)
+{
+  mpfr_t x, y;
+  int inex, rnd, err = 0;
+  mp_exp_t old_emax;
+
+  old_emax = mpfr_get_emax ();
+
+  mpfr_init2 (x, 8);
+  mpfr_init2 (y, 8);
+
+  mpfr_set_ui (y, 1, GMP_RNDN);
+  mpfr_nextbelow (y);
+  set_emax (0);  /* 1 is not representable. */
+  RND_LOOP (rnd)
+    {
+      mpfr_clear_flags ();
+      inex = mpfr_fac_ui (x, 0, (mp_rnd_t) rnd);
+      if (! mpfr_overflow_p ())
+        {
+          printf ("Error in overflowed_fac0 (rnd = %s):\n"
+                  "  The overflow flag is not set.\n",
+                  mpfr_print_rnd_mode ((mp_rnd_t) rnd));
+          err = 1;
+        }
+      if (rnd == GMP_RNDZ || rnd == GMP_RNDD)
+        {
+          if (inex >= 0)
+            {
+              printf ("Error in overflowed_fac0 (rnd = %s):\n"
+                      "  The inexact value must be negative.\n",
+                      mpfr_print_rnd_mode ((mp_rnd_t) rnd));
+              err = 1;
+            }
+          if (! mpfr_equal_p (x, y))
+            {
+              printf ("Error in overflowed_fac0 (rnd = %s):\n"
+                      "  Got ", mpfr_print_rnd_mode ((mp_rnd_t) rnd));
+              mpfr_print_binary (x);
+              printf (" instead of 0.11111111E0.\n");
+              err = 1;
+            }
+        }
+      else
+        {
+          if (inex <= 0)
+            {
+              printf ("Error in overflowed_fac0 (rnd = %s):\n"
+                      "  The inexact value must be positive.\n",
+                      mpfr_print_rnd_mode ((mp_rnd_t) rnd));
+              err = 1;
+            }
+          if (! (mpfr_inf_p (x) && MPFR_SIGN (x) > 0))
+            {
+              printf ("Error in overflowed_fac0 (rnd = %s):\n"
+                      "  Got ", mpfr_print_rnd_mode ((mp_rnd_t) rnd));
+              mpfr_print_binary (x);
+              printf (" instead of +Inf.\n");
+              err = 1;
+            }
+        }
+    }
+  set_emax (old_emax);
+
+  if (err)
+    exit (1);
+  mpfr_clear (x);
+  mpfr_clear (y);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -207,6 +279,8 @@ main (int argc, char *argv[])
   mpfr_clear (y);
   mpfr_clear (z);
   mpfr_clear (t);
+
+  overflowed_fac0 ();
 
   tests_end_mpfr ();
   return 0;

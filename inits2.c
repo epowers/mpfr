@@ -1,7 +1,8 @@
 /* mpfr_inits2 -- initialize several floating-point numbers with given
    precision
 
-Copyright 2003, 2004 Free Software Foundation, Inc.
+Copyright 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +18,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #if HAVE_CONFIG_H

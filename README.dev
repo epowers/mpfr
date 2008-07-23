@@ -8,7 +8,9 @@ are not part of the Subversion repository, you first need to run
 "autoreconf -i"; if you have both autoconf 2.13 and 2.50 installed and
 use a wrapper, you may need to run "autoreconf" a second time (as with
 old Debian packages, due to a bug in the wrapper). Then you can run
-"configure" in the usual way (see the INSTALL file).
+"configure" in the usual way (see the INSTALL file, but note that
+there are no patches to apply, and the URLs are not valid since the
+corresponding version has not been released yet).
 
 If for some reason, this doesn't work, there's still the old way: run
 the "prepare" script to generate these files; as the "prepare" script
@@ -24,9 +26,28 @@ To generate mpfr.info, you need texinfo version 4.2 (or higher).
 ===========================================================================
 
 The VERSION file contains the number of the next release version, i.e.
-the version currently developed. If nightly snapshots are built, the
-date in the yyyymmdd format must be added to the version number, for
-instance: "2.0.1-20020319".
+the version currently being developed. A suffix can be attached for the
+development versions (in general, "-dev") or pre-release versions (e.g.
+"-rc1"). It must be updated with the update-version script.
+
+If nightly snapshots are built, the date in the yyyymmdd format and/or
+the Subversion revision number (giving more accurate information) must
+be added to the version as a suffix, for instance: "2.3.0-20070621" or
+"2.3.0-dev-r4553".
+
+Patches can be tracked by adding a chunk of the form
+
+--- PATCHES~    Tue Nov  6 19:59:33 2001
++++ PATCHES     Tue Nov  6 19:59:42 2001
+@@ -1,0 +1 @@
++<your-id-here>
+
+to the patch file[*]. After such patches have been applied, the file
+get_patches.c providing the mpfr_get_patches() function will be rebuilt
+by "make". MPFR distributors can still modify the version suffix from
+the applied patches according to their version naming scheme.
+
+[*] This idea comes from Thomas Roessler, who implemented it in Mutt.
 
 ===========================================================================
 
@@ -36,31 +57,96 @@ a smaller set of changes. See diff(1) for more information.
 
 ===========================================================================
 
+Copyright Notices: For easier maintainability, make sure that the
+copyright notices match the regexp "Copyright.* yyyy Free Software"
+where yyyy is the year of the latest modification in the branch
+(and nothing else should match it).
+
+The latest rules for GNU software can be found here:
+
+  http://www.gnu.org/prep/maintain/maintain.html#Copyright-Notices
+
+===========================================================================
+
 To make a release (for the MPFR team):
 
-  1) Check the version and update the date in mpfr.texi.
+  0) Make sure that the mpfr-longlong.h file (from GMP's longlong.h) and
+     the libtool-related files (config.guess, etc.) are up-to-date. An
+     "autoreconf -f -i" may be necessary.
+
+  1) Generate the default thresholds on different architectures
+     with "make tune" and put them in mparam_h.in (make sure to
+     use the latest release of GMP).
+
+  2) Check the version and change the suffix to "rc1", "rc2", etc. with
+     update-version for the release candidates; remove the suffix for
+     the final release.
      Update the libtool version too (see Makefile.am).
-  2) Update the NEWS file.
+     Update the date in mpfr.texi.
+
+  3) Update the NEWS file.
      Update the FAQ.html file with update-faq (and check it).
-  3) Update the ChangeLog file. [To be completed]
-  4) Generate the release version with "make dist".
-  5) Test the release version on different machines, with and without
-     the --disable-alloca configure option (or compile GMP with
-     --enable-alloca=debug and MPFR with --with-gmp-build to be able
-     to get the memory leak errors), with and without -DXDEBUG in
+
+  4) Update the ChangeLog file with "TZ=UTC svn log -rHEAD:0 -v" in
+     UTF-8 locales, e.g. "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+
+  5) Generate the release version with "make dist", but see below.
+
+  6) Test the release version on different machines, with and without
+     --enable-assert (--enable-assert, though doing more checks, may
+     hide bugs due to the fact that <stdio.h> is always included) with
+     and without the --disable-alloca configure option (or compile GMP
+     with --enable-alloca=debug and MPFR with --with-gmp-build to be
+     able to get the memory leak errors), with and without -DXDEBUG in
      $CFLAGS, with and without gmp internal files, with and without
      GMP built as a shared library, with and without srcdir equal to
-     objdir (../mpfr/configure --srcdir=/users/spaces/pelissip/mpfr/),
-     with and without "-std=c99 -O3 -D_XOPEN_SOURCE=500", with and
-     without "-ansi" (which allows to turn off features that are
-     incompatible with ISO C90), with and without --enable-thread-safe
-     and in various locales (LC_ALL=tr_TR in particular, if installed).
-  6) If there are no problems, add a tag. [To be completed]
-  7) Update the version with the update-version script to indicate the
-     next version.
+     objdir (../mpfr/configure --srcdir=/users/spaces/pelissip/mpfr/).
+
+     Try different gcc versions with different options: with and without
+     "-std=c99 -O3 -D_XOPEN_SOURCE=500", with and without "-ansi" (which
+     allows to turn off features that are incompatible with ISO C90),
+     with and without --enable-thread-safe, in various FPU precisions
+     (double, double extended and single) if the platform supports that
+     (e.g. under Linux/x86), and in various locales (LC_ALL=tr_TR in
+     particular, if installed). On x86, test with -m96bit-long-double
+     and -m128bit-long-double. Try also with gcc's -fno-common option.
+
+     Try different compilers (even C++ compilers), e.g. g++, icc, opencc
+     (x86_64 machines), tcc <http://bellard.org/tcc/>.
+
+     Test with both "make check" and the worst cases.
+
+     Check that there are no abnormal regressions in the timings (both
+     for 100, 1000, 10000 digits, http://mpfr.org/mpfr-current/timings.html,
+     and for small precision, using the mbench program, see mpfr/mbench).
+
+     Test the library interface compatibility by running the test suite
+     compiled against an old library version and dynamically linked with
+     the new library version: for instance, build the shared library of
+     old and new MPFR versions with the same configure options, and from
+     the build directory of the old version, do something like:
+     (cd .libs && ln -nsf ../../mpfr-new/.libs/libmpfr.so.1.* libmpfr.so.1)
+     then "make check".
+
+  7) For the release itself (not the release candidates), if there are
+     no problems, create a tag with:
+       svn cp .../mpfr/branches/x.y .../mpfr/tags/x.y.z
+
+  8) Update the version with the update-version script to indicate the
+     next version (use the "dev" suffix).
 
 For major or minor releases (but not patchlevels), a branch may be
 created first to allow new features to be committed to the trunk.
+
+If the libtool has not been fixed yet for old Solaris versions, the
+patch patch-libtool needs to be applied, e.g.:
+  1. patch aclocal.m4 patch-libtool
+  2. autoconf
+  3. ./configure
+  4. make dist
+
+Another libtool bug (with icc) to be fixed before the next MPFR releases:
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=485421
 
 ===========================================================================
 
@@ -78,44 +164,44 @@ Another solution is to run the script 'coverage' from MPFR source directory.
 
 List of the used macros for building MPFR:
 
-+ HAVE_STRCASECMP: 	Define if the system supports 'strcasecmp' function.
-+ HAVE_STRNCASECMP:	Define if the system supports 'strncasecmp' function.
++ HAVE_STRCASECMP:      Define if the system supports 'strcasecmp' function.
++ HAVE_STRNCASECMP:     Define if the system supports 'strncasecmp' function.
 
 + HAVE_CONFIG_H:        Define if we have to include 'config.h' first.
-+ MPFR_HAVE_GMP_IMPL:	Define if we have the gmp internal files.
-			 ('gmp-impl.h', 'gmp-maparam.h', ...).
++ MPFR_HAVE_GMP_IMPL:   Define if we have the gmp internal files.
+                         ('gmp-impl.h', 'gmp-maparam.h', ...).
 
-+ HAVE_ALLOCA_H:	Define if the function 'alloca' is in alloca.h.
-+ HAVE_LONG_LONG:	Define if the system supports 'long long'
++ HAVE_ALLOCA_H:        Define if the function 'alloca' is in alloca.h.
++ HAVE_LONG_LONG:       Define if the system supports 'long long'
 
-+ HAVE_STDARG:		Define if the system supports 'stdarg.h'.
-			 Otherwise it is assumed it is 'vararg.h'.
-+ HAVE_STDINT_H:	Define if 'intmax_t' is supported (ISO C99).
++ HAVE_STDARG:          Define if the system supports 'stdarg.h'.
+                         Otherwise it is assumed it is 'vararg.h'.
++ HAVE_STDINT_H:        Define if 'intmax_t' is supported (ISO C99).
 
  Define format of long double.
 + HAVE_LDOUBLE_IEEE_EXT_LITTLE:         IEEE extended, little endian.
 + HAVE_LDOUBLE_IEEE_QUAD_BIG:           IEEE quad, big endian.
 
-+ XDEBUG:		Use generic 'double' code instead of IEEE specific one.
-			The IEEE code for double needs GMP internal files.
-+ WANT_ASSERT:		Define if we want to turn on the assertions.
-+ MPFR_EXP_CHECK:	Define if we want to check the exp field.
++ XDEBUG:               Use generic 'double' code instead of IEEE specific one.
+                        The IEEE code for double needs GMP internal files.
++ WANT_ASSERT:          Define if we want to turn on the assertions.
++ MPFR_EXP_CHECK:       Define if we want to check the exp field.
 
-+ MPFR_PREC_FORMAT:	Define the internal format of prec field
-			 (For experimented users).
++ MPFR_PREC_FORMAT:     Define the internal format of prec field
+                         (For experimented users).
 
-+ IEEE_DBL_MANT_DIG:	Number of bits in the mantissa of a double.
-			(Default: 53).
-+ LDBL_MANT_DIG:	Number of bits in the mantissa of a long double
++ IEEE_DBL_MANT_DIG:    Number of bits in the mantissa of a double.
+                        (Default: 53).
++ LDBL_MANT_DIG:        Number of bits in the mantissa of a long double
 
 List of the used macros for checking MPFR:
 
-+ MPFR_HAVE_FESETROUND:	Define if the fesetround function is defined
-			 (and in header fenv.h).
-+ HAVE_DENORMS:		Define if denormalized floats work.
-+ HAVE_SYS_TIME_H:	Define if the header sys/time.h is usable.
-+ HAVE_GETTIMEOFDAY:	Define if the function gettimeofday is present.
-+ MPFR_HAVE_TESTS_x86:	Define if we are on x86.
++ MPFR_HAVE_FESETROUND: Define if the fesetround function is defined
+                         (and in header fenv.h).
++ HAVE_DENORMS:         Define if denormalized floats work.
++ HAVE_SYS_TIME_H:      Define if the header sys/time.h is usable.
++ HAVE_GETTIMEOFDAY:    Define if the function gettimeofday is present.
++ MPFR_HAVE_TESTS_x86:  Define if we are on x86.
 
 ===========================================================================
 
@@ -146,7 +232,14 @@ produce illegal codes with the first form.
    =====================================================================
 
 Don't use "near" and "far" as variable names since they are "Keywords"
-for some C compiler (Old DOS compiler).
+for some C compiler (Old DOS compiler). Also don't use "pm", which is used
+by the C compiler 'sharp' to design variables that should be stored in the
+flash memory. Don't use "new", which is reserved in C++.
+
+   =====================================================================
+
+Avoid variable names "l", "I" and "O", which look like "1" and "0" with
+some fonts.
 
    =====================================================================
 
@@ -175,10 +268,43 @@ use 0 (possibly casted to the target pointer type).
 
    ====================================================================
 
+Use locale-dependent functions when the result needs to depend on the
+locales, e.g. the fractional point in mpfr_out_str.
+
+Conversely, do not use locale-dependent functions when the result must
+not depend on the locales. In particular, the alphanumeric characters
+used in number strings (as created by mpfr_get_str) must be those of
+the required characters from the basic character set (see ISO C99
+standard Section 5.2.1 "Character sets"). And tolower(letter) does
+not necessarily return the corresponding lowercase letter from these
+required characters. For instance, tolower('I') returns a dotless 'i'
+in Turkish locales.
+
+   ====================================================================
+
 In the tests, do not use `mpfr_set_d` (except when testing it), as the
 result will depend on the floating-point arithmetic of the system;
 this has shown many problems in the past and problems may still occur
 with new systems. Use `mpfr_set_si` or `mpfr_set_str` instead.
+
+Also, make sure that the tests run against previous MPFR versions,
+possibly by disabling some tests with code like
+
+  #if MPFR_VERSION >= MPFR_VERSION_NUM(2,3,0)
+
+Indeed one can now easily run the trunk tests in a branch by executing
+
+  svn switch .../svn/mpfr/trunk/tests tests
+
+from the working copy. One can know when the tests directory has been
+switched, thanks to
+
+  $ svn status
+      S  tests
+
+In case of failure, freeing the memory explicitly is not necessary.
+We do this in case of success just to be able to detect memory leaks
+in MPFR.
 
    ====================================================================
 
@@ -199,6 +325,11 @@ use:
 
 Do not use TMP_DECL / TMP_ALLOC, ... but MPFR_TMP_DECL, MPFR_TMP_ALLOC, ...
 
+   ====================================================================
+
+Do not use C99-only features, such as empty macro arguments or C++-style
+comments.
+
 ===========================================================================
 
 If wou want to use the logging of MPFR, you need to enable it:
@@ -206,6 +337,11 @@ If wou want to use the logging of MPFR, you need to enable it:
  make clean
  make
 Then link your program with this new build of MPFR.
+
+Warning! The logging code for functions sometimes output an "inexact"
+value, but in case of exception, this value may be meaningless. In
+fact, the output value is the value of some variable; please check
+the source code of the function to understand its real meaning.
 
 You can control what is logged using the environment variables:
 
@@ -336,7 +472,7 @@ mpfr_toto (mpfr_ptr rop, mpfr_srcptr op, mp_rnd_t rnd)
   for (;;)                               /* Infinite loop */
     {
       [Compute an estimation of the function and]
-      [ an estimation of the error].
+      [an estimate of the error.]
       if (MPFR_CAN_ROUND (...))          /* If we can round, quit the loop */
         break;
       MPFR_ZIV_NEXT (loop, prec);        /* Increase used precision */
@@ -348,13 +484,36 @@ mpfr_toto (mpfr_ptr rop, mpfr_srcptr op, mp_rnd_t rnd)
   [Clear all intermediate variables]
 
   MPFR_SAVE_EXPO_FREE (expo);            /* Restore exponent range */
-  MPFR_RET (mpfr_check_range (rop, inexact, rnd));  /* Check range and quit */
+  return mpfr_check_range (rop, inexact, rnd);  /* Check range and quit */
 }
 
+Make sure that Ziv loops cannot increase the precision forever because of
+internal exception. Otherwise one gets either a segmentation fault (with
+limited stack size) or an assertion failure (with unlimited stack size,
+e.g. with "make check").
+
+Exception handling (overflow/underflow in particular):
+  * Warning: To detect exceptions and/or possible error loss due to
+    internal exceptions, testing whether some variable is singular with
+    MPFR_IS_SINGULAR is generally not sufficient! Indeed, in case of
+    overflow (resp. underflow), the value may be rounded (in absolute
+    value) to the largest finite number (resp. to the smallest non-zero
+    number, possible even in round-to-nearest mode).
+  * The MPFR_BLOCK* macros can be useful, e.g.
+      {
+        MPFR_BLOCK_DECL (flags);
+        /* ... */
+        MPFR_BLOCK (flags, /* expression or statements */)
+        /* ... */
+        if (MPFR_OVERFLOW (flags))
+          { /* case of overflow in expression or statements */ }
+        /* ... */
+      }
+    See mpfr-impl.h (search for MPFR_BLOCK) for more information.
 
 ===========================================================================
 
-If you plan to add a new threshold in MPFR which could be tune, 
+If you plan to add a new threshold in MPFR which could be tuned,
 you should add its default value in the file `mparam_h.in'. When the
 script configure finishes, it creates the file `mparam.h' from `mparam_h.in'.
 
@@ -385,3 +544,53 @@ and write the new THRESHOLD in the file `mparam.h':
            (unsigned long) mpfr_exp_threshold);
 
 More complex tune are possible but needs special attention.
+
+===========================================================================
+
+Bit Twiddling Hacks - Sean Eron Anderson maintain a list of tricks to get
+efficient code on <http://graphics.stanford.edu/~seander/bithacks.html>.
+WARNING: some of those tricks may not take into account possible overflows,
+and may not be portable.
+
+===========================================================================
+
+MPFR manual (mpfr.texi):
+  * Use "significand", not "mantissa".
+  * Use "@minus{}" for the minus character, not "-".
+  * Follow the English typography, not the French one!
+
+===========================================================================
+
+Running "make" outputs a lot of information, and warnings are not very
+visible. The following tool "eet" allows a copy of warning messages to
+be output to a different window (e.g. xterm or zenity):
+
+  http://www.vinc17.org/unix/#eet
+
+Direct link to the tarball: http://www.vinc17.org/unix/eet.tar.bz2
+
+===========================================================================
+
+Be careful when avoiding "'var' may be used uninitialized in this function"
+warnings from gcc. Initializing such variables to a dummy value has several
+drawbacks:
+  * this may prevent other tools (that do static or dynamic analysis) from
+    detecting bugs;
+  * this makes code maintenance more difficult (e.g. when modifying the
+    code, one may more easily forget a real initialization);
+  * this makes the compiler add useless code (though this should not be
+    significant).
+
+Concerning the latter point, gcc currently supports pseudo-initializations
+like "int i = i;" but this is otherwise undefined behavior. So, do not use
+this form (possibly except via a macro defined in this way if the compiler
+is gcc).
+
+If a dummy initialization must be added, use preferably an "invalid" value
+(e.g. NULL for pointers, or a value that can be checked with MPFR_ASSERTN
+before using it) that could make the program abort instead of returning an
+incorrect value in case of a bug in MPFR.
+
+A bug has been opened on GCC's Bugzilla:
+
+    http://gcc.gnu.org/bugzilla/show_bug.cgi?id=36296

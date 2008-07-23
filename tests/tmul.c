@@ -1,6 +1,7 @@
 /* Test file for mpfr_mul.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -92,7 +93,7 @@ check53 (const char *xs, const char *ys, mp_rnd_t rnd_mode, const char *zs)
 {
   mpfr_t xx, yy, zz;
 
-  mpfr_inits2 (53, xx, yy, zz, NULL);
+  mpfr_inits2 (53, xx, yy, zz, (mpfr_ptr) 0);
   mpfr_set_str1 (xx, xs);
   mpfr_set_str1 (yy, ys);
   test_mul (zz, xx, yy, rnd_mode);
@@ -115,7 +116,7 @@ check53 (const char *xs, const char *ys, mp_rnd_t rnd_mode, const char *zs)
         putchar('\n'); */
       exit (1);
     }
-  mpfr_clears (xx, yy, zz, NULL);
+  mpfr_clears (xx, yy, zz, (mpfr_ptr) 0);
 }
 
 /* checks that x*y gives the right result with 24 bits of precision */
@@ -124,7 +125,7 @@ check24 (const char *xs, const char *ys, mp_rnd_t rnd_mode, const char *zs)
 {
   mpfr_t xx, yy, zz;
 
-  mpfr_inits2 (24, xx, yy, zz, NULL);
+  mpfr_inits2 (24, xx, yy, zz, (mpfr_ptr) 0);
   mpfr_set_str1 (xx, xs);
   mpfr_set_str1 (yy, ys);
   test_mul (zz, xx, yy, rnd_mode);
@@ -137,7 +138,7 @@ check24 (const char *xs, const char *ys, mp_rnd_t rnd_mode, const char *zs)
       putchar('\n');
       exit (1);
     }
-  mpfr_clears(xx, yy, zz, NULL);
+  mpfr_clears (xx, yy, zz, (mpfr_ptr) 0);
 }
 
 /* the following examples come from the paper "Number-theoretic Test
@@ -242,7 +243,7 @@ check_exact (void)
         {
           mpfr_random (a);
           mpfr_random (b);
-          rnd = (mp_rnd_t) RND_RAND ();
+          rnd = RND_RAND ();
           inexact = test_mul (c, a, b, rnd);
           if (test_mul (d, a, b, rnd)) /* should be always exact */
             {
@@ -446,7 +447,7 @@ check_regression (void)
   mpfr_t x, y, z;
   int i;
 
-  mpfr_inits2 (6177, x, y, z, NULL);
+  mpfr_inits2 (6177, x, y, z, (mpfr_ptr) 0);
 
   mpfr_set_str (y,
 "5.17cc1b727220a94fe13abe8fa9a6ee06db14acc9e21c820ff28b1d5ef5de2b0db92371d212"
@@ -632,7 +633,7 @@ check_regression (void)
       exit (1);
     }
 
-  mpfr_clears (x, y, z, NULL);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
 #define TEST_FUNCTION test_mul
@@ -640,11 +641,23 @@ check_regression (void)
 #define RAND_FUNCTION(x) mpfr_random2(x, MPFR_LIMB_SIZE (x), randlimb () % 100)
 #include "tgeneric.c"
 
+/* multiplies x by 53-bit approximation of Pi */
+static int
+mpfr_mulpi (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t r)
+{
+  mpfr_t z;
+  int inex;
+
+  mpfr_init2 (z, 53);
+  mpfr_set_str_binary (z, "11.001001000011111101101010100010001000010110100011");
+  inex = mpfr_mul (y, x, z, r);
+  mpfr_clear (z);
+  return inex;
+}
 
 int
 main (int argc, char *argv[])
 {
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   check_nans ();
@@ -681,6 +694,8 @@ main (int argc, char *argv[])
 
   check_regression ();
   test_generic (2, 500, 100);
+
+  data_check ("data/mulpi", mpfr_mulpi, "mpfr_mulpi");
 
   tests_end_mpfr ();
   return 0;

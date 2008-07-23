@@ -1,6 +1,7 @@
 /* Test file for mpfr_log.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -52,7 +53,7 @@ check2 (const char *as, mp_rnd_t rnd_mode, const char *res1s)
 {
   mpfr_t ta, tres;
 
-  mpfr_inits2 (53, ta, tres, NULL);
+  mpfr_inits2 (53, ta, tres, (mpfr_ptr) 0);
   mpfr_set_str1 (ta, as);
   test_log (tres, ta, rnd_mode);
 
@@ -65,7 +66,7 @@ check2 (const char *as, mp_rnd_t rnd_mode, const char *res1s)
       mpfr_out_str(stdout, 10, 0, tres, GMP_RNDN);
       exit (1);
     }
-  mpfr_clears (ta, tres, NULL);
+  mpfr_clears (ta, tres, (mpfr_ptr) 0);
 }
 
 static void
@@ -177,7 +178,11 @@ static void
 special (void)
 {
   mpfr_t x, y;
-  mp_exp_t emax = mpfr_get_emax ();
+  int inex;
+  mp_exp_t emin, emax;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   mpfr_init2 (x, 53);
   mpfr_init2 (y, 53);
@@ -189,8 +194,8 @@ special (void)
   mpfr_set_prec (x, 24);
   mpfr_set_str_binary (x, "0.111110101010101011110101E0");
   test_log (y, x, GMP_RNDN);
-  set_emin (MPFR_EMIN_MIN);
-  set_emax (MPFR_EMAX_MAX);
+  set_emin (emin);
+  set_emax (emax);
 
   mpfr_set_prec (y, 53);
   mpfr_set_prec (x, 53);
@@ -224,11 +229,47 @@ special (void)
 
   set_emax (emax);
 
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  inex = test_log (y, x, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+  MPFR_ASSERTN (mpfr_inf_p (y));
+  MPFR_ASSERTN (mpfr_sgn (y) < 0);
+
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  mpfr_neg (x, x, GMP_RNDN);
+  inex = test_log (y, x, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+  MPFR_ASSERTN (mpfr_inf_p (y));
+  MPFR_ASSERTN (mpfr_sgn (y) < 0);
+
   mpfr_clear (x);
   mpfr_clear (y);
 }
 
+static void
+x_near_one (void)
+{
+  mpfr_t x, y;
+  int inex;
+
+  mpfr_init2 (x, 32);
+  mpfr_init2 (y, 16);
+
+  mpfr_set_ui (x, 1, GMP_RNDN);
+  mpfr_nextbelow (x);
+  inex = mpfr_log (y, x, GMP_RNDD);
+  if (mpfr_cmp_str (y, "-0.1000000000000001E-31", 2, GMP_RNDN)
+      || inex >= 0)
+    {
+      printf ("Failure in x_near_one, got inex = %d and\ny = ", inex);
+      mpfr_dump (y);
+    }
+
+  mpfr_clears (x, y, (mpfr_ptr) 0);
+}
+
 #define TEST_FUNCTION test_log
+#define TEST_RANDOM_POS 8
 #include "tgeneric.c"
 
 int
@@ -307,7 +348,12 @@ main (int argc, char *argv[])
   check2 ("7.34302197248998461006e+43",GMP_RNDZ,"101.0049094695131799426235374994575977325439453125");
   check2("6.09969788341579732815e+00",GMP_RNDD,"1.80823924264386204363e+00");
 
+  x_near_one ();
+
   test_generic (2, 100, 40);
+
+  data_check ("data/log", mpfr_log, "mpfr_log");
+  bad_cases (mpfr_log, mpfr_exp, "mpfr_log", 256, -30, 30, 4, 128, 800, 50);
 
  done:
   tests_end_mpfr ();

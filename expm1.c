@@ -1,6 +1,7 @@
 /* mpfr_expm1 -- Compute exp(x)-1
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -30,6 +31,7 @@ int
 mpfr_expm1 (mpfr_ptr y, mpfr_srcptr x , mp_rnd_t rnd_mode)
 {
   int inexact;
+  mp_exp_t ex;
   MPFR_SAVE_EXPO_DECL (expo);
 
   if (MPFR_UNLIKELY (MPFR_IS_SINGULAR (x)))
@@ -60,10 +62,42 @@ mpfr_expm1 (mpfr_ptr y, mpfr_srcptr x , mp_rnd_t rnd_mode)
         }
     }
 
-  /* exp(x)-1 = x +x^2/2 + ... so the error is < 2^(2*EXP(x)-1) */
-  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, x, -MPFR_GET_EXP (x)+1,1,rnd_mode,);
+  ex = MPFR_GET_EXP (x);
+  if (ex < 0)
+    {
+      /* For -1 < x < 0, abs(expm1(x)-x) < x^2/2.
+         For 0 < x < 1,  abs(expm1(x)-x) < x^2. */
+      if (MPFR_IS_POS (x))
+        MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, x, - ex, 0, 1, rnd_mode, {});
+      else
+        MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, x, - ex, 1, 0, rnd_mode, {});
+    }
 
   MPFR_SAVE_EXPO_MARK (expo);
+
+  if (MPFR_IS_NEG (x) && ex > 5)  /* x <= -32 */
+    {
+      mpfr_t minus_one, t;
+      mp_exp_t err;
+
+      mpfr_init2 (minus_one, 2);
+      mpfr_init2 (t, 64);
+      mpfr_set_si (minus_one, -1, GMP_RNDN);
+      mpfr_const_log2 (t, GMP_RNDU); /* round upward since x is negative */
+      mpfr_div (t, x, t, GMP_RNDU); /* > x / ln(2) */
+      err = mpfr_cmp_si (t, MPFR_EMIN_MIN >= -LONG_MAX ?
+                         MPFR_EMIN_MIN : -LONG_MAX) <= 0 ?
+        - (MPFR_EMIN_MIN >= -LONG_MAX ? MPFR_EMIN_MIN : -LONG_MAX) :
+        - mpfr_get_si (t, GMP_RNDU);
+      /* exp(x) = 2^(x/ln(2))
+               <= 2^max(MPFR_EMIN_MIN,-LONG_MAX,ceil(x/ln(2)+epsilon))
+         with epsilon > 0 */
+      mpfr_clear (t);
+      MPFR_SMALL_INPUT_AFTER_SAVE_EXPO (y, minus_one, err, 0, 0, rnd_mode,
+                                        expo, { mpfr_clear (minus_one); });
+      mpfr_clear (minus_one);
+    }
+
   /* General case */
   {
     /* Declaration of the intermediary variable */
@@ -80,8 +114,8 @@ mpfr_expm1 (mpfr_ptr y, mpfr_srcptr x , mp_rnd_t rnd_mode)
 
     /* if |x| is smaller than 2^(-e), we will loose about e bits in the
        subtraction exp(x) - 1 */
-    if (MPFR_EXP(x) < 0)
-      Nt += -MPFR_EXP(x);
+    if (ex < 0)
+      Nt += - ex;
 
     /* initialize auxiliary variable */
     mpfr_init2 (t, Nt);
@@ -90,16 +124,17 @@ mpfr_expm1 (mpfr_ptr y, mpfr_srcptr x , mp_rnd_t rnd_mode)
     MPFR_ZIV_INIT (loop, Nt);
     for (;;)
       {
-        mpfr_clear_flags ();
+        MPFR_BLOCK_DECL (flags);
+
         /* exp(x) may overflow and underflow */
-        mpfr_exp (t, x, GMP_RNDN);         /* exp(x)*/
-        if (MPFR_UNLIKELY (mpfr_overflow_p ()))
+        MPFR_BLOCK (flags, mpfr_exp (t, x, GMP_RNDN));
+        if (MPFR_OVERFLOW (flags))
           {
             inexact = mpfr_overflow (y, rnd_mode, MPFR_SIGN_POS);
             MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_OVERFLOW);
             break;
           }
-        else if (MPFR_UNLIKELY (mpfr_underflow_p ()))
+        else if (MPFR_UNDERFLOW (flags))
           {
             inexact = mpfr_set_si (y, -1, rnd_mode);
             MPFR_ASSERTD (inexact == 0);

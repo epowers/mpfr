@@ -1,7 +1,7 @@
 /* Test file for mpfr_expm1.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
-Adapted from tsinh.c.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -49,6 +49,8 @@ test_expm1 (mpfr_ptr a, mpfr_srcptr b, mp_rnd_t rnd_mode)
 #endif
 
 #define TEST_FUNCTION test_expm1
+#define TEST_RANDOM_EMIN -36
+#define TEST_RANDOM_EMAX 36
 #include "tgeneric.c"
 
 static void
@@ -161,6 +163,10 @@ main (int argc, char *argv[])
   special ();
 
   test_generic (2, 100, 100);
+
+  data_check ("data/expm1", mpfr_expm1, "mpfr_expm1");
+  bad_cases (mpfr_expm1, mpfr_log1p, "mpfr_expm1", 256, -256, 255,
+             4, 128, 800, 40);
 
   tests_end_mpfr ();
   return 0;

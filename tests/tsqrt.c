@@ -1,6 +1,7 @@
 /* Test file for mpfr_sqrt.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -423,7 +424,7 @@ check_inexact (mp_prec_t p)
   mpfr_init2 (y, p);
   mpfr_init2 (z, 2*p);
   mpfr_random (x);
-  rnd = (mp_rnd_t) RND_RAND();
+  rnd = RND_RAND ();
   inexact = test_sqrt (y, x, rnd);
   if (mpfr_mul (z, y, y, rnd)) /* exact since prec(z) = 2*prec(y) */
     {
@@ -552,6 +553,10 @@ test_property2 (mp_prec_t p, mp_rnd_t r)
   mpfr_clear (y);
 }
 
+#define TEST_FUNCTION test_sqrt
+#define TEST_RANDOM_POS 8
+#include "tgeneric.c"
+
 int
 main (void)
 {
@@ -670,6 +675,9 @@ main (void)
           "1.556abe212b56e@13");
   check4 ("72154663483843080704304789585920.0", GMP_RNDD,
           "1.e2d9a51977e6d@13");
+
+  test_generic (2, 300, 15);
+  data_check ("data/sqrt", mpfr_sqrt, "mpfr_sqrt");
 
   tests_end_mpfr ();
   return 0;

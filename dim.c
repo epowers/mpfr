@@ -1,6 +1,7 @@
 /* mpfr_dim -- positive difference
 
-Copyright 2001, 2002, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
@@ -28,15 +29,12 @@ MA 02110-1301, USA. */
 */
 
 int
-mpfr_dim (mpfr_ptr z, mpfr_srcptr x ,mpfr_srcptr y , mp_rnd_t rnd_mode)
+mpfr_dim (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
 {
-  if (MPFR_ARE_SINGULAR(x,y))
+  if (MPFR_IS_NAN(x) || MPFR_IS_NAN(y))
     {
-      if (MPFR_IS_NAN(x) || MPFR_IS_NAN(y))
-        {
-          MPFR_SET_NAN(z);
-          MPFR_RET_NAN;
-        }
+      MPFR_SET_NAN(z);
+      MPFR_RET_NAN;
     }
 
   if (mpfr_cmp (x,y) > 0)

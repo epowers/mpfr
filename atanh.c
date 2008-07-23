@@ -1,6 +1,7 @@
 /* mpfr_atanh -- Inverse Hyperbolic Tangente
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -71,7 +72,8 @@ mpfr_atanh (mpfr_ptr y, mpfr_srcptr xt , mp_rnd_t rnd_mode)
     }
 
   /* atanh(x) = x + x^3/3 + ... so the error is < 2^(3*EXP(x)-1) */
-  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, xt, -2*MPFR_GET_EXP (xt)+1,1,rnd_mode,);
+  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, xt, -2 * MPFR_GET_EXP (xt), 1, 1,
+                                    rnd_mode, {});
 
   MPFR_SAVE_EXPO_MARK (expo);
 
@@ -98,7 +100,8 @@ mpfr_atanh (mpfr_ptr y, mpfr_srcptr xt , mp_rnd_t rnd_mode)
       mpfr_log (t, t, GMP_RNDN);          /* ln((1+xt)/(1-xt))*/
       mpfr_div_2ui (t, t, 1, GMP_RNDN);   /* (1/2)*ln((1+xt)/(1-xt))*/
 
-      /* error estimate see- algorithms.ps*/
+      /* error estimate: see algorithms.tex */
+      /* FIXME: this does not correspond to the value in algorithms.tex!!! */
       /* err=Nt-__gmpfr_ceil_log2(1+5*pow(2,1-MPFR_EXP(t)));*/
       err = Nt - (MAX (4 - MPFR_GET_EXP (t), 0) + 1);
 

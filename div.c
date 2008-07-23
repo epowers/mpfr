@@ -1,6 +1,7 @@
 /* mpfr_div -- divide two floating-point numbers
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,29 +17,29 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
 
 #ifdef DEBUG
-#define mpn_print(ap,n) mpn_print3(ap,n,MPFR_LIMB_ZERO)
+#define mpfr_mpn_print(ap,n) mpfr_mpn_print3 (ap,n,MPFR_LIMB_ZERO)
 static void
-mpn_print3 (mp_ptr ap, mp_size_t n, mp_limb_t cy)
+mpfr_mpn_print3 (mp_ptr ap, mp_size_t n, mp_limb_t cy)
 {
   mp_size_t i;
   for (i = 0; i < n; i++)
-    printf ("+%lu*2^%u", ap[i], BITS_PER_MP_LIMB * i);
+    printf ("+%lu*2^%lu", ap[i], BITS_PER_MP_LIMB * i);
   if (cy)
-    printf ("+2^%u", BITS_PER_MP_LIMB * n);
+    printf ("+2^%lu", BITS_PER_MP_LIMB * n);
   printf ("\n");
 }
 #endif
 
 /* check if {ap, an} is zero */
 static int
-mpn_cmpzero (mp_ptr ap, mp_size_t an)
+mpfr_mpn_cmpzero (mp_ptr ap, mp_size_t an)
 {
   while (an > 0)
     if (MPFR_LIKELY(ap[--an] != MPFR_LIMB_ZERO))
@@ -51,7 +52,7 @@ mpn_cmpzero (mp_ptr ap, mp_size_t an)
    Takes into account bp[0] for extra=1.
 */
 static int
-mpn_cmp_aux (mp_ptr ap, mp_size_t an, mp_ptr bp, mp_size_t bn, int extra)
+mpfr_mpn_cmp_aux (mp_ptr ap, mp_size_t an, mp_ptr bp, mp_size_t bn, int extra)
 {
   int cmp = 0;
   mp_size_t k;
@@ -103,20 +104,26 @@ mpn_cmp_aux (mp_ptr ap, mp_size_t an, mp_ptr bp, mp_size_t bn, int extra)
   return cmp;
 }
 
-/* {ap, n} <- {ap, n} - {bp, n} >> extra - cy, with cy=0 or 1 */
+/* {ap, n} <- {ap, n} - {bp, n} >> extra - cy, with cy = 0 or 1.
+   Return borrow out.
+*/
 static mp_limb_t
-mpn_sub_aux (mp_ptr ap, mp_ptr bp, mp_size_t n, mp_limb_t cy, int extra)
+mpfr_mpn_sub_aux (mp_ptr ap, mp_ptr bp, mp_size_t n, mp_limb_t cy, int extra)
 {
   mp_limb_t bb, rp;
+
+  MPFR_ASSERTD (cy <= 1);
   while (n--)
     {
       bb = (extra) ? ((bp[1] << (BITS_PER_MP_LIMB-1)) | (bp[0] >> 1)) : bp[0];
       rp = ap[0] - bb - cy;
-      cy = ((ap[0] < bb) || (cy && ~rp == MPFR_LIMB_ZERO)) ? MPFR_LIMB_ONE : MPFR_LIMB_ZERO;
+      cy = (ap[0] < bb) || (cy && ~rp == MPFR_LIMB_ZERO) ?
+        MPFR_LIMB_ONE : MPFR_LIMB_ZERO;
       ap[0] = rp;
       ap ++;
       bp ++;
     }
+  MPFR_ASSERTD (cy <= 1);
   return cy;
 }
 
@@ -146,6 +153,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
   int extra_bit;
   int sh, sh2;
   int inex;
+  int like_rndz;
   MPFR_TMP_DECL(marker);
 
   /**************************************************************************
@@ -234,7 +242,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
       else if (l == 0) /* no more divisor limb */
         extra_bit = 1;
       else /* k=0: no more dividend limb */
-        extra_bit = mpn_cmpzero (vp, l) == 0;
+        extra_bit = mpfr_mpn_cmpzero (vp, l) == 0;
     }
 #ifdef DEBUG
   printf ("extra_bit=%u\n", extra_bit);
@@ -251,7 +259,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
          sticky bits */
       qsize = q0size + 1;
       /* need to allocate memory for the quotient */
-      qp = (mp_ptr) MPFR_TMP_ALLOC (qsize*sizeof(mp_limb_t));
+      qp = (mp_ptr) MPFR_TMP_ALLOC (qsize * sizeof(mp_limb_t));
     }
   else
     {
@@ -261,7 +269,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
   qqsize = qsize + qsize;
 
   /* prepare the dividend */
-  ap = (mp_ptr) MPFR_TMP_ALLOC (qqsize*sizeof(mp_limb_t));
+  ap = (mp_ptr) MPFR_TMP_ALLOC (qqsize * sizeof(mp_limb_t));
   if (MPFR_LIKELY(qqsize > usize)) /* use the full dividend */
     {
       k = qqsize - usize; /* k > 0 */
@@ -278,7 +286,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
         sticky_u = mpn_rshift (ap, up + k, qqsize, 1);
       else
         MPN_COPY(ap, up + k, qqsize);
-      sticky_u = sticky_u || mpn_cmpzero (up, k);
+      sticky_u = sticky_u || mpfr_mpn_cmpzero (up, k);
     }
   low_u = sticky_u;
 
@@ -297,26 +305,25 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
           bp = (mp_ptr) MPFR_TMP_ALLOC (qsize * sizeof(mp_limb_t));
           MPN_COPY(bp, vp, vsize);
         }
-      sticky_v = sticky_v || mpn_cmpzero (vp, k);
+      sticky_v = sticky_v || mpfr_mpn_cmpzero (vp, k);
+      k = 0;
     }
-  else /* vsize < qsize */
+  else /* vsize < qsize: small divisor case */
     {
+      bp = vp;
       k = qsize - vsize;
-      bp = (mp_ptr) MPFR_TMP_ALLOC (qsize * sizeof(mp_limb_t));
-      MPN_COPY(bp + k, vp, vsize);
-      MPN_ZERO(bp, k);
     }
 
   /* we now can perform the division */
-  qh = mpn_divrem (qp, 0, ap, qqsize, bp, qsize);
+  qh = mpn_divrem (qp, 0, ap + k, qqsize - k, bp, qsize - k);
   /* warning: qh may be 1 if u1 == v1, but u < v */
-#ifdef DEBUG
-  printf ("q="); mpn_print (qp, qsize);
-  printf ("r="); mpn_print (ap, qsize);
+#ifdef DEBUG2
+  printf ("q="); mpfr_mpn_print (qp, qsize);
+  printf ("r="); mpfr_mpn_print (ap, qsize);
 #endif
 
   k = qsize;
-  sticky_u = sticky_u || mpn_cmpzero (ap, k);
+  sticky_u = sticky_u || mpfr_mpn_cmpzero (ap, k);
 
   sticky = sticky_u | sticky_v;
 
@@ -345,8 +352,8 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
   printf ("sticky=%lu sticky3=%lu inex=%d\n", sticky, sticky3, inex);
 #endif
 
-  if (sign_quotient < 0)
-    rnd_mode = MPFR_INVERT_RND(rnd_mode);
+  like_rndz = rnd_mode == GMP_RNDZ ||
+    rnd_mode == (sign_quotient < 0 ? GMP_RNDU : GMP_RNDD);
 
   /* to round, we distinguish two cases:
      (a) vsize <= qsize: we used the full divisor
@@ -354,7 +361,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
   */
 
 #ifdef DEBUG
-  printf ("vsize=%u qsize=%u\n", vsize, qsize);
+  printf ("vsize=%lu qsize=%lu\n", vsize, qsize);
 #endif
   if (MPFR_LIKELY(vsize <= qsize)) /* use the full divisor */
     {
@@ -363,19 +370,22 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
           round_bit = sticky3 & (MPFR_LIMB_ONE << (sh2 - 1));
           sticky = (sticky3 ^ round_bit) | sticky_u;
         }
-      else if (rnd_mode == GMP_RNDZ || rnd_mode == GMP_RNDD || inex == MPFR_LIMB_ZERO)
+      else if (like_rndz || inex == 0)
         sticky = (inex == 0) ? MPFR_LIMB_ZERO : MPFR_LIMB_ONE;
-      else /* rnd_mode = GMP_RNDU */
+      else  /* round away from zero */
         sticky = MPFR_LIMB_ONE;
       goto case_1;
     }
   else /* vsize > qsize: need to truncate the divisor */
     {
-      if (inex == MPFR_LIMB_ZERO)
+      if (inex == 0)
         goto truncate;
       else
         {
-          /* we can round except when sticky3 is 000...000 or 000...001
+          /* We know the estimated quotient is an upper bound of the exact
+             quotient (with rounding towards zero), with a difference of at
+             most 2 in qp[0].
+             Thus we can round except when sticky3 is 000...000 or 000...001
              for directed rounding, and 100...000 or 100...001 for rounding
              to nearest. (For rounding to nearest, we cannot determine the
              inexact flag for 000...000 or 000...001.)
@@ -401,8 +411,9 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
               mp_size_t l;
               mp_ptr sp;
               int cmp_s_r;
+              mp_limb_t qh2;
 
-              sp = (mp_ptr) MPFR_TMP_ALLOC (vsize*sizeof(mp_limb_t));
+              sp = (mp_ptr) MPFR_TMP_ALLOC (vsize * sizeof(mp_limb_t));
               k = vsize - qsize;
               /* sp <- {qp, qsize} * {vp, vsize-qsize} */
               qp[0] ^= sticky3orig; /* restore original quotient */
@@ -411,16 +422,18 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
               else
                 mpn_mul (sp, vp, k, qp, qsize);
               if (qh)
-                mpn_add_n (sp + qsize, sp + qsize, vp, k);
+                qh2 = mpn_add_n (sp + qsize, sp + qsize, vp, k);
+              else
+                qh2 = (mp_limb_t) 0;
               qp[0] ^= sticky3orig; /* restore truncated quotient */
 
-              /* compare {sp, vsize = k + qsize} to {ap, qsize} + low(u) */
-              cmp_s_r = mpn_cmp (sp + k, ap, qsize);
+              /* compare qh2 + {sp, k + qsize} to {ap, qsize} + low(u) */
+              cmp_s_r = (qh2 != 0) ? 1 : mpn_cmp (sp + k, ap, qsize);
               if (cmp_s_r == 0) /* compare {sp, k} and low(u) */
                 {
-                  cmp_s_r = (usize >= qqsize)
-                             ? mpn_cmp_aux (sp, k, up, usize-qqsize, extra_bit)
-                             : mpn_cmpzero (sp, k);
+                  cmp_s_r = (usize >= qqsize) ?
+                    mpfr_mpn_cmp_aux (sp, k, up, usize - qqsize, extra_bit) :
+                    mpfr_mpn_cmpzero (sp, k);
                 }
 #ifdef DEBUG
               printf ("cmp(q*v0,r+u0)=%d\n", cmp_s_r);
@@ -433,38 +446,55 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
                   sticky = (cmp_s_r == 0) ? sticky3 : MPFR_LIMB_ONE;
                   goto case_1;
                 }
-              else /* cmp_s_r > 0, quotient is < q1 */
+              else /* cmp_s_r > 0, quotient is < q1: to determine if it is
+                      in [q1-2,q1-1] or in [q1-1,q1], we need to subtract
+                      the low part u0 of the dividend u0 from q*v0 */
                 {
                   mp_limb_t cy = MPFR_LIMB_ZERO;
+
                   /* subtract low(u)>>extra_bit if non-zero */
-                  if (low_u != MPFR_LIMB_ZERO)
+                  if (qh2 != 0) /* whatever the value of {up, m + k}, it
+                                   will be smaller than qh2 + {sp, k} */
+                    cmp_s_r = 1;
+                  else
                     {
-                      mp_size_t m;
-                      l = usize - qqsize; /* number of low limbs in u */
-                      m = (l > k) ? l - k : 0;
-                      cy = (extra_bit) ? (up[m] & MPFR_LIMB_ONE) : MPFR_LIMB_ZERO;
-                      if (l >= k) /* u0 has more limbs */
+                      if (low_u != MPFR_LIMB_ZERO)
                         {
-                          cy = cy || mpn_cmpzero (up, m);
-                          low_u = cy;
-                          cy = mpn_sub_aux (sp, up + l - k, k,
-                                            (cy) ? MPFR_LIMB_ONE : MPFR_LIMB_ZERO, extra_bit);
+                          mp_size_t m;
+                          l = usize - qqsize; /* number of low limbs in u */
+                          m = (l > k) ? l - k : 0;
+                          cy = (extra_bit) ?
+                            (up[m] & MPFR_LIMB_ONE) : MPFR_LIMB_ZERO;
+                          if (l >= k) /* u0 has more limbs than s:
+                                         first look if {up, m} is not zero,
+                                         and compare {sp, k} and {up + m, k} */
+                            {
+                              cy = cy || mpfr_mpn_cmpzero (up, m);
+                              low_u = cy;
+                              cy = mpfr_mpn_sub_aux (sp, up + m, k,
+                                                     cy, extra_bit);
+                            }
+                          else /* l < k: s has more limbs than u0 */
+                            {
+                              low_u = MPFR_LIMB_ZERO;
+                              if (cy != MPFR_LIMB_ZERO)
+                                cy = mpn_sub_1 (sp + k - l - 1, sp + k - l - 1,
+                                                1, MPFR_LIMB_HIGHBIT);
+                              cy = mpfr_mpn_sub_aux (sp + k - l, up, l,
+                                                     cy, extra_bit);
+                            }
                         }
-                      else /* l < k: s has more limbs than u0 */
-                        {
-                          low_u = MPFR_LIMB_ZERO;
-                          if (cy != MPFR_LIMB_ZERO)
-                            cy = mpn_sub_1 (sp + k - l - 1, sp + k - l - 1, 1, MPFR_LIMB_HIGHBIT);
-                          cy = mpn_sub_aux (sp + k - l, up, l, cy, extra_bit);
-                        }
+                      MPFR_ASSERTD (cy <= 1);
+                      cy = mpn_sub_1 (sp + k, sp + k, qsize, cy);
+                      /* subtract r */
+                      cy += mpn_sub_n (sp + k, sp + k, ap, qsize);
+                      MPFR_ASSERTD (cy <= 1);
+                      /* now compare {sp, ssize} to v */
+                      cmp_s_r = mpn_cmp (sp, vp, vsize);
+                      if (cmp_s_r == 0 && low_u != MPFR_LIMB_ZERO)
+                        cmp_s_r = 1; /* since in fact we subtracted
+                                        less than 1 */
                     }
-                  cy = mpn_sub_1 (sp + k, sp + k, qsize, cy);
-                  /* subtract r */
-                  cy = mpn_sub_nc (sp + k, sp + k, ap, qsize, cy);
-                  /* now compare {sp, ssize} to v */
-                  cmp_s_r = mpn_cmp (sp, vp, vsize);
-                  if (cmp_s_r == 0 && low_u != MPFR_LIMB_ZERO)
-                    cmp_s_r = 1; /* since in fact we subtracted less than 1 */
 #ifdef DEBUG
                   printf ("cmp(q*v0-(r+u0),v)=%d\n", cmp_s_r);
 #endif
@@ -481,8 +511,8 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
                         { /* round_bit=0, sticky3=0: q1-1 is exact only
                              when sh=0 */
                           inex = (cmp_s_r || sh) ? -1 : 0;
-                          if ((rnd_mode == GMP_RNDU && inex != 0)
-                              || rnd_mode == GMP_RNDN)
+                          if (rnd_mode == GMP_RNDN ||
+                              (! like_rndz && inex != 0))
                             {
                               inex = 1;
                               goto truncate_check_qh;
@@ -498,20 +528,10 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
                     }
                   else /* q1-2 < u/v < q1-1 */
                     {
-                      /* if rnd=GMP_RNDU, the result is up(q1-1),
-                         which is q1 unless sh = 0, where it is q1-1 */
-                      if (rnd_mode == GMP_RNDU)
-                        {
-                          inex = 1;
-                          if (sh > 0)
-                            goto truncate_check_qh;
-                          else /* sh = 0 */
-                            goto sub_one_ulp;
-                        }
                       /* if rnd=GMP_RNDN, the result is q1 when
                          q1-2 >= q1-2^(sh-1), i.e. sh >= 2,
                          otherwise (sh=1) it is q1-2 */
-                      else if (rnd_mode == GMP_RNDN) /* sh > 0 */
+                      if (rnd_mode == GMP_RNDN) /* sh > 0 */
                         {
                           /* Case sh=1: sb=0 always, and q1-rb is exactly
                              representable, like q1-rb-2.
@@ -545,7 +565,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
                               goto truncate_check_qh;
                             }
                         }
-                      else /* round down */
+                      else if (like_rndz)
                         {
                           /* the result is down(q1-2), i.e. subtract one
                              ulp if sh > 0, and two ulps if sh=0 */
@@ -554,6 +574,16 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
                             goto sub_one_ulp;
                           else
                             goto sub_two_ulp;
+                        }
+                      /* if round away from zero, the result is up(q1-1),
+                         which is q1 unless sh = 0, where it is q1-1 */
+                      else
+                        {
+                          inex = 1;
+                          if (sh > 0)
+                            goto truncate_check_qh;
+                          else /* sh = 0 */
+                            goto sub_one_ulp;
                         }
                     }
                 }
@@ -564,10 +594,9 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
  case_1: /* quotient is in [q1, q1+1),
             round_bit is the round_bit (0 for directed rounding),
             sticky the sticky bit */
-  if (rnd_mode == GMP_RNDZ || rnd_mode == GMP_RNDD ||
-      (round_bit == MPFR_LIMB_ZERO && sticky == MPFR_LIMB_ZERO))
+  if (like_rndz || (round_bit == MPFR_LIMB_ZERO && sticky == MPFR_LIMB_ZERO))
     {
-      inex = (round_bit == MPFR_LIMB_ZERO && sticky == MPFR_LIMB_ZERO) ? 0 : -1;
+      inex = round_bit == MPFR_LIMB_ZERO && sticky == MPFR_LIMB_ZERO ? 0 : -1;
       goto truncate;
     }
   else if (rnd_mode == GMP_RNDN) /* sticky <> 0 or round <> 0 */
@@ -583,7 +612,7 @@ mpfr_div (mpfr_ptr q, mpfr_srcptr u, mpfr_srcptr v, mp_rnd_t rnd_mode)
       else /* round_bit=1, sticky=0 */
         goto even_rule;
     }
-  else /* rnd_mode = GMP_RNDU, sticky <> 0 */
+  else /* round away from zero, sticky <> 0 */
     goto add_one_ulp; /* with inex=1 */
 
  sub_two_ulp:

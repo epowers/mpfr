@@ -1,6 +1,7 @@
 /* Test file for mpfr_ui_div.
 
-Copyright 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -30,7 +31,7 @@ check (unsigned long y, const char *xs, mp_rnd_t rnd_mode, const char *zs)
 {
   mpfr_t xx, zz;
 
-  mpfr_inits2 (53, xx, zz, NULL);
+  mpfr_inits2 (53, xx, zz, (mpfr_ptr) 0);
   mpfr_set_str1 (xx, xs);
   mpfr_ui_div (zz, y, xx, rnd_mode);
   if (mpfr_cmp_str1(zz, zs))
@@ -41,7 +42,7 @@ check (unsigned long y, const char *xs, mp_rnd_t rnd_mode, const char *zs)
               y, xs, mpfr_print_rnd_mode (rnd_mode));
       exit (1);
     }
-  mpfr_clears (xx, zz, NULL);
+  mpfr_clears (xx, zz, (mpfr_ptr) 0);
 }
 
 static void
@@ -159,6 +160,12 @@ check_nan (void)
   mpfr_clear (q);
 }
 
+static int
+mpfr_inv (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t r)
+{
+  return mpfr_ui_div (y, 1, x, r);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -176,6 +183,9 @@ main (int argc, char *argv[])
         "1.3178666932321966062e285");
   check(1476599377, "-2.14191393656148625995e+305", GMP_RNDD,
         "-6.8938315017943889615e-297");
+
+  /* inv is for 1/x */
+  data_check ("data/inv", mpfr_inv, "mpfr_ui_div(1,x)");
 
   tests_end_mpfr ();
   return 0;

@@ -1,6 +1,6 @@
-/* Test file for mpfr_erf.
+/* Test file for mpfr_erf and mpfr_erfc.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by Ludovic Meunier and Paul Zimmermann.
 
 This file is part of the MPFR Library.
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <math.h>
@@ -31,6 +31,8 @@ MA 02110-1301, USA. */
 #include "tgeneric.c"
 
 #define TEST_FUNCTION mpfr_erfc
+#undef TEST_RANDOM_EMAX
+#define TEST_RANDOM_EMAX 63
 #define test_generic test_generic_erfc
 #include "tgeneric.c"
 
@@ -326,6 +328,34 @@ special_erf (void)
       exit (1);
     }
 
+  /* worst cases */
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
+  mpfr_set_str_binary (x, "1.0000000000000000000000000000000000000110000000101101");
+  mpfr_erf (y, x, GMP_RNDN);
+  mpfr_set_str_binary (x, "0.110101111011101100111101001110100000101011000011001");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error: erf for worst case (1)\n");
+      exit (1);
+    }
+
+  mpfr_set_str_binary (x, "1.0000000000000000000000000000011000111010101101011010");
+  mpfr_erf (y, x, GMP_RNDU);
+  mpfr_set_str_binary (x, "0.11010111101110110011110100111100100111100011111000110");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error: erf for worst case (2a)\n");
+      exit (1);
+    }
+  mpfr_set_str_binary (x, "1.0000000000000000000000000000011000111010101101011010");
+  mpfr_erf (y, x, GMP_RNDD);
+  mpfr_set_str_binary (x, "0.11010111101110110011110100111100100111100011111000101");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error: erf for worst case (2b)\n");
+      exit (1);
+    }
 
   mpfr_clear (x);
   mpfr_clear (y);
@@ -336,7 +366,7 @@ special_erfc (void)
 {
   mpfr_t x, y;
 
-  mpfr_inits (x, y, NULL);
+  mpfr_inits (x, y, (mpfr_ptr) 0);
 
   /* erfc (NaN) = NaN */
   mpfr_set_nan (x);
@@ -377,7 +407,144 @@ special_erfc (void)
       exit (1);
     }
 
-  mpfr_clears (x, y, NULL);
+  mpfr_clears (x, y, (mpfr_ptr) 0);
+}
+
+static void
+large_arg (void)
+{
+  mpfr_t x, y;
+
+  mpfr_init2 (x, 88);
+  mpfr_init2 (y, 98);
+
+  mpfr_set_si_2exp (x, -1, 173, GMP_RNDN);
+  mpfr_erfc (y, x, GMP_RNDN);
+  if (mpfr_cmp_ui (y, 2) != 0)
+    {
+      printf ("mpfr_erfc failed for large x (1)\n");
+      exit (1);
+    }
+
+
+  mpfr_set_prec (x, 33);
+  mpfr_set_prec (y, 43);
+  mpfr_set_str_binary (x, "1.11000101010111011000111100101001e6");
+  mpfr_erfc (y, x, GMP_RNDD);
+  mpfr_set_prec (x, 43);
+  mpfr_set_str_binary (x, "100010011100101100001101100101011101101E-18579");
+  if (mpfr_cmp (x, y) != 0)
+    {
+      printf ("mpfr_erfc failed for large x (2)\n");
+      exit (1);
+    }
+
+  mpfr_set_prec (y, 43);
+  mpfr_set_si_2exp (x, 1, 11, GMP_RNDN);
+  mpfr_erfc (y, x, GMP_RNDN);
+  mpfr_set_str_binary (x, "0.1100000100100010101111001111010010001000110E-6051113");
+  if (mpfr_cmp (x, y) != 0)
+    {
+      printf ("mpfr_erfc failed for large x (3)\n");
+      exit (1);
+    }
+
+  mpfr_set_prec (x, 75);
+  mpfr_set_prec (y, 85);
+  mpfr_set_str_binary (x, "0.111110111111010011101011001100001010011110101010011111010010111101010001011E15");
+  mpfr_erfc (y, x, GMP_RNDN);
+  if (mpfr_cmp_ui (y, 0) || mpfr_sgn (y) < 0)
+    {
+      printf ("mpfr_erfc failed for large x (3b)\n");
+      exit (1);
+    }
+
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 21);
+  mpfr_set_str_binary (x, "-1.0e3");
+  mpfr_erfc (y, x, GMP_RNDZ);
+  mpfr_set_prec (x, 21);
+  mpfr_set_str_binary (x, "1.11111111111111111111");
+  if (mpfr_cmp (x, y) != 0)
+    {
+      printf ("mpfr_erfc failed for large x (4)\n");
+      exit (1);
+    }
+
+  mpfr_set_prec (x, 2);
+  mpfr_set_prec (y, 31);
+  mpfr_set_str_binary (x, "-1.0e3");
+  mpfr_erfc (y, x, GMP_RNDZ);
+  mpfr_set_prec (x, 31);
+  mpfr_set_str_binary (x, "1.111111111111111111111111111111");
+  if (mpfr_cmp (x, y) != 0)
+    {
+      printf ("mpfr_erfc failed for x=-8, prec=31 (5)\n");
+      printf ("expected "); mpfr_dump (x);
+      printf ("got      "); mpfr_dump (y);
+      exit (1);
+    }
+
+  /* Reported by Christopher Creutzig on 2007-07-10. */
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
+  mpfr_set_si_2exp (x, 54563, -1, GMP_RNDN);
+  mpfr_erfc (y, x, GMP_RNDZ);
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  if (! mpfr_equal_p (y, x))
+    {
+      printf ("mpfr_erfc failed for x=27281.5, prec=53 (6)\n");
+      printf ("expected "); mpfr_dump (x);
+      printf ("got      "); mpfr_dump (y);
+      exit (1);
+    }
+
+  /* same test with rounding away from zero */
+  mpfr_set_si_2exp (x, 54563, -1, GMP_RNDN);
+  mpfr_erfc (y, x, GMP_RNDU);
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  mpfr_nextabove (x);
+  if (! mpfr_equal_p (y, x))
+    {
+      printf ("mpfr_erfc failed for x=27281.5, prec=53 (7)\n");
+      printf ("expected "); mpfr_dump (x);
+      printf ("got      "); mpfr_dump (y);
+      exit (1);
+    }
+
+  mpfr_clear (x);
+  mpfr_clear (y);
+}
+
+static void
+test_erfc (void)
+{
+  mpfr_t x, y, z;
+  int inex;
+
+  mpfr_inits2 (40, x, y, z, (mpfr_ptr) 0);
+
+  mpfr_set_si_2exp (x, -1, -10, GMP_RNDN);
+  mpfr_set_str_binary (z, "0.1000000000100100000110111010110111100000E1");
+  mpfr_erfc (y, x, GMP_RNDN);
+  if (mpfr_cmp (y, z) != 0)
+    {
+      printf ("mpfr_erfc failed for x = ");
+      mpfr_dump (x);
+      printf ("got        ");
+      mpfr_dump (y);
+      printf ("instead of ");
+      mpfr_dump (z);
+      exit (1);
+    }
+
+  /* slowness detected by Kevin Rauch on 26 Oct 2007 */
+  mpfr_set_prec (x, 128);
+  mpfr_set_si (x, -256, GMP_RNDN);
+  inex = mpfr_erfc (x, x, GMP_RNDN);
+  MPFR_ASSERTN(inex > 0 && mpfr_cmp_ui (x, 2) == 0);
+
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
 int
@@ -387,9 +554,14 @@ main (int argc, char *argv[])
 
   special_erf ();
   special_erfc ();
+  large_arg ();
+  test_erfc ();
 
   test_generic_erf (2, 100, 15);
   test_generic_erfc (2, 100, 15);
+
+  data_check ("data/erf",  mpfr_erf,  "mpfr_erf");
+  data_check ("data/erfc", mpfr_erfc, "mpfr_erfc");
 
   tests_end_mpfr ();
   return 0;

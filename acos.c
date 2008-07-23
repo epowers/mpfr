@@ -1,6 +1,7 @@
 /* mpfr_acos -- arc-cosinus of a floating-point number
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library, and was contributed by Mathieu Dutour.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
@@ -88,11 +89,22 @@ mpfr_acos (mpfr_ptr acos, mpfr_srcptr x, mp_rnd_t rnd_mode)
 
   prec = MPFR_PREC (acos) + 10 + supplement;
 
+  /* VL: The following change concerning prec comes from r3145
+     "Optimize mpfr_acos by choosing a better initial precision."
+     but it doesn't seem to be correct and leads to problems (assertion
+     failure or very important inefficiency) with tiny arguments.
+     Therefore, I've disabled it. */
   /* If x ~ 2^-N, acos(x) ~ PI/2 - x - x^3/6
      If Prec < 2*N, we can't round since x^3/6 won't be counted. */
-  if (MPFR_PREC (acos) >= MPFR_PREC (x)
-      && (mp_exp_t) prec <= -2*MPFR_GET_EXP (x) + 5)
-    prec = (mpfr_uexp_t) (-2*MPFR_GET_EXP (x)) + 5;
+#if 0
+  if (MPFR_PREC (acos) >= MPFR_PREC (x) && MPFR_GET_EXP (x) < 0)
+    {
+      mpfr_uexp_t pmin = (mpfr_uexp_t) (-2 * MPFR_GET_EXP (x)) + 5;
+      MPFR_ASSERTN (pmin <= MPFR_PREC_MAX);
+      if (prec < pmin)
+        prec = pmin;
+    }
+#endif
 
   mpfr_init2 (tmp, prec);
   mpfr_init2 (arcc, prec);

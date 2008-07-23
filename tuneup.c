@@ -1,6 +1,7 @@
 /* Tune various threshold of MPFR
 
-Copyright 2005 Free Software Foundation.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,13 +17,11 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
-#include <limits.h>
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
@@ -374,7 +373,7 @@ tune_mulders_upto (mp_size_t n)
       mulhigh_ktab[n] = k;
       t =  speed_measure (speed_mpfr_mulhigh, &s);
       if (t * TOLERANCE < tbest)
-	kbest = k, tbest = t;
+        kbest = k, tbest = t;
     }
 
   mulhigh_ktab[n] = kbest;
@@ -419,7 +418,7 @@ tune_sqr_mulders_upto (mp_size_t n)
       sqrhigh_ktab[n] = k;
       t =  speed_measure (speed_mpfr_sqrhigh, &s);
       if (t * TOLERANCE < tbest)
-	kbest = k, tbest = t;
+        kbest = k, tbest = t;
     }
 
   sqrhigh_ktab[n] = kbest;

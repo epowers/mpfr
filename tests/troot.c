@@ -1,6 +1,7 @@
 /* Test file for mpfr_root.
 
-Copyright 2005 Free Software Foundation, Inc.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -140,6 +141,50 @@ special (void)
       exit (1);
     }
 
+  /* Worst case found on 2006-11-25 */
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
+  mpfr_set_str_binary (x, "1.0100001101101101001100110001001000000101001101100011E28");
+  mpfr_root (y, x, 35, GMP_RNDN);
+  mpfr_set_str_binary (x, "1.1100000010110101100011101011000010100001101100100011E0");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error in mpfr_root (y, x, 35, GMP_RNDN) for\n"
+              "x = 1.0100001101101101001100110001001000000101001101100011E28\n"
+              "Expected ");
+      mpfr_dump (x);
+      printf ("Got      ");
+      mpfr_dump (y);
+      exit (1);
+    }
+  /* Worst cases found on 2006-11-26 */
+  mpfr_set_str_binary (x, "1.1111010011101110001111010110000101110000110110101100E17");
+  mpfr_root (y, x, 36, GMP_RNDD);
+  mpfr_set_str_binary (x, "1.0110100111010001101001010111001110010100111111000010E0");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error in mpfr_root (y, x, 36, GMP_RNDD) for\n"
+              "x = 1.1111010011101110001111010110000101110000110110101100E17\n"
+              "Expected ");
+      mpfr_dump (x);
+      printf ("Got      ");
+      mpfr_dump (y);
+      exit (1);
+    }
+  mpfr_set_str_binary (x, "1.1100011101101101100010110001000001110001111110010000E23");
+  mpfr_root (y, x, 36, GMP_RNDU);
+  mpfr_set_str_binary (x, "1.1001010100001110000110111111100011011101110011000100E0");
+  if (mpfr_cmp (x, y))
+    {
+      printf ("Error in mpfr_root (y, x, 36, GMP_RNDU) for\n"
+              "x = 1.1100011101101101100010110001000001110001111110010000E23\n"
+              "Expected ");
+      mpfr_dump (x);
+      printf ("Got      ");
+      mpfr_dump (y);
+      exit (1);
+    }
+
   /* Check for k = 1 */
   mpfr_set_ui (x, 17, GMP_RNDN);
   i = mpfr_root (y, x, 1, GMP_RNDN);
@@ -223,7 +268,6 @@ main (void)
   mp_prec_t p;
   unsigned long k;
 
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   special ();

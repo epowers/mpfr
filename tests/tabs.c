@@ -1,6 +1,7 @@
 /* Test file for mpfr_abs.
 
-Copyright 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -52,7 +53,7 @@ check_inexact (void)
       for (q=2; q<2*p; q++)
         {
           mpfr_set_prec (y, q);
-          for (rnd = 0; rnd < GMP_RND_MAX; rnd++)
+          RND_LOOP (rnd)
             {
               inexact = mpfr_abs (y, x, (mp_rnd_t) rnd);
               cmp = mpfr_cmp (y, absx);
@@ -77,12 +78,12 @@ check_inexact (void)
 }
 
 static void
-check_cmp(int argc, char *argv[])
+check_cmp (int argc, char *argv[])
 {
   mpfr_t x, y;
-  int n, k, rnd;
+  int n, k;
 
-  mpfr_inits2(53, x, y, NULL);
+  mpfr_inits2 (53, x, y, (mpfr_ptr) 0);
 
   mpfr_set_ui(x, 1, GMP_RNDN);
   (mpfr_abs) (x, x, GMP_RNDN);
@@ -134,25 +135,30 @@ check_cmp(int argc, char *argv[])
   n = (argc==1) ? 25000 : atoi(argv[1]);
   for (k = 1; k <= n; k++)
     {
-      int sign = SIGN_RAND();
-      mpfr_random(x);
-      MPFR_SET_SIGN(x, sign);
-      rnd = RND_RAND();
-      mpfr_abs(y, x, (mp_rnd_t) rnd);
-      MPFR_SET_POS(x);
-      if (mpfr_cmp(x,y))
+      mp_rnd_t rnd;
+      int sign = SIGN_RAND ();
+
+      mpfr_random (x);
+      MPFR_SET_SIGN (x, sign);
+      rnd = RND_RAND ();
+      mpfr_abs (y, x, rnd);
+      MPFR_SET_POS (x);
+      if (mpfr_cmp (x, y))
         {
           printf ("Mismatch for sign=%d and x=", sign);
-          mpfr_print_binary(x);
+          mpfr_print_binary (x);
           printf ("\nResults=");
-          mpfr_print_binary(y);
+          mpfr_print_binary (y);
           putchar ('\n');
           exit (1);
         }
     }
 
-  mpfr_clears(x, y, NULL);
+  mpfr_clears (x, y, (mpfr_ptr) 0);
 }
+
+#define TEST_FUNCTION mpfr_abs
+#include "tgeneric.c"
 
 int
 main (int argc, char *argv[])
@@ -162,6 +168,8 @@ main (int argc, char *argv[])
 
   check_inexact ();
   check_cmp (argc, argv);
+
+  test_generic (2, 1000, 10);
 
   tests_end_mpfr ();
   return 0;

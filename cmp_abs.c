@@ -1,6 +1,7 @@
 /* mpfr_cmpabs -- compare the absolute values of two FP numbers
 
-Copyright 1999, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
@@ -48,8 +49,18 @@ mpfr_cmpabs (mpfr_srcptr b, mpfr_srcptr c)
         return -1;
     }
 
-  be = MPFR_GET_EXP (b);
-  ce = MPFR_GET_EXP (c);
+  MPFR_ASSERTD (MPFR_IS_PURE_FP (b));
+  MPFR_ASSERTD (MPFR_IS_PURE_FP (c));
+
+  /* Now that we know that b and c are pure FP numbers (i.e. they have
+     a meaningful exponent), we use MPFR_EXP instead of MPFR_GET_EXP to
+     allow exponents outside the current exponent range. For instance,
+     this is useful for mpfr_pow, which compares values to __gmpfr_one.
+     This is for internal use only! For compatibility with other MPFR
+     versions, the user must still provide values that are representable
+     in the current exponent range. */
+  be = MPFR_EXP (b);
+  ce = MPFR_EXP (c);
   if (be > ce)
     return 1;
   if (be < ce)

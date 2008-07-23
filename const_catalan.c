@@ -1,6 +1,7 @@
 /* mpfr_const_catalan -- compute Catalan's constant.
 
-Copyright 2005 Free Software Foundation.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -111,8 +112,7 @@ mpfr_const_catalan_internal (mpfr_ptr g, mp_rnd_t rnd_mode)
      Found 27 '1' at 51752950
   */
   pg = MPFR_PREC (g);
-  p = pg + 8; /* pg + 7 avoids failure up for pg < 912
-                 pg + 8 gives no failure up to pg = 10000 */
+  p = pg + 9;
   p += MPFR_INT_CEIL_LOG2 (p);
 
   MPFR_GROUP_INIT_3 (group, p, x, y, z);
@@ -133,9 +133,9 @@ mpfr_const_catalan_internal (mpfr_ptr g, mp_rnd_t rnd_mode)
     mpfr_set_z (z, Q, GMP_RNDD);
     mpfr_div (y, y, z, GMP_RNDN);
     mpfr_add (x, x, y, GMP_RNDN);
-    mpfr_div_2exp (x, x, 3, GMP_RNDN);
+    mpfr_div_2ui (x, x, 3, GMP_RNDN);
 
-    if (MPFR_LIKELY (MPFR_CAN_ROUND (x, p - 4, pg, rnd_mode)))
+    if (MPFR_LIKELY (MPFR_CAN_ROUND (x, p - 5, pg, rnd_mode)))
       break;
     /* Fixme: Is it possible? */
     MPFR_ZIV_NEXT (loop, p);

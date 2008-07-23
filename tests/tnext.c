@@ -1,6 +1,7 @@
 /* Test file for mpfr_nextabove, mpfr_nextbelow, mpfr_nexttoward.
 
-Copyright 2003, 2004, 2005 Free Software Foundation.
+Copyright 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -37,7 +38,7 @@ generic_abovebelow (void)
       int neg, below;
 
       prec = (randlimb () % 300) + MPFR_PREC_MIN;
-      mpfr_inits2 (prec, x, y, z, (void *) 0);
+      mpfr_inits2 (prec, x, y, z, (mpfr_ptr) 0);
       mpfr_init2 (t, 3);
 
       /* special tests (executed once is enough) */
@@ -87,7 +88,7 @@ generic_abovebelow (void)
           printf ("\n");
           exit (1);
         }
-      mpfr_clears (x, y, z, t, (void *) 0);
+      mpfr_clears (x, y, z, t, (mpfr_ptr) 0);
     }
 }
 
@@ -106,7 +107,7 @@ inverse_test (void)
             mpfr_t x, y;
             int sign;
 
-            mpfr_inits2 (prec, x, y, (void *) 0);
+            mpfr_inits2 (prec, x, y, (mpfr_ptr) 0);
             mpfr_set_str (x, tests[i], 10, GMP_RNDN);
             if (neg)
               mpfr_neg (x, x, GMP_RNDN);
@@ -152,7 +153,7 @@ inverse_test (void)
                 printf ("\n");
                 exit (1);
               }
-            mpfr_clears (x, y, (void *) 0);
+            mpfr_clears (x, y, (mpfr_ptr) 0);
           }
 }
 

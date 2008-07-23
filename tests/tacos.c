@@ -1,6 +1,6 @@
 /* Test file for mpfr_acos.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by Mathieu Dutour.
 
 This file is part of the MPFR Library.
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -74,6 +74,10 @@ static void
 special_overflow (void)
 {
   mpfr_t x, y;
+  mp_exp_t emin, emax;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   set_emin (-125);
   set_emax (128);
@@ -90,8 +94,8 @@ special_overflow (void)
     }
   mpfr_clear (y);
   mpfr_clear (x);
-  set_emin (MPFR_EMIN_MIN);
-  set_emax (MPFR_EMAX_MAX);
+  set_emin (emin);
+  set_emax (emax);
 }
 
 int
@@ -174,6 +178,9 @@ main (void)
 
   mpfr_clear (x);
   mpfr_clear (y);
+
+  data_check ("data/acos", mpfr_acos, "mpfr_acos");
+  bad_cases (mpfr_acos, mpfr_cos, "mpfr_acos", 0, -40, 2, 4, 128, 800, 30);
 
   tests_end_mpfr ();
   return 0;

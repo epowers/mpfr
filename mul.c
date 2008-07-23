@@ -1,7 +1,7 @@
 /* mpfr_mul -- multiply two floating-point numbers
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
-  Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -155,7 +155,7 @@ mpfr_mul3 (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
     MPFR_SET_EXP (a, ax2);
     MPFR_SET_SIGN(a, sign_product);
   }
-  return inexact;
+  MPFR_RET (inexact);
 }
 
 int
@@ -191,7 +191,7 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
       MPFR_ASSERTN(0);
     }
 
-  mpfr_clears (ta, tb, tc, NULL);
+  mpfr_clears (ta, tb, tc, (mpfr_ptr) 0);
   return inexact1;
 }
 
@@ -307,8 +307,6 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
       cn = tn;
     }
   MPFR_ASSERTD (bn >= cn);
-  /* longlong's umul_ppmm seems to be buggy on HP-UX. */
-#ifndef __hpux
   if (MPFR_LIKELY (bn <= 2))
     {
       if (bn == 1)
@@ -349,8 +347,7 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
         mpn_lshift (tmp, tmp, tn, 1); /* tn <= k, so no stack corruption */
     }
   else
-#endif
-    /* Mulder mulhigh. Disable if squaring, since it is not tuned for
+    /* Mulders' mulhigh. Disable if squaring, since it is not tuned for
        such a case */
     if (MPFR_UNLIKELY (bn > MPFR_MUL_THRESHOLD && b != c))
       {
@@ -427,7 +424,7 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
               bp --;
             else
               {
-                bp = MPFR_TMP_ALLOC ((n+1) * sizeof (mp_limb_t));
+                bp = (mp_limb_t*) MPFR_TMP_ALLOC ((n+1) * sizeof (mp_limb_t));
                 bp[0] = 0;
                 MPN_COPY (bp + 1, MPFR_MANT (b) + bn - n, n);
               }
@@ -435,7 +432,7 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
               cp --; /* FIXME: Could this happen? */
             else
               {
-                cp = MPFR_TMP_ALLOC ((n+1) * sizeof (mp_limb_t));
+                cp = (mp_limb_t*) MPFR_TMP_ALLOC ((n+1) * sizeof (mp_limb_t));
                 cp[0] = 0;
                 MPN_COPY (cp + 1, MPFR_MANT (c) + cn - n, n);
               }
@@ -447,13 +444,13 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
 
             if (MPFR_LIKELY (k < 2*n))
               {
-                tmp = MPFR_TMP_ALLOC (2 * n * sizeof (mp_limb_t));
+                tmp = (mp_limb_t*) MPFR_TMP_ALLOC (2 * n * sizeof (mp_limb_t));
                 tmp += 2*n-k; /* `tmp' still points to an area of `k' limbs */
               }
           }
         MPFR_LOG_MSG (("Use mpfr_mulhigh (%lu VS %lu)\n", MPFR_PREC (a), p));
         /* Compute an approximation of the product of b and c */
-        mpfr_mulhigh_n (tmp+k-2*n, bp, cp, n);
+        mpfr_mulhigh_n (tmp + k - 2 * n, bp, cp, n);
         /* now tmp[0]..tmp[k-1] contains the product of both mantissa,
            with tmp[k-1]>=2^(BITS_PER_MP_LIMB-2) */
         b1 = tmp[k-1] >> (BITS_PER_MP_LIMB - 1); /* msb from the product */
@@ -461,9 +458,11 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
         /* If the mantissas of b and c are uniformly distributed in (1/2, 1],
            then their product is in (1/4, 1/2] with probability 2*ln(2)-1
            ~ 0.386 and in [1/2, 1] with probability 2-2*ln(2) ~ 0.614 */
-        tmp += k - tn;
         if (MPFR_UNLIKELY (b1 == 0))
-          mpn_lshift (tmp, tmp, tn, 1);
+          /* Warning: the mpfr_mulhigh_n call above only surely affects
+             tmp[k-n-1..k-1], thus we shift only those limbs */
+          mpn_lshift (tmp + k - n - 1, tmp + k - n - 1, n + 1, 1);
+        tmp += k - tn;
         MPFR_ASSERTD (MPFR_LIMB_MSB (tmp[tn-1]) != 0);
 
         if (MPFR_UNLIKELY (!mpfr_round_p (tmp, tn, p+b1-1, MPFR_PREC(a)
@@ -510,5 +509,5 @@ mpfr_mul (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mp_rnd_t rnd_mode)
         rnd_mode = GMP_RNDZ;
       return mpfr_underflow (a, rnd_mode, sign);
     }
-  return inexact;
+  MPFR_RET (inexact);
 }

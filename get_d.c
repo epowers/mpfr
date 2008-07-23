@@ -1,7 +1,8 @@
-/* mpfr_get_d -- convert a multiple precision floating-point number
-                 to a machine double precision float
+/* mpfr_get_d, mpfr_get_d_2exp -- convert a multiple precision floating-point
+                                  number to a machine double precision float
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +18,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <float.h>
@@ -167,7 +168,7 @@ mpfr_get_d (mpfr_srcptr src, mp_rnd_t rnd_mode)
         return negative ? MPFR_DBL_INFM : MPFR_DBL_INFP;
 
       MPFR_ASSERTD (MPFR_IS_ZERO(src));
-      return negative ? -0.0 : 0.0;
+      return negative ? DBL_NEG_ZERO : 0.0;
     }
 
   e = MPFR_GET_EXP (src);
@@ -183,7 +184,7 @@ mpfr_get_d (mpfr_srcptr src, mp_rnd_t rnd_mode)
       d = negative ?
         (rnd_mode == GMP_RNDD ||
          (rnd_mode == GMP_RNDN && mpfr_cmp_si_2exp(src, -1, -1075) < 0)
-         ? -DBL_MIN : -0.0) :
+         ? -DBL_MIN : DBL_NEG_ZERO) :
         (rnd_mode == GMP_RNDU ||
          (rnd_mode == GMP_RNDN && mpfr_cmp_si_2exp(src, 1, -1075) > 0)
          ? DBL_MIN : 0.0);
@@ -261,7 +262,7 @@ mpfr_get_d_2exp (long *expptr, mpfr_srcptr src, mp_rnd_t rnd_mode)
       if (MPFR_IS_INF (src))
         return negative ? MPFR_DBL_INFM : MPFR_DBL_INFP;
       MPFR_ASSERTD (MPFR_IS_ZERO(src));
-      return negative ? -0.0 : 0.0;
+      return negative ? DBL_NEG_ZERO : 0.0;
     }
 
   tmp[0] = *src;        /* Hack copy mpfr_t */

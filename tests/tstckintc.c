@@ -1,6 +1,7 @@
 /* Test file for mpfr_custom_*
 
-Copyright 2005 Free Software Foundation.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -26,21 +27,21 @@ MA 02110-1301, USA. */
 
 #include "mpfr-test.h"
 
-#define BUFFER_SIZE 1000
+#define BUFFER_SIZE 250
 #define PREC_TESTED 200
 
-char Buffer[BUFFER_SIZE];
-char *stack = Buffer;
+long Buffer[BUFFER_SIZE];
+char *stack = (char *) Buffer;
 mp_prec_t p = PREC_TESTED;
 
-#define ALIGNED(s) ( ((s)+sizeof (long)-1) / sizeof (long) * sizeof (long))
+#define ALIGNED(s) (((s) + sizeof (long) - 1) / sizeof (long) * sizeof (long))
 
 static void *
-new (size_t s)
+new_st (size_t s)
 {
-  void *p = (void*) stack;
+  void *p = (void *) stack;
   stack += ALIGNED (s);
-  if (MPFR_UNLIKELY (stack > &Buffer[BUFFER_SIZE]))
+  if (MPFR_UNLIKELY (stack > (char *) &Buffer[BUFFER_SIZE]))
     {
       printf ("Stack overflow.\n");
       exit (1);
@@ -52,8 +53,8 @@ new (size_t s)
 static mpfr_ptr
 new_mpfr (mp_prec_t p)
 {
-  mpfr_ptr x = (mpfr_ptr) new (sizeof (mpfr_t));
-  void *mantissa = new (mpfr_custom_get_size (p));
+  mpfr_ptr x = (mpfr_ptr) new_st (sizeof (mpfr_t));
+  void *mantissa = new_st (mpfr_custom_get_size (p));
   mpfr_custom_init (mantissa, p);
   mpfr_custom_init_set (x, 0, 0, p, mantissa);
   return x;
@@ -103,7 +104,8 @@ dummy_new (void)
 {
   long *r;
 
-  r = new (ALIGNED (2*sizeof (long)) + ALIGNED (mpfr_custom_get_size (p)));
+  r = (long *) new_st (ALIGNED (2 * sizeof (long)) +
+                       ALIGNED (mpfr_custom_get_size (p)));
   MPFR_ASSERTN (r != NULL);
   (mpfr_custom_init) (&r[2], p);
   r[0] = (int) MPFR_NAN_KIND;

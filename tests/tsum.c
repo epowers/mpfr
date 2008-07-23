@@ -1,6 +1,7 @@
 /* tsum -- test file for the list summation function
 
-Copyright 2004, 2005 Free Software Foundation.
+Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdlib.h>
@@ -108,11 +109,11 @@ test_sort (mp_prec_t f, unsigned long n)
   unsigned long i;
 
   /* Init stuff */
-  tab = (mpfr_t *) malloc (n * sizeof(mpfr_t));
+  tab = (mpfr_t *) (*__gmp_allocate_func) (n * sizeof (mpfr_t));
   for (i = 0; i < n; i++)
     mpfr_init2 (tab[i], f);
-  tabtmp = (mpfr_ptr *) malloc (n * sizeof(mpfr_ptr));
-  perm = (mpfr_srcptr *) malloc (n * sizeof(mpfr_srcptr));
+  tabtmp = (mpfr_ptr *) (*__gmp_allocate_func) (n * sizeof(mpfr_ptr));
+  perm = (mpfr_srcptr *) (*__gmp_allocate_func) (n * sizeof(mpfr_srcptr));
 
   for (i = 0; i < n; i++)
     {
@@ -133,9 +134,9 @@ test_sort (mp_prec_t f, unsigned long n)
   /* Clear stuff */
   for (i = 0; i < n; i++)
     mpfr_clear (tab[i]);
-  free (tabtmp);
-  free (perm);
-  free (tab);
+  (*__gmp_free_func) (tab, n * sizeof (mpfr_t));
+  (*__gmp_free_func) (tabtmp, n * sizeof(mpfr_ptr));
+  (*__gmp_free_func) (perm, n * sizeof(mpfr_srcptr));
 }
 
 static void
@@ -147,10 +148,10 @@ test_sum (mp_prec_t f, unsigned long n)
   int rnd_mode;
 
   /* Init */
-  tab = (mpfr_t *) malloc (n * sizeof(mpfr_t));
+  tab = (mpfr_t *) (*__gmp_allocate_func) (n * sizeof(mpfr_t));
   for (i = 0; i < n; i++)
     mpfr_init2 (tab[i], f);
-  mpfr_inits2 (f, sum, real_sum, real_non_rounded, NULL);
+  mpfr_inits2 (f, sum, real_sum, real_non_rounded, (mpfr_ptr) 0);
 
   /* First Uniform */
   for (i = 0; i < n; i++)
@@ -192,8 +193,8 @@ test_sum (mp_prec_t f, unsigned long n)
   /* Clear stuff */
   for (i = 0; i < n; i++)
     mpfr_clear (tab[i]);
-  mpfr_clears (sum, real_sum, real_non_rounded, NULL);
-  free (tab);
+  mpfr_clears (sum, real_sum, real_non_rounded, (mpfr_ptr) 0);
+  (*__gmp_free_func) (tab, n * sizeof(mpfr_t));
 }
 
 static
@@ -203,7 +204,7 @@ void check_special (void)
   mpfr_ptr tabp[3];
   int i;
 
-  mpfr_inits (tab[0], tab[1], tab[2], r, NULL);
+  mpfr_inits (tab[0], tab[1], tab[2], r, (mpfr_ptr) 0);
   tabp[0] = tab[0];
   tabp[1] = tab[1];
   tabp[2] = tab[2];
@@ -276,7 +277,7 @@ void check_special (void)
       exit (1);
     }
 
-  mpfr_clears (tab[0], tab[1], tab[2], r, NULL);
+  mpfr_clears (tab[0], tab[1], tab[2], r, (mpfr_ptr) 0);
 }
 
 
@@ -290,8 +291,8 @@ main (void)
 
   check_special ();
   test_sort (1764, 1026);
-  for (p = 2 ; p < 1764 ; p+=17)
-    for (n = 2 ; n < 1026 ; n+=42+p)
+  for (p = 2 ; p < 444 ; p += 17)
+    for (n = 2 ; n < 1026 ; n += 42 + p)
       test_sum (p, n);
 
   tests_end_mpfr ();

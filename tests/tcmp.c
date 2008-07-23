@@ -1,6 +1,7 @@
 /* Test file for mpfr_cmp.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -29,7 +30,8 @@ main (void)
 {
   double x, y;
   mpfr_t xx, yy;
-  int i, c;
+  int c;
+  long i;
   mp_prec_t p;
 
   tests_start_mpfr ();
@@ -52,7 +54,7 @@ main (void)
   mpfr_set_str_binary(xx, "0.10011010101000110101010000000011001001001110001011101011111011101E623");
   mpfr_set_str_binary(yy, "0.10011010101000110101010000000011001001001110001011101011111011100E623");
   p = 0;
-  if (mpfr_cmp2(xx, yy, &p) <= 0 || p != 64)
+  if (mpfr_cmp2 (xx, yy, &p) <= 0 || p != 64)
     {
       printf ("Error (1) in mpfr_cmp2\n");
       exit (1);
@@ -60,7 +62,7 @@ main (void)
   mpfr_set_str_binary(xx, "0.10100010001110110111000010001000010011111101000100011101000011100");
   mpfr_set_str_binary(yy, "0.10100010001110110111000010001000010011111101000100011101000011011");
   p = 0;
-  if (mpfr_cmp2(xx, yy, &p) <= 0 || p != 64)
+  if (mpfr_cmp2 (xx, yy, &p) <= 0 || p != 64)
     {
       printf ("Error (2) in mpfr_cmp2\n");
       exit (1);
@@ -98,74 +100,72 @@ main (void)
   /* bug found by Gerardo Ballabio */
   mpfr_set_ui(xx, 0, GMP_RNDN);
   mpfr_set_str (yy, "0.1", 10, GMP_RNDN);
-  if (mpfr_cmp(xx, yy) >= 0)
+  if ((c = mpfr_cmp (xx, yy)) >= 0)
     {
-      printf ("Error in mpfr_cmp(0.0, 0.1), gives %d\n", mpfr_cmp(xx, yy));
+      printf ("Error in mpfr_cmp(0.0, 0.1), gives %d\n", c);
       exit (1);
     }
 
   mpfr_set_inf (xx, 1);
   mpfr_set_str (yy, "-23489745.0329", 10, GMP_RNDN);
-  if (mpfr_cmp(xx, yy) <= 0)
+  if ((c = mpfr_cmp (xx, yy)) <= 0)
     {
-      printf ("Error in mpfr_cmp(Infp, 23489745.0329), gives %d\n",
-              mpfr_cmp(xx, yy));
+      printf ("Error in mpfr_cmp(Infp, 23489745.0329), gives %d\n", c);
       exit (1);
     }
 
   mpfr_set_inf (xx, 1);
   mpfr_set_inf (yy, -1);
-  if (mpfr_cmp(xx, yy) <= 0)
+  if ((c = mpfr_cmp (xx, yy)) <= 0)
     {
-      printf ("Error in mpfr_cmp(Infp, Infm), gives %d\n", mpfr_cmp(xx, yy));
+      printf ("Error in mpfr_cmp(Infp, Infm), gives %d\n", c);
       exit (1);
     }
 
   mpfr_set_inf (xx, -1);
   mpfr_set_inf (yy, 1);
-  if (mpfr_cmp(xx, yy) >= 0)
+  if ((c = mpfr_cmp (xx, yy)) >= 0)
     {
-      printf ("Error in mpfr_cmp(Infm, Infp), gives %d\n", mpfr_cmp(xx, yy));
+      printf ("Error in mpfr_cmp(Infm, Infp), gives %d\n", c);
       exit (1);
     }
 
   mpfr_set_inf (xx, 1);
   mpfr_set_inf (yy, 1);
-  if (mpfr_cmp(xx, yy) != 0)
+  if ((c = mpfr_cmp (xx, yy)) != 0)
     {
-      printf ("Error in mpfr_cmp(Infp, Infp), gives %d\n", mpfr_cmp(xx, yy));
+      printf ("Error in mpfr_cmp(Infp, Infp), gives %d\n", c);
       exit (1);
     }
 
   mpfr_set_inf (xx, -1);
   mpfr_set_inf (yy, -1);
-  if (mpfr_cmp(xx, yy) != 0)
+  if ((c = mpfr_cmp (xx, yy)) != 0)
     {
-      printf ("Error in mpfr_cmp(Infm, Infm), gives %d\n", mpfr_cmp(xx, yy));
+      printf ("Error in mpfr_cmp(Infm, Infm), gives %d\n", c);
       exit (1);
     }
 
   mpfr_set_inf (xx, -1);
   mpfr_set_str (yy, "2346.09234", 10, GMP_RNDN);
-  if (mpfr_cmp(xx, yy) >= 0)
+  if ((c = mpfr_cmp (xx, yy)) >= 0)
     {
-      printf ("Error in mpfr_cmp(Infm, 2346.09234), gives %d\n",
-              mpfr_cmp(xx, yy));
+      printf ("Error in mpfr_cmp(Infm, 2346.09234), gives %d\n", c);
       exit (1);
     }
 
   mpfr_set_ui (xx, 0, GMP_RNDN);
   mpfr_set_ui (yy, 1, GMP_RNDN);
-  if ((i = mpfr_cmp3 (xx, yy, 1)) >= 0)
+  if ((c = mpfr_cmp3 (xx, yy, 1)) >= 0)
     {
       printf ("Error: mpfr_cmp3 (0, 1, 1) gives %d instead of"
-              " a negative value\n", i);
+              " a negative value\n", c);
       exit (1);
     }
-  if ((i = mpfr_cmp3 (xx, yy, -1)) <= 0)
+  if ((c = mpfr_cmp3 (xx, yy, -1)) <= 0)
     {
       printf ("Error: mpfr_cmp3 (0, 1, -1) gives %d instead of"
-              " a positive value\n", i);
+              " a positive value\n", c);
       exit (1);
     }
 

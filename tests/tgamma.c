@@ -1,6 +1,7 @@
 /* mpfr_tgamma -- test file for gamma function
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library, and was contributed by Mathieu Dutour.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -105,8 +106,11 @@ special (void)
   mpfr_set_str (x, CHECK_Y1, 10, GMP_RNDN);
   if (mpfr_cmp (y, x))
     {
-      printf ("mpfr_gamma("CHECK_X1") is wrong: expected %1.20e, got %1.20e\n",
-              mpfr_get_d (x, GMP_RNDN), mpfr_get_d (y, GMP_RNDN));
+      printf ("mpfr_lngamma("CHECK_X1") is wrong:\n"
+              "expected ");
+      mpfr_print_binary (x); putchar ('\n');
+      printf ("got      ");
+      mpfr_print_binary (y); putchar ('\n');
       exit (1);
     }
 
@@ -117,8 +121,11 @@ special (void)
   mpfr_set_str (x, CHECK_Y2, 10, GMP_RNDN);
   if (mpfr_cmp (y, x))
     {
-      printf ("mpfr_gamma("CHECK_X2") is wrong: expected %1.20e, got %1.20e\n",
-              mpfr_get_d (x, GMP_RNDN), mpfr_get_d (y, GMP_RNDN));
+      printf ("mpfr_lngamma("CHECK_X2") is wrong:\n"
+              "expected ");
+      mpfr_print_binary (x); putchar ('\n');
+      printf ("got      ");
+      mpfr_print_binary (y); putchar ('\n');
       exit (1);
     }
 
@@ -190,7 +197,11 @@ static void
 special_overflow (void)
 {
   mpfr_t x, y;
-  mp_exp_t emin = mpfr_get_emin ();
+  mp_exp_t emin, emax;
+  int inex;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   set_emin (-125);
   set_emax (128);
@@ -247,7 +258,7 @@ special_overflow (void)
       printf ("got      "); mpfr_dump (y);
       exit (1);
     }
-  
+
   /* another tests from Kenneth Wilder, 31 Aug 2005 */
   set_emax (200);
   set_emin (-200);
@@ -302,7 +313,7 @@ special_overflow (void)
   mpfr_set_prec (x, 171);
   mpfr_set_prec (y, 38);
   mpfr_set_str (x, "-2993155353253689176481146537402947624254601559176535", 10,
-		GMP_RNDN);
+                GMP_RNDN);
   mpfr_div_2exp (x, x, 170, GMP_RNDN);
   mpfr_gamma (y, x, GMP_RNDN);
   mpfr_set_prec (x, 38);
@@ -320,7 +331,7 @@ special_overflow (void)
   mpfr_set_prec (x, 337);
   mpfr_set_prec (y, 38);
   mpfr_set_str (x, "-30000.000000000000000000000000000000000000000000001", 10,
-		GMP_RNDN);
+                GMP_RNDN);
   mpfr_gamma (y, x, GMP_RNDN);
   mpfr_set_prec (x, 38);
   mpfr_set_str (x, "-3.623795987425E-121243", 10, GMP_RNDN);
@@ -357,21 +368,111 @@ special_overflow (void)
       exit (1);
     }
 
+  /* check exact result */
+  mpfr_set_prec (x, 2);
+  mpfr_set_ui (x, 3, GMP_RNDN);
+  inex = mpfr_gamma (x, x, GMP_RNDN);
+  if (inex != 0 || mpfr_cmp_ui (x, 2) != 0)
+    {
+      printf ("Error for gamma(3)\n");
+      exit (1);
+    }
+
+  mpfr_set_emax (1024);
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
+  mpfr_set_str_binary (x, "101010110100110011111010000110001000111100000110101E-43");
+  mpfr_gamma (x, x, GMP_RNDU);
+  mpfr_set_str_binary (y, "110000011110001000111110110101011110000100001111111E971");
+  if (mpfr_cmp (x, y) != 0)
+    {
+      printf ("Error for gamma(4)\n");
+      printf ("expected "); mpfr_dump (y);
+      printf ("got      "); mpfr_dump (x);
+      exit (1);
+    }
+
+  set_emin (emin);
+  set_emax (emax);
+
+  /* bug found by Kevin Rauch, 26 Oct 2007 */
+  mpfr_set_str (x, "1e19", 10, GMP_RNDN);
+  inex = mpfr_gamma (x, x, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_inf_p (x) && inex > 0);
+
   mpfr_clear (y);
   mpfr_clear (x);
-  set_emin (MPFR_EMIN_MIN);
-  set_emax (MPFR_EMAX_MAX);
+}
+
+/* test gamma on some integral values (from Christopher Creutzig). */
+static void
+gamma_integer (void)
+{
+  mpz_t n;
+  mpfr_t x, y;
+  unsigned int i;
+
+  mpz_init (n);
+  mpfr_init2 (x, 149);
+  mpfr_init2 (y, 149);
+
+  for (i = 0; i < 100; i++)
+    {
+      mpz_fac_ui (n, i);
+      mpfr_set_ui (x, i+1, GMP_RNDN);
+      mpfr_gamma (y, x, GMP_RNDN);
+      mpfr_set_z (x, n, GMP_RNDN);
+      if (!mpfr_equal_p (x, y))
+        {
+          printf ("Error for gamma(%d)\n", i+1);
+          printf ("expected "); mpfr_dump (x);
+          printf ("got      "); mpfr_dump (y);
+          exit (1);
+        }
+    }
+  mpfr_clear (y);
+  mpfr_clear (x);
+  mpz_clear (n);
+}
+
+/* bug found by Kevin Rauch */
+static void
+test20071231 (void)
+{
+  mpfr_t x;
+  int inex;
+  mp_exp_t emin;
+
+  emin = mpfr_get_emin ();
+  mpfr_set_emin (-1000000);
+
+  mpfr_init2 (x, 21);
+  mpfr_set_str (x, "-1000001.5", 10, GMP_RNDN);
+  inex = mpfr_gamma (x, x, GMP_RNDN);
+  MPFR_ASSERTN(MPFR_IS_ZERO(x) && MPFR_IS_POS(x) && inex < 0);
+  mpfr_clear (x);
+
+  mpfr_set_emin (emin);
+
+  mpfr_init2 (x, 53);
+  mpfr_set_str (x, "-1000000001.5", 10, GMP_RNDN);
+  inex = mpfr_gamma (x, x, GMP_RNDN);
+  MPFR_ASSERTN(MPFR_IS_ZERO(x) && MPFR_IS_POS(x) && inex < 0);
+  mpfr_clear (x);
 }
 
 int
-main (void)
+main (int argc, char *argv[])
 {
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   special ();
   special_overflow ();
   test_generic (2, 100, 2);
+  gamma_integer ();
+  test20071231 ();
+
+  data_check ("data/gamma", mpfr_gamma, "mpfr_gamma");
 
   tests_end_mpfr ();
   return 0;

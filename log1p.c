@@ -1,6 +1,7 @@
 /* mpfr_log1p -- Compute log(1+x)
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -29,6 +30,7 @@ int
 mpfr_log1p (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
 {
   int comp, inexact;
+  mp_exp_t ex;
   MPFR_SAVE_EXPO_DECL (expo);
 
   if (MPFR_UNLIKELY (MPFR_IS_SINGULAR (x)))
@@ -62,8 +64,16 @@ mpfr_log1p (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
         }
     }
 
-  /* log(1+x) = x-x^2/2 + ... so the error is < 2^(2*EXP(x)-1) */
-  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, x, -MPFR_GET_EXP (x)+1,0,rnd_mode,);
+  ex = MPFR_GET_EXP (x);
+  if (ex < 0)  /* -0.5 < x < 0.5 */
+    {
+      /* For x > 0,    abs(log(1+x)-x) < x^2/2.
+         For x > -0.5, abs(log(1+x)-x) < x^2. */
+      if (MPFR_IS_POS (x))
+        MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, x, - ex - 1, 0, 0, rnd_mode, {});
+      else
+        MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, x, - ex, 0, 1, rnd_mode, {});
+    }
 
   comp = mpfr_cmp_si (x, -1);
   /* log1p(x) is undefined for x < -1 */
@@ -104,17 +114,24 @@ mpfr_log1p (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
     /* initialise of intermediary variable */
     mpfr_init2 (t, Nt);
 
-    /* First computation of cosh */
+    /* First computation of log1p */
     MPFR_ZIV_INIT (loop, Nt);
     for (;;)
       {
         /* compute log1p */
-        mpfr_add_ui (t, x, 1, GMP_RNDN);      /* 1+x */
-        mpfr_log (t, t, GMP_RNDN);        /* log(1+x)*/
+        inexact = mpfr_add_ui (t, x, 1, GMP_RNDN);      /* 1+x */
+        /* if inexact = 0, then t = x+1, and the result is simply log(t) */
+        if (inexact == 0)
+          {
+            inexact = mpfr_log (y, t, rnd_mode);
+            goto end;
+          }
+        mpfr_log (t, t, GMP_RNDN);        /* log(1+x) */
 
-        /* estimation of the error */
-        /*err=Nt-(__gmpfr_ceil_log2(1+pow(2,1-MPFR_GET_EXP(t))));*/
-        err = Nt - (MAX (1 - MPFR_GET_EXP (t), 0) + 1);
+        /* the error is bounded by (1/2+2^(1-EXP(t))*ulp(t) (cf algorithms.tex)
+           if EXP(t)>=2, then error <= ulp(t)
+           if EXP(t)<=1, then error <= 2^(2-EXP(t))*ulp(t) */
+        err = Nt - MAX (0, 2 - MPFR_GET_EXP (t));
 
         if (MPFR_LIKELY (MPFR_CAN_ROUND (t, err, Ny, rnd_mode)))
           break;
@@ -123,9 +140,10 @@ mpfr_log1p (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
         MPFR_ZIV_NEXT (loop, Nt);
         mpfr_set_prec (t, Nt);
       }
-    MPFR_ZIV_FREE (loop);
     inexact = mpfr_set (y, t, rnd_mode);
 
+  end:
+    MPFR_ZIV_FREE (loop);
     mpfr_clear (t);
   }
 

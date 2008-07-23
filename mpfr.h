@@ -1,6 +1,7 @@
 /* mpfr.h -- Include file for mpfr.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #ifndef __MPFR_H
@@ -24,9 +25,9 @@ MA 02110-1301, USA. */
 
 /* Define MPFR version number */
 #define MPFR_VERSION_MAJOR 2
-#define MPFR_VERSION_MINOR 3
+#define MPFR_VERSION_MINOR 4
 #define MPFR_VERSION_PATCHLEVEL 0
-#define MPFR_VERSION_STRING "2.3.0"
+#define MPFR_VERSION_STRING "2.4.0-dev"
 
 /* Macros dealing with MPFR VERSION */
 #define MPFR_VERSION_NUM(a,b,c) (((a) << 16L) | ((b) << 8) | (c))
@@ -43,12 +44,20 @@ MPFR_VERSION_NUM(MPFR_VERSION_MAJOR,MPFR_VERSION_MINOR,MPFR_VERSION_PATCHLEVEL)
 # define _MPFR_H_HAVE_FILE 1
 #endif
 
+#if defined (_GMP_H_HAVE_VA_LIST)
+# define _MPFR_H_HAVE_VA_LIST 1
+#endif
+
 /* Check if stdint.h/inttypes.h is included or if the user wants intmax_t */
 #if (defined (INTMAX_C) && defined (UINTMAX_C)) || defined (MPFR_USE_INTMAX_T)
 # define _MPFR_H_HAVE_INTMAX_T 1
 #endif
 
-/* Definition of rounding modes (DON'T USE GMP_RNDNA!)*/
+/* Definition of rounding modes (DON'T USE GMP_RNDNA!)
+   Warning! Changing the contents of this enum should be seen as an
+   interface change since the old and the new types are not compatible
+   (the integer type compatible with the enumerated type can even change,
+   see ISO C99, 6.7.2.2#4), and in Makefile.am, AGE should be set to 0. */
 typedef enum {
   GMP_RNDN=0, GMP_RNDZ, GMP_RNDU, GMP_RNDD, GMP_RND_MAX,
   GMP_RNDNA=-1
@@ -118,14 +127,6 @@ typedef __gmp_const __mpfr_struct *mpfr_srcptr;
 /* For those who needs a direct access and fast access to the sign field */
 #define MPFR_SIGN(x) ((x)->_mpfr_sign)
 
-/* Cache struct */
-struct __gmpfr_cache_s {
-  mpfr_t x;
-  int inexact;
-  int (*func)(mpfr_ptr, mpfr_rnd_t);
-};
-typedef struct __gmpfr_cache_s mpfr_cache_t[1];
-
 /* Stack interface */
 typedef enum {
   MPFR_NAN_KIND = 0,
@@ -167,11 +168,17 @@ typedef enum {
 # define __MPFR_DECLSPEC __GMP_DECLSPEC
 #endif
 
+/* Note: some functions need that a specific system header is included before
+   mpfr.h to be defined. If the user forgets to include the header, the mpfr
+   function prototype in the user object file is not correct. In order to
+   raise a linker error in that case, we change their internal name in the
+   mpfr library (prefixed by __gmpfr instead of mpfr)*/
 #if defined (__cplusplus)
 extern "C" {
 #endif
 
 __MPFR_DECLSPEC __gmp_const char * mpfr_get_version _MPFR_PROTO ((void));
+__MPFR_DECLSPEC __gmp_const char * mpfr_get_patches _MPFR_PROTO ((void));
 
 __MPFR_DECLSPEC mp_exp_t mpfr_get_emin     _MPFR_PROTO ((void));
 __MPFR_DECLSPEC int      mpfr_set_emin     _MPFR_PROTO ((mp_exp_t));
@@ -235,6 +242,10 @@ __MPFR_DECLSPEC void mpfr_set_default_prec _MPFR_PROTO((mpfr_prec_t));
 __MPFR_DECLSPEC mp_prec_t mpfr_get_default_prec _MPFR_PROTO((void));
 
 __MPFR_DECLSPEC int mpfr_set_d _MPFR_PROTO ((mpfr_ptr, double, mpfr_rnd_t));
+#if MPFR_WANT_DECIMAL_FLOATS
+__MPFR_DECLSPEC int mpfr_set_decimal64 _MPFR_PROTO ((mpfr_ptr, _Decimal64,
+                                                     mp_rnd_t));
+#endif
 __MPFR_DECLSPEC int
   mpfr_set_ld _MPFR_PROTO ((mpfr_ptr, long double, mpfr_rnd_t));
 __MPFR_DECLSPEC int
@@ -265,9 +276,12 @@ __MPFR_DECLSPEC int
   mpfr_abs _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_rnd_t));
 __MPFR_DECLSPEC int
   mpfr_set _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_neg _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_signbit _MPFR_PROTO ((mpfr_srcptr));
 __MPFR_DECLSPEC int
-  mpfr_copysign _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_srcptr,mpfr_rnd_t));
-__MPFR_DECLSPEC int mpfr_neg _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,mpfr_rnd_t));
+  mpfr_setsign _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, int, mpfr_rnd_t));
+__MPFR_DECLSPEC int
+  mpfr_copysign _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_srcptr, mpfr_rnd_t));
 
 #ifdef _MPFR_H_HAVE_INTMAX_T
 #define mpfr_set_sj __gmpfr_set_sj
@@ -288,11 +302,17 @@ __MPFR_DECLSPEC uintmax_t mpfr_get_uj _MPFR_PROTO ((mpfr_srcptr, mpfr_rnd_t));
 
 __MPFR_DECLSPEC mp_exp_t mpfr_get_z_exp _MPFR_PROTO ((mpz_ptr, mpfr_srcptr));
 __MPFR_DECLSPEC double mpfr_get_d _MPFR_PROTO ((mpfr_srcptr, mpfr_rnd_t));
+#if MPFR_WANT_DECIMAL_FLOATS
+__MPFR_DECLSPEC _Decimal64 mpfr_get_decimal64 _MPFR_PROTO ((mpfr_srcptr,
+                                                           mp_rnd_t));
+#endif
 __MPFR_DECLSPEC long double mpfr_get_ld _MPFR_PROTO ((mpfr_srcptr,
                                                       mpfr_rnd_t));
 __MPFR_DECLSPEC double mpfr_get_d1 _MPFR_PROTO ((mpfr_srcptr));
 __MPFR_DECLSPEC double mpfr_get_d_2exp _MPFR_PROTO ((long*, mpfr_srcptr,
                                                      mpfr_rnd_t));
+__MPFR_DECLSPEC long double mpfr_get_ld_2exp _MPFR_PROTO ((long*, mpfr_srcptr,
+                                                           mpfr_rnd_t));
 __MPFR_DECLSPEC long mpfr_get_si _MPFR_PROTO ((mpfr_srcptr, mpfr_rnd_t));
 __MPFR_DECLSPEC unsigned long mpfr_get_ui _MPFR_PROTO ((mpfr_srcptr,
                                                         mpfr_rnd_t));
@@ -319,7 +339,36 @@ __MPFR_DECLSPEC size_t mpfr_inp_str _MPFR_PROTO ((mpfr_ptr, FILE*, int,
                                                   mpfr_rnd_t));
 __MPFR_DECLSPEC size_t mpfr_out_str _MPFR_PROTO ((FILE*, int, size_t,
                                                   mpfr_srcptr, mpfr_rnd_t));
+#define mpfr_fprintf __gmpfr_fprintf
+__MPFR_DECLSPEC int mpfr_fprintf _MPFR_PROTO ((FILE*, __gmp_const char*,
+                                               ...));
 #endif
+__MPFR_DECLSPEC int mpfr_printf _MPFR_PROTO ((__gmp_const char*, ...));
+__MPFR_DECLSPEC int mpfr_asprintf _MPFR_PROTO ((char**, __gmp_const char*,
+                                                ...));
+__MPFR_DECLSPEC int mpfr_sprintf _MPFR_PROTO ((char*, __gmp_const char*,
+                                               ...));
+__MPFR_DECLSPEC int mpfr_snprintf _MPFR_PROTO ((char*, size_t,
+                                                __gmp_const char*, ...));
+
+#ifdef _MPFR_H_HAVE_VA_LIST
+#ifdef _MPFR_H_HAVE_FILE
+#define mpfr_vfprintf __gmpfr_vfprintf
+__MPFR_DECLSPEC int mpfr_vfprintf _MPFR_PROTO ((FILE*, __gmp_const char*,
+                                                va_list));
+#endif /* _MPFR_H_HAVE_FILE */
+#define mpfr_vprintf __gmpfr_vprintf
+#define mpfr_vasprintf __gmpfr_vasprintf
+#define mpfr_vsprintf __gmpfr_vsprintf
+#define mpfr_vsnprintf __gmpfr_vsnprintf
+__MPFR_DECLSPEC int mpfr_vprintf _MPFR_PROTO ((__gmp_const char*, va_list));
+__MPFR_DECLSPEC int mpfr_vasprintf _MPFR_PROTO ((char**, __gmp_const char*,
+                                                 va_list));
+__MPFR_DECLSPEC int mpfr_vsprintf _MPFR_PROTO ((char*, __gmp_const char*,
+                                               va_list));
+__MPFR_DECLSPEC int mpfr_vsnprintf _MPFR_PROTO ((char*, size_t,
+                                                __gmp_const char*, va_list));
+#endif /* _MPFR_H_HAVE_VA_LIST */
 
 __MPFR_DECLSPEC int mpfr_pow _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
                                            mpfr_srcptr, mpfr_rnd_t));
@@ -338,6 +387,8 @@ __MPFR_DECLSPEC int mpfr_sqrt _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
                                             mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_sqrt_ui _MPFR_PROTO ((mpfr_ptr, unsigned long,
                                                mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_rec_sqrt _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                                                mpfr_rnd_t));
 
 __MPFR_DECLSPEC int mpfr_add _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
                                            mpfr_srcptr, mpfr_rnd_t));
@@ -374,6 +425,19 @@ __MPFR_DECLSPEC int mpfr_div_si _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
 __MPFR_DECLSPEC int mpfr_si_div _MPFR_PROTO ((mpfr_ptr, long int,
                                               mpfr_srcptr, mpfr_rnd_t));
 
+__MPFR_DECLSPEC int mpfr_add_d _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                                              double, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_sub_d _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                                              double, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_d_sub _MPFR_PROTO ((mpfr_ptr, double,
+                                              mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_mul_d _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                                              double, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_div_d _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                                              double, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_d_div _MPFR_PROTO ((mpfr_ptr, double,
+                                              mpfr_srcptr, mpfr_rnd_t));
+
 __MPFR_DECLSPEC int mpfr_sqr _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,mpfr_rnd_t));
 
 __MPFR_DECLSPEC int mpfr_const_pi _MPFR_PROTO ((mpfr_ptr, mpfr_rnd_t));
@@ -397,7 +461,8 @@ __MPFR_DECLSPEC int mpfr_exp10 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
                                              mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_expm1 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
                                              mpfr_rnd_t));
-__MPFR_DECLSPEC int mpfr_eint _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_eint _MPFR_PROTO ((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_li2 _MPFR_PROTO ((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
 
 __MPFR_DECLSPEC int mpfr_cmp  _MPFR_PROTO ((mpfr_srcptr, mpfr_srcptr));
 __MPFR_DECLSPEC int mpfr_cmp3 _MPFR_PROTO ((mpfr_srcptr, mpfr_srcptr, int));
@@ -443,6 +508,14 @@ __MPFR_DECLSPEC int mpfr_rint_ceil _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
 __MPFR_DECLSPEC int mpfr_rint_floor _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
                                                   mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_frac _MPFR_PROTO ((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_modf _MPFR_PROTO ((mpfr_ptr, mpfr_ptr, mpfr_srcptr,
+                                                  mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_remquo _MPFR_PROTO ((mpfr_ptr, long*, mpfr_srcptr,
+                                              mpfr_srcptr, mp_rnd_t));
+__MPFR_DECLSPEC int mpfr_remainder _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                                                 mpfr_srcptr, mp_rnd_t));
+__MPFR_DECLSPEC int mpfr_fmod _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                                                 mpfr_srcptr, mp_rnd_t));
 
 __MPFR_DECLSPEC int mpfr_fits_ulong_p _MPFR_PROTO((mpfr_srcptr, mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_fits_slong_p _MPFR_PROTO((mpfr_srcptr, mpfr_rnd_t));
@@ -479,6 +552,8 @@ __MPFR_DECLSPEC int mpfr_asinh _MPFR_PROTO((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_cosh _MPFR_PROTO((mpfr_ptr,mpfr_srcptr, mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_sinh _MPFR_PROTO((mpfr_ptr,mpfr_srcptr, mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_tanh _MPFR_PROTO((mpfr_ptr,mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_sinh_cosh _MPFR_PROTO ((mpfr_ptr, mpfr_ptr,
+                                               mpfr_srcptr, mpfr_rnd_t));
 
 __MPFR_DECLSPEC int mpfr_sech _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_csch _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,mpfr_rnd_t));
@@ -506,10 +581,19 @@ __MPFR_DECLSPEC int mpfr_cbrt _MPFR_PROTO ((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_root _MPFR_PROTO ((mpfr_ptr,mpfr_srcptr,unsigned long,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_gamma _MPFR_PROTO((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_lngamma _MPFR_PROTO((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_lgamma _MPFR_PROTO((mpfr_ptr,int*,mpfr_srcptr,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_zeta _MPFR_PROTO ((mpfr_ptr,mpfr_srcptr,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_zeta_ui _MPFR_PROTO ((mpfr_ptr,unsigned long,mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_fac_ui _MPFR_PROTO ((mpfr_ptr, unsigned long int,
                                               mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_j0 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_j1 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_jn _MPFR_PROTO ((mpfr_ptr, long, mpfr_srcptr,
+                                          mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_y0 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_y1 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_yn _MPFR_PROTO ((mpfr_ptr, long, mpfr_srcptr,
+                                          mpfr_rnd_t));
 
 __MPFR_DECLSPEC int mpfr_min _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_srcptr,
                                            mpfr_rnd_t));
@@ -542,14 +626,11 @@ __MPFR_DECLSPEC int mpfr_cmp_f _MPFR_PROTO ((mpfr_srcptr, mpf_srcptr));
 
 __MPFR_DECLSPEC int mpfr_fma _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_srcptr,
                                            mpfr_srcptr, mpfr_rnd_t));
+__MPFR_DECLSPEC int mpfr_fms _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr, mpfr_srcptr,
+                                           mpfr_srcptr, mpfr_rnd_t));
 __MPFR_DECLSPEC int mpfr_sum _MPFR_PROTO ((mpfr_ptr, mpfr_ptr *__gmp_const,
                                            unsigned long, mpfr_rnd_t));
 
-__MPFR_DECLSPEC void mpfr_init_cache _MPFR_PROTO ((mpfr_cache_t,
-                                           int(*)(mpfr_ptr,mpfr_rnd_t)));
-__MPFR_DECLSPEC void mpfr_clear_cache _MPFR_PROTO ((mpfr_cache_t));
-__MPFR_DECLSPEC int  mpfr_cache _MPFR_PROTO ((mpfr_ptr, mpfr_cache_t,
-                                              mpfr_rnd_t));
 __MPFR_DECLSPEC void mpfr_free_cache _MPFR_PROTO ((void));
 
 __MPFR_DECLSPEC int  mpfr_subnormalize _MPFR_PROTO ((mpfr_ptr, int,
@@ -571,7 +652,9 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
 }
 #endif
 
-/* DON'T USE THIS! */
+/* DON'T USE THIS! (For MPFR-public macros only, see below.)
+   The mpfr_sgn macro uses the fact that __MPFR_EXP_NAN and __MPFR_EXP_ZERO
+   are the smallest values. */
 #if __GMP_MP_SIZE_T_INT
 #define __MPFR_EXP_NAN  ((mp_exp_t)((~((~(unsigned int)0)>>1))+2))
 #define __MPFR_EXP_ZERO ((mp_exp_t)((~((~(unsigned int)0)>>1))+1))
@@ -582,9 +665,20 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
 #define __MPFR_EXP_INF  ((mp_exp_t)((~((~(unsigned long)0)>>1))+3))
 #endif
 
+/* Define MPFR_USE_EXTENSION to avoid "gcc -pedantic" warnings. */
+#ifndef MPFR_EXTENSION
+# if defined(MPFR_USE_EXTENSION)
+#  define MPFR_EXTENSION __extension__
+# else
+#  define MPFR_EXTENSION
+# endif
+#endif
+
+/* Warning! This macro doesn't work with K&R C and shouldn't be used
+   internally. For public use only, but see the MPFR manual. */
 #define MPFR_DECL_INIT(_x, _p)                                        \
-  mp_limb_t __gmpfr_local_tab_##_x[((_p)-1)/GMP_NUMB_BITS+1];         \
-  mpfr_t    _x = {{(_p),1,__MPFR_EXP_NAN,__gmpfr_local_tab_##_x}}
+  MPFR_EXTENSION mp_limb_t __gmpfr_local_tab_##_x[((_p)-1)/GMP_NUMB_BITS+1]; \
+  MPFR_EXTENSION mpfr_t _x = {{(_p),1,__MPFR_EXP_NAN,__gmpfr_local_tab_##_x}}
 
 /* Fast access macros to replace function interface.
    If the USER don't want to use the macro interface, let him make happy
@@ -595,7 +689,10 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
 #define mpfr_nan_p(_x)    ((_x)->_mpfr_exp == __MPFR_EXP_NAN)
 #define mpfr_inf_p(_x)    ((_x)->_mpfr_exp == __MPFR_EXP_INF)
 #define mpfr_zero_p(_x)   ((_x)->_mpfr_exp == __MPFR_EXP_ZERO)
-#define mpfr_sgn(_x)      (mpfr_zero_p(_x) ? 0 : MPFR_SIGN(_x))
+#define mpfr_sgn(_x)                                          \
+  ((_x)->_mpfr_exp < __MPFR_EXP_INF ?                         \
+   (mpfr_nan_p (_x) ? mpfr_set_erangeflag () : (void) 0), 0 : \
+   MPFR_SIGN (_x))
 
 /* Prevent them from using as lvalues */
 #define mpfr_get_prec(_x) ((_x)->_mpfr_prec + 0)
@@ -610,6 +707,9 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
 #define mpfr_cmp_si(b,i) mpfr_cmp_si_2exp((b),(i),0)
 #define mpfr_set(a,b,r)  mpfr_set4(a,b,r,MPFR_SIGN(b))
 #define mpfr_abs(a,b,r)  mpfr_set4(a,b,r,1)
+#define mpfr_copysign(a,b,c,r) mpfr_set4(a,b,r,MPFR_SIGN(c))
+#define mpfr_setsign(a,b,s,r) mpfr_set4(a,b,r,(s) ? -1 : 1)
+#define mpfr_signbit(x)  (MPFR_SIGN(x) < 0)
 #define mpfr_cmp(b, c)   mpfr_cmp3(b, c, 1)
 #define mpfr_mul_2exp(y,x,n,r) mpfr_mul_2ui((y),(x),(n),(r))
 #define mpfr_div_2exp(y,x,n,r) mpfr_div_2ui((y),(x),(n),(r))
@@ -622,6 +722,7 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
 #if defined (__GNUC__) && !defined(__ICC) && !defined(__cplusplus)
 #if (__GNUC__ >= 2)
 #undef mpfr_cmp_ui
+/* We use the fact that mpfr_sgn on NaN sets the erange flag and returns 0. */
 #define mpfr_cmp_ui(_f,_u)                 \
  (__builtin_constant_p (_u) && (_u) == 0 ? \
    mpfr_sgn (_f) :                         \
@@ -640,13 +741,13 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
      _p->_mpfr_sign = 1;                   \
      _p->_mpfr_exp = __MPFR_EXP_ZERO;      \
      (void) (_r); 0; }) :                  \
-   mpfr_set_ui (_f,_u,_r))
+   mpfr_set_ui_2exp ((_f), (_u), 0, (_r)))
 #endif
 #undef mpfr_set_si
 #define mpfr_set_si(_f,_s,_r)              \
  (__builtin_constant_p (_s) && (_s) >= 0 ? \
    mpfr_set_ui ((_f), (_s), (_r)) :        \
-   mpfr_set_si ((_f), (_s), (_r)))
+   mpfr_set_si_2exp ((_f), (_s), 0, (_r)))
 #endif
 #endif
 
@@ -685,7 +786,7 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
   : (int) MPFR_ZERO_KIND * MPFR_SIGN (x) )
 
 
-#endif /* MPFR_NO_MACRO */
+#endif /* MPFR_USE_NO_MACRO */
 
 /* Theses are defined to be macros */
 #define mpfr_init_set_si(x, i, rnd) \
@@ -694,6 +795,8 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
  ( mpfr_init(x), mpfr_set_ui((x), (i), (rnd)) )
 #define mpfr_init_set_d(x, d, rnd) \
  ( mpfr_init(x), mpfr_set_d((x), (d), (rnd)) )
+#define mpfr_init_set_ld(x, d, rnd) \
+ ( mpfr_init(x), mpfr_set_ld((x), (d), (rnd)) )
 #define mpfr_init_set_z(x, i, rnd) \
  ( mpfr_init(x), mpfr_set_z((x), (i), (rnd)) )
 #define mpfr_init_set_q(x, i, rnd) \

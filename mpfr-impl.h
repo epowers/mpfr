@@ -1,7 +1,7 @@
 /* Utilities for MPFR developers, not exported.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
-  Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,16 +17,26 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #ifndef __MPFR_IMPL_H__
 #define __MPFR_IMPL_H__
 
-/* Include stdio.h iff we are debugging or we want to check */
-#if defined(DEBUG) || defined(WANT_ASSERT)
-# include <stdio.h>
+/* Let's include some standard headers unconditionally as they are
+   already needed by several source files or when some options are
+   enabled/disabled, and it is easy to forget them (some configure
+   options may hide the error).
+   Note: If some source file must not have such a header included
+   (which is very unlikely and probably means something broken in
+   this source file), we should do that with some macro (that would
+   also force to disable incompatible features). */
+#if defined (__cplusplus)
+#include <cstdio>
+#else
+#include <stdio.h>
 #endif
+#include <limits.h>
 
 /* Check if we are inside a build of MPFR or inside the test suite.
    This is needed in mpfr.h to export or import the functions.
@@ -79,6 +89,13 @@ MA 02110-1301, USA. */
 
 #endif
 #undef MPFR_NEED_LONGLONG_H
+
+/* For the definition of MPFR_THREAD_ATTR. GCC/ICC detection macros are
+   no longer used, as they sometimes gave incorrect information about
+   the support of thread-local variables. A configure check is now done.
+   If the use of detection macros is needed in the future, this could be
+   moved below (after the detection macros are defined). */
+#include "mpfr-thread.h"
 
 
 /******************************************************
@@ -153,15 +170,6 @@ MA 02110-1301, USA. */
 # error "Can't compute log2(BITS_PER_MP_LIMB)"
 #endif
 
-/* mpn_sub_nc is internal but may be defined in the header
-   but not in the library! That's why we may need to overide it.*/
-#ifndef MPFR_HAVE_MPN_SUB_NC
-mp_limb_t mpfr_sub_nc _MPFR_PROTO ((mp_ptr, mp_srcptr, mp_srcptr, mp_size_t,
-                                    mp_limb_t ));
-#undef mpn_sub_nc
-#define mpn_sub_nc mpfr_sub_nc
-#endif
-
 #if __MPFR_GNUC(3,0) || __MPFR_ICC(8,1,0)
 # define MPFR_NORETURN_ATTR __attribute__ ((noreturn))
 # define MPFR_CONST_ATTR    __attribute__ ((const))
@@ -174,15 +182,13 @@ mp_limb_t mpfr_sub_nc _MPFR_PROTO ((mp_ptr, mp_srcptr, mp_srcptr, mp_size_t,
  ************* Global Internal Variables **************
  ******************************************************/
 
-#ifdef MPFR_USE_THREAD_SAFE
-# if __MPFR_GNUC(3,3) || __MPFR_ICC(8,1,0)
-#  define MPFR_THREAD_ATTR __thread
-# else
-#  error "Can't build MPFR as thread safe"
-# endif
-#else
-# define MPFR_THREAD_ATTR
-#endif
+/* Cache struct */
+struct __gmpfr_cache_s {
+  mpfr_t x;
+  int inexact;
+  int (*func)(mpfr_ptr, mpfr_rnd_t);
+};
+typedef struct __gmpfr_cache_s mpfr_cache_t[1];
 
 #if defined (__cplusplus)
 extern "C" {
@@ -198,6 +204,13 @@ __MPFR_DECLSPEC extern MPFR_THREAD_ATTR mpfr_cache_t __gmpfr_cache_const_log2;
 __MPFR_DECLSPEC extern MPFR_THREAD_ATTR mpfr_cache_t __gmpfr_cache_const_euler;
 __MPFR_DECLSPEC extern MPFR_THREAD_ATTR mpfr_cache_t __gmpfr_cache_const_catalan;
 
+#define BASE_MAX 36
+__MPFR_DECLSPEC extern const __mpfr_struct __gmpfr_l2b[BASE_MAX-1][2];
+
+/* Note: do not use the following values when they can be outside the
+   current exponent range, e.g. when the exponent range has not been
+   extended yet; under such a condition, they can be used only in
+   mpfr_cmpabs. */
 __MPFR_DECLSPEC extern const mpfr_t __gmpfr_one;
 __MPFR_DECLSPEC extern const mpfr_t __gmpfr_two;
 __MPFR_DECLSPEC extern const mpfr_t __gmpfr_four;
@@ -244,6 +257,40 @@ __MPFR_DECLSPEC extern const mpfr_t __gmpfr_four;
 #define mpfr_erangeflag_p() \
   ((int) (__gmpfr_flags & MPFR_FLAGS_ERANGE))
 
+/* Testing an exception flag correctly is tricky. There are mainly two
+   pitfalls: First, one needs to remember to clear the corresponding
+   flag, in case it was set before the function call or during some
+   intermediate computations (in practice, one can clear all the flags).
+   Secondly, one needs to test the flag early enough, i.e. before it
+   can be modified by another function. Moreover, it is quite difficult
+   (if not impossible) to reliably check problems with "make check". To
+   avoid these pitfalls, it is recommended to use the following macros.
+   Other use of the exception-flag predicate functions/macros will be
+   detected by mpfrlint.
+   Note: _op can be either a statement or an expression.
+   MPFR_BLOCK_EXCEP should be used only inside a block; it is useful to
+   detect some exception in order to exit the block as soon as possible. */
+#define MPFR_BLOCK_DECL(_flags) unsigned int _flags
+#define MPFR_BLOCK(_flags,_op)          \
+  do                                    \
+    {                                   \
+      mpfr_clear_flags ();              \
+      _op;                              \
+      (_flags) = __gmpfr_flags;         \
+    }                                   \
+  while (0)
+#define MPFR_BLOCK_TEST(_flags,_f) MPFR_UNLIKELY ((_flags) & (_f))
+#define MPFR_BLOCK_EXCEP (__gmpfr_flags & (MPFR_FLAGS_UNDERFLOW | \
+                                           MPFR_FLAGS_OVERFLOW | \
+                                           MPFR_FLAGS_NAN))
+/* Let's use a MPFR_ prefix, because e.g. OVERFLOW is defined by glibc's
+   math.h, though this is not a reserved identifier! */
+#define MPFR_UNDERFLOW(_flags)  MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_UNDERFLOW)
+#define MPFR_OVERFLOW(_flags)   MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_OVERFLOW)
+#define MPFR_NANFLAG(_flags)    MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_NAN)
+#define MPFR_INEXFLAG(_flags)   MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_INEXACT)
+#define MPFR_ERANGEFLAG(_flags) MPFR_BLOCK_TEST (_flags, MPFR_FLAGS_ERANGE)
+
 
 /******************************************************
  ******************** Assertions **********************
@@ -267,20 +314,31 @@ __MPFR_DECLSPEC extern const mpfr_t __gmpfr_four;
 # define MPFR_ASSERTD(expr)  ((void) 0)
 #endif
 
-/* Check if the args are correct  */
-/* Can't be used since TMP variables are not correct */
-#define MPFR_CHECK1(x,r) \
- MPFR_ASSERTD(mpfr_check(x) && GMP_RNDN <= r && r <= GMP_RNDD)
-#define MPFR_CHECK2(x,y,r) \
- MPFR_ASSERTD(mpfr_check(x) && mpfr_check(y) && GMP_RNDN <= r && r <= GMP_RNDD)
-#define MPFR_CHECK3(x,y,z,r) \
- MPFR_ASSERTD(mpfr_check(x) && mpfr_check(y) && mpfr_check(z) && \
-  GMP_RNDN <= r && r <= GMP_RNDD)
-
 /* Code to deal with impossible
    WARNING: It doesn't use do { } while (0) for Insure++*/
 #define MPFR_RET_NEVER_GO_HERE()  {MPFR_ASSERTN(0); return 0;}
 
+
+/******************************************************
+ ******************** Warnings ************************
+ ******************************************************/
+
+/* MPFR_WARNING is no longer useful, but let's keep the macro in case
+   it needs to be used again in the future. */
+
+#ifdef MPFR_USE_WARNINGS
+# include <stdlib.h>
+# define MPFR_WARNING(W)                    \
+  do                                        \
+    {                                       \
+      char *q = getenv ("MPFR_QUIET");      \
+      if (q == NULL || *q == 0)             \
+        fprintf (stderr, "MPFR: %s\n", W);  \
+    }                                       \
+  while (0)
+#else
+# define MPFR_WARNING(W)  ((void) 0)
+#endif
 
 
 /******************************************************
@@ -327,10 +385,12 @@ static double double_zero = 0.0;
 # define DBL_NAN (double_zero/double_zero)
 # define DBL_POS_INF ((double) 1.0/double_zero)
 # define DBL_NEG_INF ((double)-1.0/double_zero)
+# define DBL_NEG_ZERO (-double_zero)
 #else
 # define DBL_POS_INF ((double) 1.0/0.0)
 # define DBL_NEG_INF ((double)-1.0/0.0)
 # define DBL_NAN     ((double) 0.0/0.0)
+# define DBL_NEG_ZERO (-0.0)
 #endif
 
 /* for x of type ieee_double_extract */
@@ -354,8 +414,6 @@ typedef union ieee_double_extract Ieee_double_extract;
 #  define DOUBLE_ISNAN(x) ((x) != (x))
 # endif
 #endif
-
-
 
 /******************************************************
  *************** Long double macros *******************
@@ -458,6 +516,15 @@ typedef union {
 #endif
 
 /******************************************************
+ *************** _Decimal64 support *******************
+ ******************************************************/
+
+#if MPFR_WANT_DECIMAL_FLOATS
+/* to cast between binary64 and decimal64 */
+union ieee_double_decimal64 { double d; _Decimal64 d64; };
+#endif
+
+/******************************************************
  **************** mpfr_t properties *******************
  ******************************************************/
 
@@ -482,7 +549,10 @@ typedef union {
  ***************** exponent limits ********************
  ******************************************************/
 
-/* Defined limits and unsigned type of exponent */
+/* Define limits and unsigned type of exponent. The following definitions
+ * depend on mp_exp_t; if this type changes in GMP, these definitions will
+ * need to be modified (alternatively, a mpfr_exp_t type could be defined).
+ */
 #if __GMP_MP_SIZE_T_INT == 1
 typedef unsigned int            mpfr_uexp_t;
 # define MPFR_EXP_MAX (INT_MAX)
@@ -495,12 +565,18 @@ typedef unsigned long int  mpfr_uexp_t;
 #ifndef mp_exp_unsigned_t
 # define mp_exp_unsigned_t mpfr_uexp_t
 #endif
+#define mpfr_get_exp_t(x,r) mpfr_get_si((x),(r))
+#define mpfr_set_exp_t(x,e,r) mpfr_set_si((x),(e),(r))
 
 /* Invalid exponent value (to track bugs...) */
 #define MPFR_EXP_INVALID \
  ((mp_exp_t) 1 << (BITS_PER_MP_LIMB*sizeof(mp_exp_t)/sizeof(mp_limb_t)-2))
 
-/* Definition of the intervals of the exponent limits */
+/* Definition of the exponent limits for MPFR numbers.
+ * These limits are chosen so that if e is such an exponent, then 2e-1 and
+ * 2e+1 are representable. This is useful for intermediate computations,
+ * in particular the multiplication.
+ */
 #undef MPFR_EMIN_MIN
 #undef MPFR_EMIN_MAX
 #undef MPFR_EMAX_MIN
@@ -617,6 +693,9 @@ typedef unsigned long int  mpfr_uexp_t;
 
 #define MPFR_SET_ERANGE() (__gmpfr_flags |= MPFR_FLAGS_ERANGE)
 
+#define SIGN(I) ((I) < 0 ? -1 : (I) > 0)
+#define SAME_SIGN(I1,I2) (SIGN (I1) == SIGN (I2))
+
 
 
 /******************************************************
@@ -660,7 +739,7 @@ typedef unsigned long int  mpfr_uexp_t;
 # error "Neither GMP_LIMB_HIGHBIT nor MP_LIMB_T_HIGHBIT defined in GMP"
 #endif
 
-/* Mask to get the Most Significent Bit of a limb */
+/* Mask to get the Most Significant Bit of a limb */
 #define MPFR_LIMB_MSB(l) ((l)&MPFR_LIMB_HIGHBIT)
 
 /* Definition of MPFR_LIMB_ONE & MPFR_LIMB_ZERO*/
@@ -704,7 +783,7 @@ typedef union { mp_size_t s; mp_limb_t l; } mpfr_size_limb_t;
 #else
 #define MPFR_TMP_DECL(x) TMP_DECL
 #define MPFR_TMP_MARK(x) TMP_MARK
-#define MPFR_TMP_ALLOC(s) TMP_SALLOC(s)
+#define MPFR_TMP_ALLOC(s) TMP_ALLOC(s)
 #define MPFR_TMP_FREE(x) TMP_FREE
 #endif
 
@@ -857,7 +936,6 @@ do {                                                                  \
 /*   MPFR_TRACE (operation) : execute operation iff DEBUG flag is set */
 /*   MPFR_DUMP (x) : print x (a mpfr_t) on stdout */
 #ifdef DEBUG
-# include <stdio.h>
 # define MPFR_TRACE(x) x
 #else
 # define MPFR_TRACE(x) (void) 0
@@ -886,7 +964,34 @@ do {                                                                  \
   } while (0)
 
 /* Needs <locale.h> */
-#define MPFR_DECIMAL_POINT ((unsigned char) localeconv()->decimal_point[0])
+#ifdef HAVE_LOCALE_H
+#include <locale.h>
+/* Warning! In case of signed char, the value of MPFR_DECIMAL_POINT may
+   be negative (the ISO C99 does not seem to forbid negative values). */
+#define MPFR_DECIMAL_POINT (localeconv()->decimal_point[0])
+#define MPFR_THOUSANDS_SEPARATOR (localeconv()->thousands_sep[0])
+#else
+#define MPFR_DECIMAL_POINT ((char) '.')
+#define MPFR_THOUSANDS_SEPARATOR ('\0')
+#endif
+
+
+/* Set y to s*significand(x)*2^e, for example MPFR_ALIAS(y,x,1,MPFR_EXP(x))
+   sets y to |x|, and MPFR_ALIAS(y,x,MPFR_SIGN(x),0) sets y to x*2^f such
+   that 1/2 <= |y| < 1. Does not check y is in the valid exponent range.
+   WARNING! x and y share the same mantissa. So, some operations are
+   not valid if x has been provided via an argument, e.g., trying to
+   modify the mantissa of y, even temporarily, or calling mpfr_clear on y.
+*/
+#define MPFR_ALIAS(y,x,s,e)                     \
+  do                                            \
+    {                                           \
+      MPFR_PREC(y) = MPFR_PREC(x);              \
+      MPFR_SIGN(y) = (s);                       \
+      MPFR_EXP(y) = (e);                        \
+      MPFR_MANT(y) = MPFR_MANT(x);              \
+    } while (0)
+
 
 /******************************************************
  **************  Save exponent macros  ****************
@@ -919,12 +1024,18 @@ typedef struct {
 /* Speed up final checking */
 #define mpfr_check_range(x,t,r) \
  (MPFR_LIKELY (MPFR_EXP (x) >= __gmpfr_emin && MPFR_EXP (x) <= __gmpfr_emax) \
-               ? (t) : mpfr_check_range(x,t,r))
+  ? ((t) ? (__gmpfr_flags |= MPFR_FLAGS_INEXACT, (t)) : 0)                   \
+  : mpfr_check_range(x,t,r))
 
 
 /******************************************************
  *****************  Inline Rounding *******************
  ******************************************************/
+
+/*
+ * Note: due to the labels, one cannot use a macro MPFR_RNDRAW* more than
+ * once in a function (otherwise these labels would not be unique).
+ */
 
 /*
  * Round mantissa (srcp, sprec) to mpfr_t dest using rounding mode rnd
@@ -1014,6 +1125,8 @@ typedef struct {
               }                                                             \
             else                                                            \
               {                                                             \
+                if (0)                                                      \
+                  goto addoneulp_doit; /* dummy code to avoid warning */    \
               addoneulp:                                                    \
                 inexact = sign;                                             \
               addoneulp_doit:                                               \
@@ -1079,42 +1192,80 @@ typedef struct {
      , OVERFLOW_HANDLER)
 
 /* Return TRUE if b is non singular and we can round it to precision 'prec'
-   with rounding mode 'rnd', and with error at most 'error' */
+   and determine the ternary value, with rounding mode 'rnd', and with
+   error at most 'error' */
 #define MPFR_CAN_ROUND(b,err,prec,rnd)                                       \
  (!MPFR_IS_SINGULAR (b) && mpfr_round_p (MPFR_MANT (b), MPFR_LIMB_SIZE (b),  \
                                          (err), (prec) + ((rnd)==GMP_RNDN)))
 
-/* Assuming that the function as a taylor expansion which looks like:
-    y=o(f(x)) = o(x + g(x)) with |g(x)| <=2^(EXP(x)-err)
-   we can quickly set y to x if x is small (ie err > prec(y)+1) in most
+/* TODO: fix this description (see round_near_x.c). */
+/* Assuming that the function has a Taylor expansion which looks like:
+    y=o(f(x)) = o(v + g(x)) with |g(x)| <= 2^(EXP(v)-err)
+   we can quickly set y to v if x is small (ie err > prec(y)+1) in most
    cases. It assumes that f(x) is not representable exactly as a FP number.
-   x must not be a singular value (NAN, INF or ZERO).
+   v must not be a singular value (NAN, INF or ZERO); usual values are
+   v=1 or v=x.
 
-   y is the destination (a mpfr_t), x the value to set (a mpfr_t),
-   err the error term (a mp_exp_t), dir (an int) is the direction of
-   the commited error (if dir = 0, it rounds towards 0, if dir=1,
-   it rounds away from 0), rnd the rounding mode.
+   y is the destination (a mpfr_t), v the value to set (a mpfr_t),
+   err1+err2 with err2 <= 3 the error term (mp_exp_t's), dir (an int) is
+   the direction of the committed error (if dir = 0, it rounds towards 0,
+   if dir=1, it rounds away from 0), rnd the rounding mode.
 
    It returns from the function a ternary value in case of success.
    If you want to free something, you must fill the "extra" field
    in consequences, otherwise put nothing in it.
 
-   The test is less restrictive thant necessary, but the function
+   The test is less restrictive than necessary, but the function
    will finish the check itself.
+
+   Note: err1 + err2 is allowed to overflow as mp_exp_t, but it must give
+   its real value as mpfr_uexp_t.
 */
-#define MPFR_FAST_COMPUTE_IF_SMALL_INPUT(y,x,err,dir,rnd,extra)     \
-  do {                                                              \
-   mp_exp_t _err = (err);                                           \
-   if (MPFR_UNLIKELY (_err > 0                                      \
-                      && (mpfr_uexp_t) _err > MPFR_PREC (y) + 1))   \
-    {                                                               \
-      int _inexact = mpfr_round_near_x ((y),(x),(err),(dir),(rnd)); \
-      if (_inexact != 0)                                            \
-        {                                                           \
-         extra;                                                     \
-         return _inexact;                                           \
-        }                                                           \
-    }                                                               \
+#define MPFR_FAST_COMPUTE_IF_SMALL_INPUT(y,v,err1,err2,dir,rnd,extra)   \
+  do {                                                                  \
+    mpfr_ptr _y = (y);                                                  \
+    mp_exp_t _err1 = (err1);                                            \
+    mp_exp_t _err2 = (err2);                                            \
+    if (_err1 > 0)                                                      \
+      {                                                                 \
+        mpfr_uexp_t _err = (mpfr_uexp_t) _err1 + _err2;                 \
+        if (MPFR_UNLIKELY (_err > MPFR_PREC (_y) + 1))                  \
+          {                                                             \
+            int _inexact = mpfr_round_near_x (_y,(v),_err,(dir),(rnd)); \
+            if (_inexact != 0)                                          \
+              {                                                         \
+                extra;                                                  \
+                return _inexact;                                        \
+              }                                                         \
+          }                                                             \
+      }                                                                 \
+  } while (0)
+
+/* Variant, to be called somewhere after MPFR_SAVE_EXPO_MARK. This variant
+   is needed when there are some computations before or when some non-zero
+   real constant is used, such as __gmpfr_one for mpfr_cos. */
+#define MPFR_SMALL_INPUT_AFTER_SAVE_EXPO(y,v,err1,err2,dir,rnd,expo,extra) \
+  do {                                                                  \
+    mpfr_ptr _y = (y);                                                  \
+    mp_exp_t _err1 = (err1);                                            \
+    mp_exp_t _err2 = (err2);                                            \
+    if (_err1 > 0)                                                      \
+      {                                                                 \
+        mpfr_uexp_t _err = (mpfr_uexp_t) _err1 + _err2;                 \
+        if (MPFR_UNLIKELY (_err > MPFR_PREC (_y) + 1))                  \
+          {                                                             \
+            int _inexact;                                               \
+            mpfr_clear_flags ();                                        \
+            _inexact = mpfr_round_near_x (_y,(v),_err,(dir),(rnd));     \
+            if (_inexact != 0)                                          \
+              {                                                         \
+                extra;                                                  \
+                MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, __gmpfr_flags);      \
+                MPFR_SAVE_EXPO_FREE (expo);                             \
+                return mpfr_check_range (_y, _inexact, (rnd));          \
+              }                                                         \
+          }                                                             \
+      }                                                                 \
   } while (0)
 
 /******************************************************
@@ -1129,6 +1280,15 @@ typedef struct {
 #define MPFR_ZIV_FREE(x)
 
 #else
+
+/* The following test on glibc is there mainly for Darwin (Mac OS X), to
+   obtain a better error message. The real test should have been a test
+   concerning nested functions in gcc, which are disabled by default on
+   Darwin; but it is not possible to do that without a configure test. */
+# if defined (__cplusplus) || !(__MPFR_GNUC(3,0) && __MPFR_GLIBC(2,0))
+#  error "Logging not supported (needs gcc >= 3.0 and GNU C Library >= 2.0)."
+# endif
+
 /* Use LOGGING */
 #define MPFR_ZIV_DECL(_x)                                     \
   mp_prec_t _x;                                               \
@@ -1175,8 +1335,6 @@ typedef struct {
 #define MPFR_LOG_STAT_F     64
 
 #ifdef MPFR_USE_LOGGING
-
-# include <stdio.h>
 
 /* Check if we can support this feature */
 # ifdef MPFR_USE_THREAD_SAFE
@@ -1271,26 +1429,31 @@ struct mpfr_group_t {
 #define MPFR_GROUP_DECL(g) struct mpfr_group_t g
 #define MPFR_GROUP_CLEAR(g) do {                                 \
  if (MPFR_UNLIKELY ((g).alloc != 0)) {                           \
-    MPFR_ASSERTD ((g).mant != (g).tab);                          \
-    (*__gmp_free_func)((g).mant, (g).alloc);                     \
+   MPFR_ASSERTD ((g).mant != (g).tab);                           \
+   (*__gmp_free_func) ((g).mant, (g).alloc);                     \
  }} while (0)
 
-#define MPFR_GROUP_INIT_TEMPLATE(g, prec, num, handler) do {     \
- mp_prec_t _prec = (prec);                                       \
- mp_size_t _size;                                                \
- MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                          \
- if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX)) mpfr_abort_prec_max(); \
- _size = (mp_prec_t)(_prec +BITS_PER_MP_LIMB-1)/BITS_PER_MP_LIMB;\
- if (MPFR_UNLIKELY (_size*(num) > MPFR_GROUP_STATIC_SIZE)) {     \
-  (g).alloc = (num)*_size*sizeof (mp_limb_t);                    \
-  (g).mant = (*__gmp_allocate_func) ((g).alloc);                 \
- } else {                                                        \
-  (g).alloc = 0;                                                 \
-  (g).mant = (g).tab;                                            \
- }                                                               \
- handler;                                                        \
+#define MPFR_GROUP_INIT_TEMPLATE(g, prec, num, handler) do {            \
+ mp_prec_t _prec = (prec);                                              \
+ mp_size_t _size;                                                       \
+ MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                                 \
+ if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX))                             \
+   mpfr_abort_prec_max ();                                              \
+ _size = (mp_prec_t) (_prec + BITS_PER_MP_LIMB - 1) / BITS_PER_MP_LIMB; \
+ if (MPFR_UNLIKELY (_size * (num) > MPFR_GROUP_STATIC_SIZE))            \
+   {                                                                    \
+     (g).alloc = (num) * _size * sizeof (mp_limb_t);                    \
+     (g).mant = (mp_limb_t *) (*__gmp_allocate_func) ((g).alloc);       \
+   }                                                                    \
+ else                                                                   \
+   {                                                                    \
+     (g).alloc = 0;                                                     \
+     (g).mant = (g).tab;                                                \
+   }                                                                    \
+ handler;                                                               \
  } while (0)
-#define MPFR_GROUP_TINIT(g, n, x) MPFR_TMP_INIT1 ((g).mant+_size*(n), x, _prec)
+#define MPFR_GROUP_TINIT(g, n, x)                       \
+  MPFR_TMP_INIT1 ((g).mant + _size * (n), x, _prec)
 
 #define MPFR_GROUP_INIT_1(g, prec, x)                            \
  MPFR_GROUP_INIT_TEMPLATE(g, prec, 1, MPFR_GROUP_TINIT(g, 0, x))
@@ -1316,21 +1479,22 @@ struct mpfr_group_t {
    MPFR_GROUP_TINIT(g, 2, z);MPFR_GROUP_TINIT(g, 3, t);          \
    MPFR_GROUP_TINIT(g, 4, a);MPFR_GROUP_TINIT(g, 5, b))
 
-#define MPFR_GROUP_REPREC_TEMPLATE(g, prec, num, handler) do {   \
- mp_prec_t _prec = (prec);                                       \
- size_t    _oalloc = (g).alloc;                                  \
- mp_size_t _size;                                                \
- MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                          \
- if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX)) mpfr_abort_prec_max(); \
- _size = (mp_prec_t)(_prec +BITS_PER_MP_LIMB-1)/BITS_PER_MP_LIMB;\
- (g).alloc = (num)*_size*sizeof(mp_limb_t);                      \
- if (MPFR_LIKELY (_oalloc == 0))                                 \
-  (g).mant = (*__gmp_allocate_func) ((g).alloc);                 \
- else                                                            \
-  (g).mant = (*__gmp_reallocate_func)((g).mant,_oalloc,(g).alloc);\
- handler;                                                        \
-} while (0)
-
+#define MPFR_GROUP_REPREC_TEMPLATE(g, prec, num, handler) do {          \
+ mp_prec_t _prec = (prec);                                              \
+ size_t    _oalloc = (g).alloc;                                         \
+ mp_size_t _size;                                                       \
+ MPFR_ASSERTD (_prec >= MPFR_PREC_MIN);                                 \
+ if (MPFR_UNLIKELY (_prec > MPFR_PREC_MAX))                             \
+   mpfr_abort_prec_max ();                                              \
+ _size = (mp_prec_t) (_prec + BITS_PER_MP_LIMB - 1) / BITS_PER_MP_LIMB; \
+ (g).alloc = (num) * _size * sizeof (mp_limb_t);                        \
+ if (MPFR_LIKELY (_oalloc == 0))                                        \
+   (g).mant = (mp_limb_t *) (*__gmp_allocate_func) ((g).alloc);         \
+ else                                                                   \
+   (g).mant = (mp_limb_t *)                                             \
+     (*__gmp_reallocate_func) ((g).mant, _oalloc, (g).alloc);           \
+ handler;                                                               \
+ } while (0)
 
 #define MPFR_GROUP_REPREC_1(g, prec, x)                          \
  MPFR_GROUP_REPREC_TEMPLATE(g, prec, 1, MPFR_GROUP_TINIT(g, 0, x))
@@ -1433,6 +1597,13 @@ __MPFR_DECLSPEC int mpfr_const_pi_internal _MPFR_PROTO ((mpfr_ptr,mp_rnd_t));
 __MPFR_DECLSPEC int mpfr_const_log2_internal _MPFR_PROTO((mpfr_ptr,mp_rnd_t));
 __MPFR_DECLSPEC int mpfr_const_euler_internal _MPFR_PROTO((mpfr_ptr, mp_rnd_t));
 __MPFR_DECLSPEC int mpfr_const_catalan_internal _MPFR_PROTO((mpfr_ptr, mp_rnd_t));
+
+__MPFR_DECLSPEC void mpfr_init_cache _MPFR_PROTO ((mpfr_cache_t,
+                                           int(*)(mpfr_ptr,mpfr_rnd_t)));
+__MPFR_DECLSPEC void mpfr_clear_cache _MPFR_PROTO ((mpfr_cache_t));
+__MPFR_DECLSPEC int  mpfr_cache _MPFR_PROTO ((mpfr_ptr, mpfr_cache_t,
+                                              mpfr_rnd_t));
+
 __MPFR_DECLSPEC void mpfr_mulhigh_n _MPFR_PROTO ((mp_ptr, mp_srcptr,
                                                   mp_srcptr, mp_size_t));
 __MPFR_DECLSPEC void mpfr_sqrhigh_n _MPFR_PROTO ((mp_ptr, mp_srcptr, mp_size_t));
@@ -1445,7 +1616,8 @@ __MPFR_DECLSPEC void mpfr_dump_mant _MPFR_PROTO ((const mp_limb_t *,
                                                   mp_prec_t));
 
 __MPFR_DECLSPEC int mpfr_round_near_x _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
-                                                    mp_exp_t, int, mp_rnd_t));
+                                                    mpfr_uexp_t, int,
+                                                    mp_rnd_t));
 __MPFR_DECLSPEC void mpfr_abort_prec_max _MPFR_PROTO ((void))
        MPFR_NORETURN_ATTR;
 

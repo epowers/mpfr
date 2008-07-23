@@ -1,6 +1,6 @@
 /* mpfr_zeta -- compute the Riemann Zeta function
 
-Copyright 2003, 2004, 2005 Free Software Foundation.
+Copyright 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by Jean-Luc Re'my and the Spaces project, INRIA Lorraine.
 
 This file is part of the MPFR Library.
@@ -17,10 +17,8 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
-
-#include <limits.h>  /* For CHAR_BIT */
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
@@ -123,7 +121,7 @@ mpfr_zeta_part_a (mpfr_t sum, mpfr_srcptr s, int n)
 
   mpfr_neg (s1, s, GMP_RNDN);
   mpfr_ui_pow (u, n, s1, GMP_RNDN);
-  mpfr_div_2exp (u, u, 1, GMP_RNDN);
+  mpfr_div_2ui (u, u, 1, GMP_RNDN);
   mpfr_set (sum, u, GMP_RNDN);
   for (i=n-1; i>1; i--)
     {
@@ -175,7 +173,8 @@ mpfr_zeta_pos (mpfr_t z, mpfr_srcptr s, mp_rnd_t rnd_mode)
       else
         err = ((mp_exp_t)1) << err;
       err = 1 - (-err+1); /* GET_EXP(one) - (-err+1) = err :) */
-      MPFR_FAST_COMPUTE_IF_SMALL_INPUT (z, __gmpfr_one, err, 1, rnd_mode, );
+      MPFR_FAST_COMPUTE_IF_SMALL_INPUT (z, __gmpfr_one, err, 0, 1,
+                                        rnd_mode, {});
     }
 
   d = precz + MPFR_INT_CEIL_LOG2(precz) + 10;
@@ -331,7 +330,39 @@ mpfr_zeta (mpfr_t z, mpfr_srcptr s, mp_rnd_t rnd_mode)
           MPFR_RET (0);
         }
     }
+
   /* s is neither Nan, nor Inf, nor Zero */
+
+  /* check tiny s: we have zeta(s) = -1/2 - 1/2 log(2 Pi) s + ... around s=0,
+     and for |s| <= 0.074, we have |zeta(s) + 1/2| <= |s|.
+     Thus if |s| <= 1/4*ulp(1/2), we can deduce the correct rounding
+     (the 1/4 covers the case where |zeta(s)| < 1/2 and rounding to nearest).
+     A sufficient condition is that EXP(s) + 1 < -PREC(z). */
+  if (MPFR_EXP(s) + 1 < - (mp_exp_t) MPFR_PREC(z))
+    {
+      int signs = MPFR_SIGN(s);
+      mpfr_set_si_2exp (z, -1, -1, rnd_mode); /* -1/2 */
+      if ((rnd_mode == GMP_RNDU || rnd_mode == GMP_RNDZ) && signs < 0)
+        {
+          mpfr_nextabove (z); /* z = -1/2 + epsilon */
+          inex = 1;
+        }
+      else if (rnd_mode == GMP_RNDD && signs > 0)
+        {
+          mpfr_nextbelow (z); /* z = -1/2 - epsilon */
+          inex = -1;
+        }
+      else
+        {
+          if (rnd_mode == GMP_RNDU) /* s > 0: z = -1/2 */
+            inex = 1;
+          else if (rnd_mode == GMP_RNDD)
+            inex = -1;              /* s < 0: z = -1/2 */
+          else /* (GMP_RNDZ and s > 0) or GMP_RNDN: z = -1/2 */
+            inex = (signs > 0) ? 1 : -1;
+        }
+      return mpfr_check_range (z, inex, rnd_mode);
+    }
 
   /* Check for case s= -2n */
   if (MPFR_IS_NEG (s))
@@ -355,6 +386,8 @@ mpfr_zeta (mpfr_t z, mpfr_srcptr s, mp_rnd_t rnd_mode)
   else /* use reflection formula
           zeta(s) = 2^s*Pi^(s-1)*sin(Pi*s/2)*gamma(1-s)*zeta(1-s) */
     {
+      int overflow = 0;
+
       precz = MPFR_PREC (z);
       precs = MPFR_PREC (s);
 
@@ -382,6 +415,14 @@ mpfr_zeta (mpfr_t z, mpfr_srcptr s, mp_rnd_t rnd_mode)
           mpfr_sub (s1, __gmpfr_one, s, GMP_RNDN);/* s1 = 1-s */
           mpfr_zeta_pos (z_pre, s1, GMP_RNDN);   /* zeta(1-s)  */
           mpfr_gamma (y, s1, GMP_RNDN);          /* gamma(1-s) */
+          if (MPFR_IS_INF (y)) /* Zeta(s) < 0 for -4k-2 < s < -4k,
+                                  Zeta(s) > 0 for -4k < s < -4k+2 */
+            {
+              mpfr_div_2ui (s1, s, 2, GMP_RNDN); /* s/4, exact */
+              mpfr_frac (s1, s1, GMP_RNDN); /* exact, -1 < s1 < 0 */
+              overflow = (mpfr_cmp_si_2exp (s1, -1, -1) > 0) ? -1 : 1;
+              break;
+            }
           mpfr_mul (z_pre, z_pre, y, GMP_RNDN);  /* gamma(1-s)*zeta(1-s) */
           mpfr_const_pi (p, GMP_RNDD);
           mpfr_mul (y, s, p, GMP_RNDN);
@@ -402,7 +443,13 @@ mpfr_zeta (mpfr_t z, mpfr_srcptr s, mp_rnd_t rnd_mode)
           MPFR_GROUP_REPREC_4 (group, prec1, z_pre, s1, y, p);
         }
       MPFR_ZIV_FREE (loop);
-      inex = mpfr_set (z, z_pre, rnd_mode);
+      if (overflow != 0)
+        {
+          inex = mpfr_overflow (z, rnd_mode, overflow);
+          MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_OVERFLOW);
+        }
+      else
+        inex = mpfr_set (z, z_pre, rnd_mode);
       MPFR_GROUP_CLEAR (group);
     }
 

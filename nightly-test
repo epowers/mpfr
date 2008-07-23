@@ -1,0 +1,26 @@
+#!/bin/sh
+# Usage: nightly-test <GMPDIR> <BRANCH>
+set -e
+GMP="$1"
+BRANCH="$2"
+DIR=mpfr-nightly
+echo "BRANCH=$BRANCH"
+echo "GMP=$GMP"
+cd /tmp
+/bin/rm -fr "$DIR"
+mkdir "$DIR"
+# The following test should be useless, but let's be paranoid.
+test ! -h "$DIR"
+svn checkout "svn://scm.gforge.inria.fr/svn/mpfr/${BRANCH:-trunk}" "$DIR"
+cd "$DIR"
+autoreconf -i
+./configure --with-gmp="$GMP" --disable-alloca --enable-assert=full \
+  --disable-shared --enable-thread-safe --enable-tests-timeout=60 CFLAGS="-Wall -Wmissing-prototypes -O2 -g -fstack-protector -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security"
+make
+export GMP_CHECK_RANDOMIZE=1
+export MPFR_CHECK_MAX=1
+export MPFR_CHECK_ALL=1
+export MPFR_SUSPICIOUS_OVERFLOW=1
+make check
+cd /tmp
+/bin/rm -fr "$DIR"

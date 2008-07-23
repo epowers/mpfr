@@ -1,6 +1,7 @@
 /* Test file for mpfr_get_str.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -764,6 +765,48 @@ check_small (void)
   s = mpfr_get_str (NULL, &e, 32, 9, x, GMP_RNDN);
   mpfr_free_str (s);
 
+  mpfr_set_prec (x, 7);
+  mpfr_set_str_binary (x, "0.1010101E10");
+  s = mpfr_get_str (NULL, &e, 10, 2, x, GMP_RNDU);
+  mpfr_free_str (s);
+
+  /* checks rounding of negative numbers */
+  mpfr_set_prec (x, 7);
+  mpfr_set_str (x, "-11.5", 10, GMP_RNDN);
+  s = mpfr_get_str (NULL, &e, 10, 2, x, GMP_RNDD);
+  if (strcmp (s, "-12"))
+    {
+      printf ("Error in mpfr_get_str for x=-11.5 and rnd=GMP_RNDD\n"
+              "got %s instead of -12\n", s);
+      exit (1);
+  }
+  mpfr_free_str (s);
+
+  s = mpfr_get_str (NULL, &e, 10, 2, x, GMP_RNDU);
+  if (strcmp (s, "-11"))
+    {
+      printf ("Error in mpfr_get_str for x=-11.5 and rnd=GMP_RNDU\n");
+      exit (1);
+    }
+  mpfr_free_str (s);
+
+  /* bug found by Jean-Pierre Merlet, produced error in mpfr_get_str */
+  mpfr_set_prec (x, 128);
+  mpfr_set_str_binary (x, "0.10111001100110011001100110011001100110011001100110011001100110011001100110011001100110011001100110011001100110011001100110011010E3");
+  s = mpfr_get_str (NULL, &e, 10, 0, x, GMP_RNDU);
+  mpfr_free_str (s);
+
+  mpfr_set_prec (x, 381);
+  mpfr_set_str_binary (x, "0.111111111111111111111111111111111111111111111111111111111111111111101110110000100110011101101101001010111000101111000100100011110101010110101110100000010100001000110100000100011111001000010010000010001010111001011110000001110010111101100001111000101101100000010110000101100100000101010110010110001010100111001111100011100101100000100100111001100010010011110011011010110000001000010");
+  s = mpfr_get_str (NULL, &e, 10, 0, x, GMP_RNDD);
+  if (e != 0)
+    {
+      printf ("Error in mpfr_get_str for x=0.999999..., exponent is %d"
+              " instead of 0\n", (int) e);
+      exit (1);
+    }
+  mpfr_free_str (s);
+
   mpfr_clear (x);
 }
 
@@ -1025,32 +1068,55 @@ check_special (int b, mp_prec_t p)
 }
 
 static void
-check_bug_base2k(void)
+check_bug_base2k (void)
 {
   /*
    * -2.63b22b55697e800000000000@130
    * +-0.1001100011101100100010101101010101011010010111111010000000000000000000000000+00000000000000000000001E522
   */
-  mpfr_t xx,yy,zz;
+  mpfr_t xx, yy, zz;
   char *s;
   mp_exp_t e;
 
-  mpfr_init2(xx,107);
-  mpfr_init2(yy,79);
-  mpfr_init2(zz,99);
+  mpfr_init2 (xx, 107);
+  mpfr_init2 (yy, 79);
+  mpfr_init2 (zz, 99);
 
-  mpfr_set_str(xx, "-1.90e8c3e525d7c0000000000000@-18", 16, GMP_RNDN);
-  mpfr_set_str(yy, "-2.63b22b55697e8000000@130", 16, GMP_RNDN);
-  mpfr_add(zz, xx, yy, GMP_RNDD);
-  s = mpfr_get_str(NULL, &e, 16, 0, zz, GMP_RNDN);
-  if (strcmp(s, "-263b22b55697e8000000000008"))
+  mpfr_set_str (xx, "-1.90e8c3e525d7c0000000000000@-18", 16, GMP_RNDN);
+  mpfr_set_str (yy, "-2.63b22b55697e8000000@130", 16, GMP_RNDN);
+  mpfr_add (zz, xx, yy, GMP_RNDD);
+  s = mpfr_get_str (NULL, &e, 16, 0, zz, GMP_RNDN);
+  if (strcmp (s, "-263b22b55697e8000000000008"))
     {
-      printf(
-"Error for get_str base 16\nGot %s expected -263b22b55697e8000000000008\n", s);
-      exit(1);
+      printf ("Error for get_str base 16\n"
+              "Got %s expected -263b22b55697e8000000000008\n", s);
+      exit (1);
     }
   mpfr_free_str (s);
-  mpfr_clears(xx,yy,zz,NULL);
+  mpfr_clears (xx, yy, zz, (mpfr_ptr) 0);
+}
+
+static void
+check_reduced_exprange (void)
+{
+  mpfr_t x;
+  char *s;
+  mp_exp_t emax, e;
+
+  emax = mpfr_get_emax ();
+  mpfr_init2 (x, 8);
+  mpfr_set_str (x, "0.11111111E0", 2, GMP_RNDN);
+  set_emax (0);
+  s = mpfr_get_str (NULL, &e, 16, 0, x, GMP_RNDN);
+  set_emax (emax);
+  if (strcmp (s, "ff0"))
+    {
+      printf ("Error for mpfr_get_str on 0.11111111E0 in base 16:\n"
+              "Got \"%s\" instead of \"ff0\".\n", s);
+      exit (1);
+    }
+  mpfr_free_str (s);
+  mpfr_clear (x);
 }
 
 #define ITER 1000
@@ -1088,7 +1154,7 @@ main (int argc, char *argv[])
       mpfr_set_exp (x, (e == -10) ? mpfr_get_emin () :
                     ((e == 10) ? mpfr_get_emax () : e));
       b = 2 + (randlimb () % 35);
-      r = (mp_rnd_t) RND_RAND();
+      r = RND_RAND ();
       mpfr_get_str (s, &f, b, m, x, r);
     }
   mpfr_clear (x);
@@ -1112,7 +1178,9 @@ main (int argc, char *argv[])
   check3 (6.7274500420134077e-87, GMP_RNDU, "67275");
   check3 (6.7274500420134077e-87, GMP_RNDD, "67274");
 
-  check_bug_base2k();
+  check_bug_base2k ();
+  check_reduced_exprange ();
+
   tests_end_mpfr ();
   return 0;
 }

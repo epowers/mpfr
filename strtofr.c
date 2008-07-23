@@ -1,6 +1,7 @@
 /* mpfr_strtofr -- set a floating-point number from a string
 
-Copyright 2004, 2005 Free Software Foundation, Inc.
+Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,13 +17,12 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <string.h> /* For strlen */
 #include <stdlib.h> /* For strtol */
-#include <ctype.h>  /* For isdigit and isspace */
-#include <locale.h> /* For MPFR_DECIMAL_POINT */
+#include <ctype.h>  /* For isspace */
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
@@ -101,10 +101,6 @@ static const unsigned long RedInvLog2Table[MPFR_MAX_BASE-1][2] = {
   {231UL, 1370UL},
   {3515UL, 20929UL} };
 #if 0
-#include <stdio.h>
-#include <limits.h>
-#include "gmp.h"
-#include "mpfr.h"
 #define N 8
 int main ()
 {
@@ -175,7 +171,7 @@ digit_value_in_base (int c, int base)
 
   MPFR_ASSERTD (base > 0 && base <= MPFR_MAX_BASE);
 
-  if (isdigit (c))
+  if (c >= '0' && c <= '9')
     digit = c - '0';
   else if (c >= 'a' && c <= 'z')
     digit = (base >= 37) ? c - 'a' + 36 : c - 'a' + 10;
@@ -190,6 +186,7 @@ digit_value_in_base (int c, int base)
 /* Compatible with any locale, but one still assumes that 'a', 'b', 'c',
    ..., 'z', and 'A', 'B', 'C', ..., 'Z' are consecutive values (like
    in any ASCII-based character set). */
+/* TODO: support EBCDIC. */
 static int
 fast_casecmp (const char *s1, const char *s2)
 {
@@ -229,13 +226,18 @@ parse_string (mpfr_t x, struct parsed_string *pstr,
   const char *prefix_str;
   int decimal_point;
 
-  decimal_point = MPFR_DECIMAL_POINT;
+  decimal_point = (unsigned char) MPFR_DECIMAL_POINT;
 
   /* Init variable */
   pstr->mantissa = NULL;
 
   /* Optional leading whitespace */
   while (isspace((unsigned char) *str)) str++;
+
+  /* An optional sign `+' or `-' */
+  pstr->negative = (*str == '-');
+  if (*str == '-' || *str == '+')
+    str++;
 
   /* Can be case-insensitive NAN */
   if (fast_casecmp (str, "@nan@") == 0)
@@ -266,11 +268,6 @@ parse_string (mpfr_t x, struct parsed_string *pstr,
       __gmpfr_flags |= MPFR_FLAGS_NAN;
       return 0;
     }
-
-  /* An optional `+' or `-' */
-  pstr->negative = (*str == '-');
-  if ((*str == '-') || (*str == '+'))
-    str++;
 
   /* Can be case-insensitive INF */
   if (fast_casecmp (str, "@inf@") == 0)
@@ -328,7 +325,9 @@ parse_string (mpfr_t x, struct parsed_string *pstr,
 
   for (;;) /* Loop until an invalid character is read */
     {
-      int c = *str++;
+      int c = (unsigned char) *str++;
+      /* The cast to unsigned char is needed because of digit_value_in_base;
+         decimal_point uses this convention too. */
       if (c == '.' || c == decimal_point)
         {
           if (MPFR_UNLIKELY(point)) /* Second '.': stop parsing */
@@ -339,7 +338,8 @@ parse_string (mpfr_t x, struct parsed_string *pstr,
       c = digit_value_in_base (c, base);
       if (c == -1)
         break;
-      *mant++ = (char) c;
+      MPFR_ASSERTN (c >= 0); /* c is representable in an unsigned char */
+      *mant++ = (unsigned char) c;
       if (!point)
         pstr->exp_base ++;
     }
@@ -352,7 +352,7 @@ parse_string (mpfr_t x, struct parsed_string *pstr,
     {
       /* Check if there was a prefix (in such a case, we have to read
          again the mantissa without skipping the prefix)
-         The allocated mantissa is still enought big since we will
+         The allocated mantissa is still big enough since we will
          read only 0, and we alloc one more char than needed.
          FIXME: Not really friendly. Maybe cleaner code? */
       if (prefix_str != NULL)
@@ -482,7 +482,7 @@ parsed_string_to_mpfr (mpfr_t x, struct parsed_string *pstr, mp_rnd_t rnd)
       MPFR_ASSERTD (y[real_ysize - 1] != 0);
       count_leading_zeros (count, y[real_ysize - 1]);
       exact = (real_ysize <= ysize);
-      if (exact != 0) /* shift y to the left in that case y shoud be exact */
+      if (exact != 0) /* shift y to the left in that case y should be exact */
         {
           /* shift {y, num_limb} for count bits to the left */
           if (count != 0)
@@ -716,37 +716,42 @@ int
 mpfr_strtofr (mpfr_t x, const char *string, char **end, int base,
               mp_rnd_t rnd)
 {
-  int res = -1;
+  int res;
   struct parsed_string pstr;
+
+  MPFR_ASSERTN (base == 0 || (base >= 2 && base <= 36));
 
   /* If an error occured, it must return 0 */
   MPFR_SET_ZERO (x);
   MPFR_SET_POS (x);
 
-  if (base == 0 || (base >= 2 && base <= /*MPFR_MAX_BASE*/36))
+  /* Though bases up to MPFR_MAX_BASE are supported, we require a lower
+     limit: 36. For such values <= 36, parsing is case-insensitive. */
+  MPFR_ASSERTN (MPFR_MAX_BASE >= 36);
+  res = parse_string (x, &pstr, &string, base);
+  /* If res == 0, then it was exact (NAN or INF),
+     so it is also the ternary value */
+  if (MPFR_UNLIKELY (res == -1))  /* invalid data */
+    res = 0;  /* x is set to 0, which is exact, thus ternary value is 0 */
+  else if (res == 1)
     {
-      res = parse_string (x, &pstr, &string, base);
-      /* If res == 0, then it was exact (NAN or INF),
-         so it is also the ternary value */
-      if (res == 1)
-        {
-          res = parsed_string_to_mpfr (x, &pstr, rnd);
-          free_parsed_string (&pstr);
-        }
-      else if (res == 2)
-        res = mpfr_overflow (x, rnd, (pstr.negative) ? -1 : 1);
-      MPFR_ASSERTD (res != 3);
-#if 0
-      else if (res == 3)
-        {
-          /* This is called when there is a huge overflow
-             (Real expo < MPFR_EXP_MIN << __gmpfr_emin */
-          if (rnd == GMP_RNDN)
-            rnd = GMP_RNDZ;
-          res = mpfr_underflow (x, rnd, (pstr.negative) ? -1 : 1);
-        }
-#endif
+      res = parsed_string_to_mpfr (x, &pstr, rnd);
+      free_parsed_string (&pstr);
     }
+  else if (res == 2)
+    res = mpfr_overflow (x, rnd, (pstr.negative) ? -1 : 1);
+  MPFR_ASSERTD (res != 3);
+#if 0
+  else if (res == 3)
+    {
+      /* This is called when there is a huge overflow
+         (Real expo < MPFR_EXP_MIN << __gmpfr_emin */
+      if (rnd == GMP_RNDN)
+        rnd = GMP_RNDZ;
+      res = mpfr_underflow (x, rnd, (pstr.negative) ? -1 : 1);
+    }
+#endif
+
   if (end != NULL)
     *end = (char *) string;
   return res;

@@ -1,7 +1,7 @@
 /* Test file for mpfr_asin.
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
-Original version by Mathieu Dutour.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -26,6 +26,7 @@ MA 02110-1301, USA. */
 #include "mpfr-test.h"
 
 #define TEST_FUNCTION mpfr_asin
+#define TEST_RANDOM_EMAX 7
 #include "tgeneric.c"
 
 static void
@@ -170,6 +171,10 @@ static void
 special_overflow (void)
 {
   mpfr_t x, y;
+  mp_exp_t emin, emax;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   set_emin (-125);
   set_emax (128);
@@ -186,8 +191,32 @@ special_overflow (void)
     }
   mpfr_clear (y);
   mpfr_clear (x);
-  set_emin (MPFR_EMIN_MIN);
-  set_emax (MPFR_EMAX_MAX);
+  set_emin (emin);
+  set_emax (emax);
+}
+
+/* bug reported by Kevin Rauch on 15 December 2007 */
+static void
+test20071215 (void)
+{
+  mpfr_t x, y;
+
+  mpfr_init (x);
+  mpfr_init (y);
+
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  mpfr_neg (x, x, GMP_RNDN);
+  mpfr_set_ui (y, 1, GMP_RNDN);
+  mpfr_asin (y, x, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_zero_p (y) && MPFR_IS_NEG(y));
+
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  mpfr_set_si (y, -1, GMP_RNDN);
+  mpfr_asin (y, x, GMP_RNDN);
+  MPFR_ASSERTN(mpfr_zero_p (y) && MPFR_IS_POS(y));
+
+  mpfr_clear (x);
+  mpfr_clear (y);
 }
 
 int
@@ -198,9 +227,15 @@ main (void)
   special ();
   special_overflow ();
 
-  test_generic (2, 100, 7);
+  test_generic (2, 100, 15);
 
   tests_end_mpfr ();
 
+  data_check ("data/asin", mpfr_asin, "mpfr_asin");
+  bad_cases (mpfr_asin, mpfr_sin, "mpfr_asin", 256, -40, 1, 4, 128, 800, 30);
+
+  test20071215 ();
+
+  tests_end_mpfr ();
   return 0;
 }

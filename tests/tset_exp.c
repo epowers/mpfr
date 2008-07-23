@@ -1,6 +1,7 @@
 /* Test file for mpfr_set_exp.
 
-Copyright 2004 Free Software Foundation.
+Copyright 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -29,8 +30,12 @@ main (int argc, char *argv[])
 {
   mpfr_t x;
   int ret;
+  mp_exp_t emin, emax;
 
   tests_start_mpfr ();
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   mpfr_init (x);
 
@@ -53,6 +58,9 @@ main (int argc, char *argv[])
   MPFR_ASSERTN(ret != 0 && mpfr_cmp_ui (x, 1) == 0);
 
   mpfr_clear (x);
+
+  set_emin (emin);
+  set_emax (emax);
 
   tests_end_mpfr ();
   return 0;

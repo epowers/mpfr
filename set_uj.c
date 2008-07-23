@@ -1,6 +1,7 @@
 /* mpfr_set_uj -- set a MPFR number from a huge machine unsigned integer
 
-Copyright 2004, 2005 Free Software Foundation.
+Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #if HAVE_CONFIG_H
@@ -36,7 +37,6 @@ MA 02110-1301, USA. */
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
-#include <limits.h> /* For CHAR_BIT */
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
@@ -55,8 +55,10 @@ mpfr_set_uj_2exp (mpfr_t x, uintmax_t j, intmax_t e, mp_rnd_t rnd)
   unsigned int cnt, i;
   mp_size_t k, len;
   mp_limb_t limb;
-  mp_limb_t yp[sizeof(uintmax_t)/sizeof(mp_limb_t)];
+  mp_limb_t yp[sizeof(uintmax_t) / sizeof(mp_limb_t)];
   mpfr_t y;
+  unsigned long uintmax_bit_size = sizeof(uintmax_t) * CHAR_BIT;
+  unsigned long bpml = BITS_PER_MP_LIMB % uintmax_bit_size;
 
   /* Special case */
   if (j == 0)
@@ -69,13 +71,16 @@ mpfr_set_uj_2exp (mpfr_t x, uintmax_t j, intmax_t e, mp_rnd_t rnd)
   MPFR_ASSERTN (sizeof(uintmax_t) % sizeof(mp_limb_t) == 0);
 
   /* Create an auxillary var */
-  MPFR_TMP_INIT1 (yp, y, sizeof(uintmax_t) * CHAR_BIT);
+  MPFR_TMP_INIT1 (yp, y, uintmax_bit_size);
   k = numberof (yp);
   if (k == 1)
     limb = yp[0] = j;
   else
     {
-      for (i = 0; i < k; i++, j >>= BITS_PER_MP_LIMB)
+      /* Note: either BITS_PER_MP_LIMB = uintmax_bit_size, then k = 1 the
+         shift j >>= bpml is never done, or BITS_PER_MP_LIMB < uintmax_bit_size
+         and bpml = BITS_PER_MP_LIMB. */
+      for (i = 0; i < k; i++, j >>= bpml)
         yp[i] = j; /* Only the low bits are copied */
 
       /* Find the first limb not equal to zero. */
@@ -95,7 +100,15 @@ mpfr_set_uj_2exp (mpfr_t x, uintmax_t j, intmax_t e, mp_rnd_t rnd)
     mpn_lshift (yp+len, yp, k, cnt);  /* Normalize the High Limb*/
   else if (len != 0)
     MPN_COPY_DECR (yp+len, yp, k);    /* Must use DECR */
-  MPN_ZERO (yp, len);                 /* Zeroing the last limbs */
+  if (len != 0)
+    /* Note: when numberof(yp)==1, len is constant and null, so the compiler
+       can optimize out this code. */
+    {
+      if (len == 1)
+        yp[0] = (mp_limb_t) 0;
+      else
+        MPN_ZERO (yp, len);   /* Zeroing the last limbs */
+    }
   e += k * BITS_PER_MP_LIMB - cnt;    /* Update Expo */
   MPFR_ASSERTD (MPFR_LIMB_MSB(yp[numberof (yp) - 1]) != 0);
 

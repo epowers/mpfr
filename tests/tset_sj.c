@@ -1,7 +1,8 @@
 /* Test file for
    mpfr_set_sj, mpfr_set_uj, mpfr_set_sj_2exp and mpfr_set_uj_2exp.
 
-Copyright 2004 Free Software Foundation, Inc.
+Copyright 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +18,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #if HAVE_CONFIG_H
@@ -64,7 +65,7 @@ check_set_uj (mp_prec_t pmin, mp_prec_t pmax, int N)
   int inex1, inex2, n;
   mp_limb_t limb;
 
-  mpfr_inits2 (pmax, x, y, NULL);
+  mpfr_inits2 (pmax, x, y, (mpfr_ptr) 0);
 
   for ( p = pmin ; p < pmax ; p++)
     {
@@ -106,7 +107,7 @@ check_set_uj (mp_prec_t pmin, mp_prec_t pmax, int N)
   if (!MPFR_IS_ZERO (x))
     ERROR ("Setting 0");
 
-  mpfr_clears (x, y, NULL);
+  mpfr_clears (x, y, (mpfr_ptr) 0);
 }
 
 static void
@@ -126,7 +127,7 @@ check_set_uj_2exp (void)
     ERROR("(1024U,-10)");
 
   inex = mpfr_set_uj_2exp (x, 1024, 10, GMP_RNDN);
-  if (inex || mpfr_cmp_ui(x, 1024*1024))
+  if (inex || mpfr_cmp_ui(x, 1024L * 1024L))
     ERROR("(1024U,+10)");
 
   inex = mpfr_set_uj_2exp (x, UINTMAX_MAX, 1000, GMP_RNDN);

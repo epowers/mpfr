@@ -1,6 +1,7 @@
 /* mpfr_set_f -- set a MPFR number from a GNU MPF number
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -80,7 +81,22 @@ mpfr_set_f (mpfr_ptr y, mpf_srcptr x, mp_rnd_t rnd_mode)
       inexact = 0;
     }
 
-  MPFR_SET_EXP(y, EXP(x) * BITS_PER_MP_LIMB - cnt + carry);
+  /* warning: EXP(x) * BITS_PER_MP_LIMB may exceed the maximal exponent */
+  if (EXP(x) > 1 + (__gmpfr_emax - 1) / BITS_PER_MP_LIMB)
+    {
+      /* EXP(x) >= 2 + floor((__gmpfr_emax-1)/BITS_PER_MP_LIMB)
+         EXP(x) >= 2 + (__gmpfr_emax - BITS_PER_MP_LIMB) / BITS_PER_MP_LIMB
+                >= 1 + __gmpfr_emax / BITS_PER_MP_LIMB
+         EXP(x) * BITS_PER_MP_LIMB >= __gmpfr_emax + BITS_PER_MP_LIMB
+         Since 0 <= cnt <= BITS_PER_MP_LIMB-1, and 0 <= carry <= 1,
+         we have then EXP(x) * BITS_PER_MP_LIMB - cnt + carry > __gmpfr_emax */
+      return mpfr_overflow (y, rnd_mode, MPFR_SIGN (y));
+    }
+  else
+    {
+      /* Do not use MPFR_SET_EXP as the exponent may be out of range. */
+      MPFR_EXP (y) = EXP (x) * BITS_PER_MP_LIMB - (mp_exp_t) cnt + carry;
+    }
 
-  return inexact;
+  return mpfr_check_range (y, inexact, rnd_mode);
 }

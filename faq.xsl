@@ -1,8 +1,18 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE stylesheet [
+<!ENTITY styles SYSTEM "http://www.mpfr.org/styles/visual.css">
 <!ENTITY filter "h:div[@class = 'logo' or @class = 'end']">
 ]>
+
+<!--
+XSLT stylesheet to generate the FAQ.html file distributed in MPFR from
+the faq.html file on the MPFR web site. Use the following command:
+wget -q -O - http://www.mpfr.org/faq.html | \
+  xsltproc -''-nodtdattr faq.xsl - | \
+  perl -pe 's,(<(h:)?style.*),<style type="text/css">/*<![CDATA[*/,;
+            s,(</(h:)?style>),/*]]>*/</style>,' > FAQ.html
+-->
 
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -15,6 +25,36 @@
             doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
             indent="no"/>
 
+<xsl:template match="/">
+  <xsl:text>&#10;</xsl:text>
+  <xsl:comment>
+Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
+
+This file is part of the MPFR Library.
+
+The MPFR Library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License (either version 2.1
+of the License, or, at your option, any later version) and the GNU General
+Public License as published by the Free Software Foundation (most of MPFR is
+under the former, some under the latter).
+
+The MPFR Library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
+MA 02110-1301, USA.
+</xsl:comment>
+  <xsl:text>&#10;</xsl:text>
+  <xsl:copy>
+    <xsl:apply-templates select="node()"/>
+  </xsl:copy>
+</xsl:template>
+
 <xsl:template match="node()|@*">
   <xsl:copy>
     <xsl:apply-templates select="node()|@*"/>
@@ -26,14 +66,8 @@
     <xsl:text>&#10;</xsl:text>
     <xsl:copy-of select="h:title"/>
     <xsl:text>&#10;</xsl:text>
-    <h:style type="text/css"><![CDATA[
-dt
-{
-  margin-top: 2ex;
-  margin-bottom: 1ex;
-  font-weight: bolder;
-}
-]]></h:style>
+    <h:style type="text/css"><xsl:text disable-output-escaping="yes">
+&styles;</xsl:text></h:style>
     <xsl:text>&#10;</xsl:text>
   </xsl:copy>
 </xsl:template>

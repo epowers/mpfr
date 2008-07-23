@@ -1,6 +1,7 @@
 /* Test file for mpfr_sqr.
 
-Copyright 2004, 2005 Free Software Foundation.
+Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -27,6 +28,9 @@ MA 02110-1301, USA. */
 void check_special (void);
 void check_random (mpfr_prec_t p);
 
+#define TEST_FUNCTION mpfr_sqr
+#include "tgeneric.c"
+
 int main(void)
 {
   mpfr_prec_t p;
@@ -36,6 +40,8 @@ int main(void)
   check_special ();
   for(p = 2 ; p < 200 ; p++)
     check_random (p);
+
+  test_generic (2, 200, 15);
 
   tests_end_mpfr ();
   return 0;
@@ -75,7 +81,7 @@ void check_random(mpfr_prec_t p)
   int r;
   int i, inexact1, inexact2;
 
-  mpfr_inits2(p, x, y, z, NULL);
+  mpfr_inits2 (p, x, y, z, (mpfr_ptr) 0);
   for(i = 0 ; i < 500 ; i++)
     {
       mpfr_random (x);
@@ -90,7 +96,7 @@ void check_random(mpfr_prec_t p)
               error2 ((mp_rnd_t) r,p,x,y,inexact1,inexact2);
           }
     }
-  mpfr_clears(x,y,z,NULL);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
 void check_special(void)

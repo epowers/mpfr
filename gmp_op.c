@@ -1,6 +1,7 @@
 /* Implementations of operations between mpfr and mpz/mpq data
 
-Copyright 2001, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2001, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,15 +17,13 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
-
-#include <stddef.h>
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
 
-/* Init and set a mpfr_t with enought precision to store a mpz */
+/* Init and set a mpfr_t with enough precision to store a mpz */
 static void
 init_set_z (mpfr_ptr t, mpz_srcptr z)
 {
@@ -40,7 +39,7 @@ init_set_z (mpfr_ptr t, mpz_srcptr z)
   MPFR_ASSERTD (i == 0);
 }
 
-/* Init, set a mpfr_t with enought precision to store a mpz_t without round,
+/* Init, set a mpfr_t with enough precision to store a mpz_t without round,
    call the function, and clear the allocated mpfr_t  */
 static int
 foo (mpfr_ptr x, mpfr_srcptr y, mpz_srcptr z, mp_rnd_t r,

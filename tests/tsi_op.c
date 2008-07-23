@@ -1,7 +1,8 @@
 /* Test file for mpfr_add_si, mpfr_sub_si, mpfr_si_sub, mpfr_mul_si,
    mpfr_div_si, mpfr_si_div
 
-Copyright 2004 Free Software Foundation.
+Copyright 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +18,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -100,9 +101,8 @@ main (int argc, char *argv[])
   int y;
   int i;
 
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
-  mpfr_inits2 (53, x, z, NULL);
+  mpfr_inits2 (53, x, z, (mpfr_ptr) 0);
   for(i = 0 ; i < numberof (tab) ; i++)
     {
       mpfr_set_str (x, tab[i].op1, 16, GMP_RNDN);
@@ -132,7 +132,7 @@ main (int argc, char *argv[])
   if (mpfr_cmp_str1 (z, "-1024"))
     ERROR1("si_div", i, z, "-1024");
 
-  mpfr_clears (x, z, NULL);
+  mpfr_clears (x, z, (mpfr_ptr) 0);
 
   check_invert ();
 

@@ -1,6 +1,7 @@
 /* Test file for mpfr_cmp2.
 
-Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation.
+Copyright 1999, 2000, 2001, 2002, 2003, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -56,7 +57,7 @@ worst_cases (void)
   mpfr_init2 (y, 200);
 
   mpfr_set_ui (y, 1, GMP_RNDN);
-  for (i=1; i<MPFR_PREC(x); i++)
+  for (i = 1; i < MPFR_PREC(x); i++)
     {
       mpfr_set_ui (x, 1, GMP_RNDN);
       mpfr_div_2exp (y, y, 1, GMP_RNDN); /* y = 1/2^i */
@@ -85,18 +86,18 @@ worst_cases (void)
         }
     }
 
-  for (i=0; i<64; i++) /* |u| = i */
+  for (i = 0; i < 64; i++) /* |u| = i */
     {
       mpfr_random (x);
       mpfr_set (y, x, GMP_RNDN);
       set_bit (x, i + 1, 1);
       set_bit (y, i + 1, 0);
-      for (j=0; j<64; j++) /* |v| = j */
+      for (j = 0; j < 64; j++) /* |v| = j */
         {
           b = randlimb () % 2;
           set_bit (x, i + j + 2, b);
           set_bit (y, i + j + 2, b);
-          for (k=0; k<64; k++)
+          for (k = 0; k < 64; k++)
             {
               if (k)
                 set_bit (x, i + j + k + 1, 0);
@@ -290,7 +291,8 @@ special (void)
 int
 main (void)
 {
-  int i, j;
+  int i;
+  long j;
   double x, y, z;
 
   tests_start_mpfr ();
@@ -322,9 +324,9 @@ main (void)
           x = y;
           y = z;
         }
-      if (y != 0.0 && y != -0.0)
+      if (y != 0.0)
         tcmp2 (x, y, -1);
-  }
+    }
 
   tests_end_mpfr ();
 

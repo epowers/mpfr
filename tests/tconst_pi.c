@@ -1,6 +1,7 @@
 /* Test file for mpfr_const_pi.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -56,8 +57,19 @@ check_large (void)
     mpfr_const_pi (x, GMP_RNDZ);
   }
 
-  mpfr_clears (x, y, z, NULL);
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
+
+/* Wrapper for tgeneric */
+static int
+my_const_pi (mpfr_ptr x, mpfr_srcptr y, mp_rnd_t r)
+{
+  return mpfr_const_pi (x, r);
+}
+
+#define RAND_FUNCTION(x) mpfr_set_ui ((x), 0, GMP_RNDN)
+#define TEST_FUNCTION my_const_pi
+#include "tgeneric.c"
 
 int
 main (int argc, char *argv[])
@@ -107,6 +119,8 @@ main (int argc, char *argv[])
   mpfr_clear (x);
 
   check_large();
+
+  test_generic (2, 200, 1);
 
   tests_end_mpfr ();
   return 0;

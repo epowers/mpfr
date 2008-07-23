@@ -1,7 +1,7 @@
 /* Test file for mpfr_log2.
 
-Copyright 2001, 2002, 2004 Free Software Foundation.
-Adapted from tsinh.c.
+Copyright 2001, 2002, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -26,42 +26,44 @@ MA 02110-1301, USA. */
 #include "mpfr-test.h"
 
 #define TEST_FUNCTION mpfr_log2
+#define TEST_RANDOM_POS 8
 #include "tgeneric.c"
 
 static void
 special (void)
 {
   mpfr_t x;
+  int inex;
 
   mpfr_init (x);
 
   mpfr_set_nan (x);
-  mpfr_log2 (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_nan_p (x));
+  inex = mpfr_log2 (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_nan_p (x) && inex == 0);
 
   mpfr_set_inf (x, -1);
-  mpfr_log2 (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_nan_p (x));
+  inex = mpfr_log2 (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_nan_p (x) && inex == 0);
 
   mpfr_set_inf (x, 1);
-  mpfr_log2 (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) > 0);
+  inex = mpfr_log2 (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_inf_p (x) && mpfr_sgn (x) > 0 && inex == 0);
 
   mpfr_set_ui (x, 0, GMP_RNDN);
-  mpfr_log2 (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) < 0);
+  inex = mpfr_log2 (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_inf_p (x) && mpfr_sgn (x) < 0 && inex == 0);
   mpfr_set_ui (x, 0, GMP_RNDN);
   mpfr_neg (x, x, GMP_RNDN);
-  mpfr_log2 (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_inf_p (x) && mpfr_sgn (x) < 0);
+  inex = mpfr_log2 (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_inf_p (x) && mpfr_sgn (x) < 0 && inex == 0);
 
   mpfr_set_si (x, -1, GMP_RNDN);
-  mpfr_log2 (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_nan_p (x));
+  inex = mpfr_log2 (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_nan_p (x) && inex == 0);
 
   mpfr_set_si (x, 1, GMP_RNDN);
-  mpfr_log2 (x, x, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS(x));
+  inex = mpfr_log2 (x, x, GMP_RNDN);
+  MPFR_ASSERTN (mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS(x) && inex == 0);
 
   mpfr_clear (x);
 }
@@ -74,6 +76,8 @@ main (int argc, char *argv[])
   special ();
 
   test_generic (2, 100, 30);
+
+  data_check ("data/log2", mpfr_log2, "mpfr_log2");
 
   tests_end_mpfr ();
   return 0;

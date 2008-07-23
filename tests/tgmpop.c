@@ -1,7 +1,8 @@
 /* Test file for mpfr_add_[q,z], mpfr_sub_[q,z], mpfr_div_[q,z], mpfr_mul_[q,z]
    and mpfr_cmp_[q,z]
 
-Copyright 2004, 2005 Free Software Foundation.
+Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +18,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -143,7 +144,7 @@ check_for_zero ()
   mpq_set_ui (q, 0, 1);
 
   MPFR_SET_ZERO (x);
-  for(r = 0 ; r < GMP_RND_MAX ; r++)
+  RND_LOOP (r)
     {
       for (i = MPFR_SIGN_NEG ; i <= MPFR_SIGN_POS ;
            i+=MPFR_SIGN_POS-MPFR_SIGN_NEG)
@@ -322,7 +323,7 @@ test_specialz (int (*mpfr_func)(mpfr_ptr, mpfr_srcptr, mpz_srcptr, mp_rnd_t),
   mpz_t  z1, z2;
   int res;
 
-  mpfr_inits2 (128, x1, x2, NULL);
+  mpfr_inits2 (128, x1, x2, (mpfr_ptr) 0);
   mpz_init (z1); mpz_init(z2);
   mpz_fac_ui (z1, 19); /* 19!+1 fits perfectly in a 128 bits mantissa */
   mpz_add_ui (z1, z1, 1);
@@ -385,7 +386,7 @@ test_specialz (int (*mpfr_func)(mpfr_ptr, mpfr_srcptr, mpz_srcptr, mp_rnd_t),
     }
 
   mpz_clear (z1); mpz_clear(z2);
-  mpfr_clears(x1, x2, NULL);
+  mpfr_clears (x1, x2, (mpfr_ptr) 0);
 }
 
 static void
@@ -400,7 +401,7 @@ test_genericz (mp_prec_t p0, mp_prec_t p1, unsigned int N,
   int inexact, compare, compare2;
   unsigned int n;
 
-  mpfr_inits (arg1, dst_big, dst_small, tmp, NULL);
+  mpfr_inits (arg1, dst_big, dst_small, tmp, (mpfr_ptr) 0);
   mpz_init (arg2);
 
   for (prec = p0; prec <= p1; prec++)
@@ -413,7 +414,7 @@ test_genericz (mp_prec_t p0, mp_prec_t p1, unsigned int N,
         {
           mpfr_urandomb (arg1, RANDS);
           mpz_urandomb (arg2, RANDS, 1024);
-          rnd = (mp_rnd_t) RND_RAND ();
+          rnd = RND_RAND ();
           mpfr_set_prec (dst_big, 2*prec);
           compare = func(dst_big, arg1, arg2, rnd);
           if (mpfr_can_round (dst_big, 2*prec, rnd, rnd, prec))
@@ -462,7 +463,7 @@ test_genericz (mp_prec_t p0, mp_prec_t p1, unsigned int N,
     }
 
   mpz_clear (arg2);
-  mpfr_clears (arg1, dst_big, dst_small, tmp, NULL);
+  mpfr_clears (arg1, dst_big, dst_small, tmp, (mpfr_ptr) 0);
 }
 
 static void
@@ -477,7 +478,7 @@ test_genericq (mp_prec_t p0, mp_prec_t p1, unsigned int N,
   int inexact, compare, compare2;
   unsigned int n;
 
-  mpfr_inits (arg1, dst_big, dst_small, tmp, NULL);
+  mpfr_inits (arg1, dst_big, dst_small, tmp, (mpfr_ptr) 0);
   mpq_init (arg2);
 
   for (prec = p0; prec <= p1; prec++)
@@ -491,7 +492,7 @@ test_genericq (mp_prec_t p0, mp_prec_t p1, unsigned int N,
           mpfr_urandomb (arg1, RANDS);
           mpq_set_ui (arg2, randlimb (), randlimb() );
           mpq_canonicalize (arg2);
-          rnd = (mp_rnd_t) RND_RAND ();
+          rnd = RND_RAND ();
           mpfr_set_prec (dst_big, prec+10);
           compare = func(dst_big, arg1, arg2, rnd);
           if (mpfr_can_round (dst_big, prec+10, rnd, rnd, prec))
@@ -542,7 +543,7 @@ test_genericq (mp_prec_t p0, mp_prec_t p1, unsigned int N,
     }
 
   mpq_clear (arg2);
-  mpfr_clears (arg1, dst_big, dst_small, tmp, NULL);
+  mpfr_clears (arg1, dst_big, dst_small, tmp, (mpfr_ptr) 0);
 }
 
 static void
@@ -558,7 +559,7 @@ test_specialq (mp_prec_t p0, mp_prec_t p1, unsigned int N,
 
   for (prec = p0 ; prec < p1 ; prec++)
     {
-      mpfr_inits2 (prec, fra, frb, frq, NULL);
+      mpfr_inits2 (prec, fra, frb, frq, (mpfr_ptr) 0);
       mpq_init (q1); mpq_init(q2); mpq_init (qr);
 
       for( n = 0 ; n < N ; n++)
@@ -588,7 +589,7 @@ test_specialq (mp_prec_t p0, mp_prec_t p1, unsigned int N,
         }
 
       mpq_clear (q1); mpq_clear (q2); mpq_clear (qr);
-      mpfr_clears (fra, frb, frq, NULL);
+      mpfr_clears (fra, frb, frq, (mpfr_ptr) 0);
     }
 }
 

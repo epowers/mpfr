@@ -1,6 +1,7 @@
 /* mpfr_asin -- arc-sinus of a floating-point number
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library, and was contributed by Mathieu Dutour.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
@@ -46,12 +47,14 @@ mpfr_asin (mpfr_ptr asin, mpfr_srcptr x, mp_rnd_t rnd_mode)
         {
           MPFR_ASSERTD (MPFR_IS_ZERO (x));
           MPFR_SET_ZERO (asin);
+          MPFR_SET_SAME_SIGN (asin, x);
           MPFR_RET (0); /* exact result */
         }
     }
 
   /* asin(x) = x + x^3/6 + ... so the error is < 2^(3*EXP(x)-2) */
-  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (asin,x, -2*MPFR_GET_EXP (x)+2,1,rnd_mode,);
+  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (asin, x, -2 * MPFR_GET_EXP (x), 2, 1,
+                                    rnd_mode, {});
 
   /* Set x_p=|x| (x is a normal number) */
   mpfr_init2 (xp, MPFR_PREC (x));

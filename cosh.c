@@ -1,6 +1,7 @@
 /* mpfr_cosh -- hyperbolic cosine
 
-Copyright 2001, 2002, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -56,6 +57,13 @@ mpfr_cosh (mpfr_ptr y, mpfr_srcptr xt , mp_rnd_t rnd_mode)
     }
 
   MPFR_SAVE_EXPO_MARK (expo);
+
+  /* cosh(x) = 1+x^2/2 + ... <= 1+x^2 for x <= 2.9828...,
+     thus the error < 2^(2*EXP(x)). If x >= 1, then EXP(x) >= 1,
+     thus the following will always fail. */
+  MPFR_FAST_COMPUTE_IF_SMALL_INPUT (y, __gmpfr_one, -2 * MPFR_GET_EXP (xt), 0,
+                                    1, rnd_mode, inexact = _inexact; goto end);
+
   MPFR_TMP_INIT_ABS(x, xt);
   /* General case */
   {
@@ -79,12 +87,13 @@ mpfr_cosh (mpfr_ptr y, mpfr_srcptr xt , mp_rnd_t rnd_mode)
     MPFR_ZIV_INIT (loop, Nt);
     for (;;)
       {
+        MPFR_BLOCK_DECL (flags);
+
         /* Compute cosh */
-        mpfr_clear_flags ();
-        mpfr_exp (te, x, GMP_RNDD);         /* exp(x) */
+        MPFR_BLOCK (flags, mpfr_exp (te, x, GMP_RNDD));  /* exp(x) */
         /* exp can overflow (but not underflow since x>0) */
-        /* BUG/TODO/FIXME: exp can overflow but cosh may be representable! */
-        if (MPFR_UNLIKELY (mpfr_overflow_p ()))
+        if (MPFR_OVERFLOW (flags))
+          /* cosh(x) > exp(x), cosh(x) underflows too */
           {
             inexact = mpfr_overflow (y, rnd_mode, MPFR_SIGN_POS);
             MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_OVERFLOW);
@@ -111,7 +120,7 @@ mpfr_cosh (mpfr_ptr y, mpfr_srcptr xt , mp_rnd_t rnd_mode)
     MPFR_GROUP_CLEAR (group);
   }
 
+ end:
   MPFR_SAVE_EXPO_FREE (expo);
-  inexact = mpfr_check_range (y, inexact, rnd_mode);
-  return inexact;
+  return mpfr_check_range (y, inexact, rnd_mode);
 }

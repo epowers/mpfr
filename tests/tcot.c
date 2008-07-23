@@ -1,6 +1,7 @@
 /* Test file for mpfr_cot.
 
-Copyright 2005 Free Software Foundation, Inc.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -25,6 +26,7 @@ MA 02110-1301, USA. */
 #include "mpfr-test.h"
 
 #define TEST_FUNCTION mpfr_cot
+#define REDUCE_EMAX 262143 /* otherwise arg. reduction is too expensive */
 #include "tgeneric.c"
 
 static void
@@ -79,13 +81,63 @@ check_specials (void)
   mpfr_clear (y);
 }
 
+static void
+two2emin (mp_exp_t e)
+{
+  mp_exp_t old_emin, old_emax;
+  mpfr_t x, y;
+  int i, rnd;
+
+  old_emin = mpfr_get_emin ();
+  old_emax = mpfr_get_emax ();
+
+  if (mpfr_set_emin (-e) || mpfr_set_emax (e))
+    {
+      printf ("Can't change exponent range\n");
+      exit (1);
+    }
+
+  mpfr_inits2 (53, x, y, (mpfr_ptr) 0);
+  for (i = -4; i <= 4; i++)
+    RND_LOOP (rnd)
+      {
+        mpfr_set_si (y, i, GMP_RNDN);
+        mpfr_ui_div (y, 1, y, (mp_rnd_t) rnd);  /* no overflow/underflow */
+        mpfr_set_si_2exp (x, i, -e, GMP_RNDN);
+        if (ABS (i) != 3)  /* not a power of 2 (not 0 either) */
+          mpfr_sub (y, y, x, (mp_rnd_t) rnd);  /* no overflow/underflow */
+        mpfr_set_ui_2exp (x, 1, -e, GMP_RNDN);
+        mpfr_div (y, y, x, (mp_rnd_t) rnd);  /* 1/x - SIGN(x).epsilon */
+        mpfr_set_si_2exp (x, i, -e, GMP_RNDN);
+        mpfr_cot (x, x, (mp_rnd_t) rnd);
+        if (! mpfr_equal_p (x, y))
+          {
+            printf ("Error in two2emin for i = %d and rnd = %s\n",
+                    i, mpfr_print_rnd_mode ((mp_rnd_t) rnd));
+            printf ("Got        ");
+            mpfr_dump (x);
+            printf ("instead of ");
+            mpfr_dump (y);
+            exit (1);
+          }
+      }
+  mpfr_clears (x, y, (mpfr_ptr) 0);
+
+  mpfr_set_emin (old_emin);
+  mpfr_set_emax (old_emax);
+}
+
 int
 main (int argc, char *argv[])
 {
   tests_start_mpfr ();
 
   check_specials ();
-  test_generic (2, 200, 10);
+  two2emin (256);
+  two2emin (MPFR_EMAX_DEFAULT);
+  if (MPFR_EMAX_MAX != MPFR_EMAX_DEFAULT)
+    two2emin (MPFR_EMAX_MAX);
+  test_generic (2, 200, 5);
 
   tests_end_mpfr ();
   return 0;

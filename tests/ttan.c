@@ -1,6 +1,7 @@
 /* Test file for mpfr_tan.
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -25,6 +26,7 @@ MA 02110-1301, USA. */
 #include "mpfr-test.h"
 
 #define TEST_FUNCTION mpfr_tan
+#define REDUCE_EMAX 262143 /* otherwise arg. reduction is too expensive */
 #include "tgeneric.c"
 
 static void
@@ -69,9 +71,9 @@ check_nans (void)
   MPFR_ASSERTN(mpfr_cmp (x, y) == 0);
 
   /* Compute ~Pi/2 to check overflow */
-  /* TOO SLOW! Disable this test.
   mpfr_set_prec (x, 20000);
-  mpfr_const_pi (x, GMP_RNDD); mpfr_div_2ui (x, x, 1, GMP_RNDN);
+  mpfr_const_pi (x, GMP_RNDD);
+  mpfr_div_2ui (x, x, 1, GMP_RNDN);
   mpfr_set_prec (y, 24);
   mpfr_tan (y, x, GMP_RNDN);
   if (mpfr_cmp_str (y, "0.100011101101011000100011E20001", 2, GMP_RNDN))
@@ -79,14 +81,22 @@ check_nans (void)
       printf("Error computing tan(~Pi/2)\n");
       mpfr_dump (y);
       exit (1);
-      } */
+    }
+
+  /* bug found by Kaveh Ghazi on 13 Jul 2007 */
+  mpfr_set_prec (x, 53);
+  mpfr_set_prec (y, 53);
+  mpfr_set_str_binary (x, "0.10011100110111000001000010110100101000000000000000000E34");
+  mpfr_tan (y, x, GMP_RNDN);
+  mpfr_set_str_binary (x, "0.1000010011001010001000010100000110100111000011010101E41");
+  MPFR_ASSERTN(mpfr_cmp (x, y) == 0);
 
   mpfr_clear (x);
   mpfr_clear (y);
 }
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
   mpfr_t x;
   unsigned int i;
@@ -143,7 +153,10 @@ main(int argc, char *argv[])
 
   mpfr_clear (x);
 
-  test_generic (2, 100, 100);
+  test_generic (2, 100, 10);
+
+  data_check ("data/tan", mpfr_tan, "mpfr_tan");
+  bad_cases (mpfr_tan, mpfr_atan, "mpfr_tan", 256, -256, 255, 4, 128, 800, 40);
 
   tests_end_mpfr ();
   return 0;

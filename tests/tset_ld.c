@@ -1,6 +1,7 @@
 /* Test file for mpfr_set_ld and mpfr_get_ld.
 
-Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,13 +17,12 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
-#include <time.h>
 #include <limits.h>
 #if WITH_FPU_CONTROL
 #include <fpu_control.h>
@@ -161,11 +161,11 @@ main (int argc, char *argv[])
   /* check +0.0 and -0.0 */
   d = 0.0;
   check_set_get (d, x);
-  d = -0.0;
+  d = DBL_NEG_ZERO;
   check_set_get (d, x);
 
   /* checks that sign of -0.0 is set */
-  mpfr_set_ld (x, -0.0, GMP_RNDN);
+  mpfr_set_ld (x, DBL_NEG_ZERO, GMP_RNDN);
   if (MPFR_SIGN(x) > 0)
     {
       printf ("Error: sign of -0.0 is not set correctly\n");

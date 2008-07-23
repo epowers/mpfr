@@ -1,6 +1,7 @@
 /* mpfr_const_log2 -- compute natural logarithm of 2
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -147,7 +148,7 @@ mpfr_const_log2_internal (mpfr_ptr x, mp_rnd_t rnd_mode)
       MPFR_ASSERTD(w >= 3 && N >= 2);
 
       lgN = MPFR_INT_CEIL_LOG2 (N) + 1;
-      T  = (*__gmp_allocate_func) (3 * lgN * sizeof (mpz_t));
+      T  = (mpz_t *) (*__gmp_allocate_func) (3 * lgN * sizeof (mpz_t));
       P  = T + lgN;
       Q  = T + 2*lgN;
       for (i = 0; i < lgN; i++)

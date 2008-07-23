@@ -1,6 +1,7 @@
 /* Test file for mpfr_const_log2.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -44,7 +45,7 @@ check (mp_prec_t p0, mp_prec_t p1)
       mpfr_set_prec (x, p0);
       mpfr_set_prec (y, p0);
         {
-          rnd = (mp_rnd_t) RND_RAND ();
+          rnd = RND_RAND ();
           mpfr_const_log2 (x, rnd);
           mpfr_set (y, z, rnd);
           if ((dif = mpfr_cmp (x, y))
@@ -85,7 +86,7 @@ check_large (void)
   mpfr_set_prec (x, 26249);
   mpfr_const_log2 (x, GMP_RNDZ);
 
-  mpfr_clears (x, y, NULL);
+  mpfr_clears (x, y, (mpfr_ptr) 0);
 }
 
 static void
@@ -123,6 +124,17 @@ check_cache ()
 
   mpfr_clear (x);
 }
+
+/* Wrapper for tgeneric */
+static int
+my_const_log2 (mpfr_ptr x, mpfr_srcptr y, mp_rnd_t r)
+{
+  return mpfr_const_log2 (x, r);
+}
+
+#define RAND_FUNCTION(x) mpfr_set_ui ((x), 0, GMP_RNDN)
+#define TEST_FUNCTION my_const_log2
+#include "tgeneric.c"
 
 int
 main (int argc, char *argv[])
@@ -181,6 +193,8 @@ main (int argc, char *argv[])
 
   check_large();
   check_cache ();
+
+  test_generic (2, 200, 1);
 
   tests_end_mpfr ();
   return 0;

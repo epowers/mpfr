@@ -1,6 +1,7 @@
 /* mpfr_exp2 -- power of 2 function 2^y
 
-Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,10 +17,8 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
-
-#include <limits.h>
 
 #define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
@@ -31,6 +30,8 @@ int
 mpfr_exp2 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
 {
   int inexact;
+  long xint;
+  mpfr_t xfrac;
   MPFR_SAVE_EXPO_DECL (expo);
 
   if (MPFR_UNLIKELY (MPFR_IS_SINGULAR (x)))
@@ -58,9 +59,8 @@ mpfr_exp2 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
 
   /* since the smallest representable non-zero float is 1/2*2^__gmpfr_emin,
      if x < __gmpfr_emin - 1, the result is either 1/2*2^__gmpfr_emin or 0 */
-  MPFR_ASSERTD (MPFR_EMIN_MIN - 2 >= LONG_MIN);
-
-  if (mpfr_cmp_si_2exp (x, __gmpfr_emin - 1, 0) < 0)
+  MPFR_ASSERTN (MPFR_EMIN_MIN >= LONG_MIN + 2);
+  if (MPFR_UNLIKELY (mpfr_cmp_si (x, __gmpfr_emin - 1) < 0))
     {
       mp_rnd_t rnd2 = rnd_mode;
       /* in round to nearest mode, round to zero when x <= __gmpfr_emin-2 */
@@ -70,64 +70,77 @@ mpfr_exp2 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
       return mpfr_underflow (y, rnd2, 1);
     }
 
-  if (mpfr_integer_p (x)) /* we know that x >= 2^(emin-1) */
-    {
-      long xd;
+  MPFR_ASSERTN (MPFR_EMAX_MAX <= LONG_MAX);
+  if (MPFR_UNLIKELY (mpfr_cmp_si (x, __gmpfr_emax) >= 0))
+    return mpfr_overflow (y, rnd_mode, 1);
 
-      MPFR_ASSERTD (MPFR_EMAX_MAX <= LONG_MAX);
-      if (mpfr_cmp_si_2exp (x, __gmpfr_emax, 0) > 0)
-        return mpfr_overflow (y, rnd_mode, 1);
-
-      xd = mpfr_get_si (x, GMP_RNDN);
-
-      mpfr_set_ui (y, 1, GMP_RNDZ);
-      return mpfr_mul_2si (y, y, xd, rnd_mode);
-    }
+  /* We now know that emin - 1 <= x < emax. */
 
   MPFR_SAVE_EXPO_MARK (expo);
 
-  /* General case */
-  {
-    /* Declaration of the intermediary variable */
-    mpfr_t t;
+  /* 2^x = 1 + x*log(2) + O(x^2) for x near zero, and for |x| <= 1 we have
+     |2^x - 1| <= x < 2^EXP(x). If x > 0 we must round away from 0 (dir=1);
+     if x < 0 we must round towards 0 (dir=0). */
+  MPFR_SMALL_INPUT_AFTER_SAVE_EXPO (y, __gmpfr_one, - MPFR_GET_EXP (x), 0,
+                                    MPFR_SIGN(x) > 0, rnd_mode, expo, {});
 
-    /* Declaration of the size variable */
-    mp_prec_t Ny = MPFR_PREC(y);              /* target precision */
-    mp_prec_t Nt;                             /* working precision */
-    mp_exp_t err;                             /* error */
-    MPFR_ZIV_DECL (loop);
+  xint = mpfr_get_si (x, GMP_RNDZ);
+  mpfr_init2 (xfrac, MPFR_PREC (x));
+  mpfr_sub_si (xfrac, x, xint, GMP_RNDN); /* exact */
 
-    /* compute the precision of intermediary variable */
-    /* the optimal number of bits : see algorithms.tex */
-    Nt = Ny + 5 + MPFR_INT_CEIL_LOG2 (Ny);
+  if (MPFR_IS_ZERO (xfrac))
+    {
+      mpfr_set_ui (y, 1, GMP_RNDN);
+      inexact = 0;
+    }
+  else
+    {
+      /* Declaration of the intermediary variable */
+      mpfr_t t;
 
-    /* initialise of intermediary       variable */
-    mpfr_init2 (t, Nt);
+      /* Declaration of the size variable */
+      mp_prec_t Ny = MPFR_PREC(y);              /* target precision */
+      mp_prec_t Nt;                             /* working precision */
+      mp_exp_t err;                             /* error */
+      MPFR_ZIV_DECL (loop);
 
-    /* First computation */
-    MPFR_ZIV_INIT (loop, Nt);
-    for (;;)
-      {
-        /* compute   exp(x*ln(2))*/
-        mpfr_const_log2 (t, GMP_RNDU);       /* ln(2) */
-        mpfr_mul (t, x, t, GMP_RNDU);        /* x*ln(2) */
-        err = Nt - (MPFR_GET_EXP (t) + 2);   /* Estimate of the error */
-        mpfr_exp (t, t, GMP_RNDN);           /* exp(x*ln(2))*/
+      /* compute the precision of intermediary variable */
+      /* the optimal number of bits : see algorithms.tex */
+      Nt = Ny + 5 + MPFR_INT_CEIL_LOG2 (Ny);
 
-        if (MPFR_LIKELY (MPFR_CAN_ROUND (t, err, Ny, rnd_mode)))
-          break;
+      /* initialise of intermediary variable */
+      mpfr_init2 (t, Nt);
 
-        /* Actualisation of the precision */
-        MPFR_ZIV_NEXT (loop, Nt);
-        mpfr_set_prec (t, Nt);
-      }
-    MPFR_ZIV_FREE (loop);
+      /* First computation */
+      MPFR_ZIV_INIT (loop, Nt);
+      for (;;)
+        {
+          /* compute exp(x*ln(2))*/
+          mpfr_const_log2 (t, GMP_RNDU);       /* ln(2) */
+          mpfr_mul (t, xfrac, t, GMP_RNDU);    /* xfrac * ln(2) */
+          err = Nt - (MPFR_GET_EXP (t) + 2);   /* Estimate of the error */
+          mpfr_exp (t, t, GMP_RNDN);           /* exp(xfrac * ln(2)) */
 
-    inexact = mpfr_set (y, t, rnd_mode);
+          if (MPFR_LIKELY (MPFR_CAN_ROUND (t, err, Ny, rnd_mode)))
+            break;
 
-    mpfr_clear (t);
-  }
+          /* Actualisation of the precision */
+          MPFR_ZIV_NEXT (loop, Nt);
+          mpfr_set_prec (t, Nt);
+        }
+      MPFR_ZIV_FREE (loop);
+
+      inexact = mpfr_set (y, t, rnd_mode);
+
+      mpfr_clear (t);
+    }
+
+  mpfr_clear (xfrac);
+  mpfr_clear_flags ();
+  mpfr_mul_2si (y, y, xint, GMP_RNDN); /* exact or overflow */
+  /* Note: We can have an overflow only when t was rounded up to 2. */
+  MPFR_ASSERTD (MPFR_IS_PURE_FP (y) || inexact > 0);
+  MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, __gmpfr_flags);
   MPFR_SAVE_EXPO_FREE (expo);
-
   return mpfr_check_range (y, inexact, rnd_mode);
 }

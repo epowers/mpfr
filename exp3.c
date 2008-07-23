@@ -1,6 +1,7 @@
 /* mpfr_exp -- exponential of a floating-point number
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,10 +17,8 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
-
-#include <limits.h> /* for CHAR_BIT */
 
 #define MPFR_NEED_LONGLONG_H /* for MPFR_MPZ_SIZEINBASE2 */
 #include "mpfr-impl.h"
@@ -70,7 +69,7 @@ mpfr_exp_rational (mpfr_ptr y, mpz_ptr p, long r, int m,
   mpz_set_ui (S[0], 1);
   k = 0;
   mult[0] = 0; /* the multiplier P[k]/Q[k] for the remaining terms
-		  satisfies P[k]/Q[k] <= 2^(-mult[k]) */
+                  satisfies P[k]/Q[k] <= 2^(-mult[k]) */
   log2_nb_terms[0] = 0; /* log2(#terms) [exact in 1st loop where 2^k] */
   prec_i_have = 0;
 
@@ -87,22 +86,22 @@ mpfr_exp_rational (mpfr_ptr y, mpz_ptr p, long r, int m,
       l = 0;
       while ((j & 1) == 0) /* combine and reduce */
         {
-	  /* invariant: S[k] corresponds to 2^l consecutive terms */
+          /* invariant: S[k] corresponds to 2^l consecutive terms */
           mpz_mul (S[k], S[k], ptoj[l]);
           mpz_mul (S[k-1], S[k-1], Q[k]);
-	  /* Q[k] corresponds to 2^l consecutive terms too.
-	     Since it does not contains the factor 2^(r*2^l),
-	     when going from l to l+1 we need to multiply
-	     by 2^(r*2^(l+1))/2^(r*2^l) = 2^(r*2^l) */
+          /* Q[k] corresponds to 2^l consecutive terms too.
+             Since it does not contains the factor 2^(r*2^l),
+             when going from l to l+1 we need to multiply
+             by 2^(r*2^(l+1))/2^(r*2^l) = 2^(r*2^l) */
           mpz_mul_2exp (S[k-1], S[k-1], r << l);
           mpz_add (S[k-1], S[k-1], S[k]);
           mpz_mul (Q[k-1], Q[k-1], Q[k]);
           log2_nb_terms[k-1] ++; /* number of terms in S[k-1]
-				    is a power of 2 by construction */
+                                    is a power of 2 by construction */
           MPFR_MPZ_SIZEINBASE2 (prec_i_have, Q[k]);
-	  MPFR_MPZ_SIZEINBASE2 (prec_ptoj, ptoj[l]);
-	  mult[k-1] += prec_i_have + (r << l) - prec_ptoj - 1;
-	  prec_i_have = mult[k] = mult[k-1];
+          MPFR_MPZ_SIZEINBASE2 (prec_ptoj, ptoj[l]);
+          mult[k-1] += prec_i_have + (r << l) - prec_ptoj - 1;
+          prec_i_have = mult[k] = mult[k-1];
           /* since mult[k] >= mult[k-1] + nbits(Q[k]),
              we have Q[0]*...*Q[k] <= 2^mult[k] = 2^prec_i_have */
           l ++;
@@ -164,7 +163,10 @@ mpfr_exp_3 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
   mp_prec_t realprec, Prec;
   int iter;
   int inexact = 0;
+  MPFR_SAVE_EXPO_DECL (expo);
   MPFR_ZIV_DECL (ziv_loop);
+
+  MPFR_SAVE_EXPO_MARK (expo);
 
   /* decompose x */
   /* we first write x = 1.xxxxxxxxxxxxx
@@ -199,6 +201,8 @@ mpfr_exp_3 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
   MPFR_ZIV_INIT (ziv_loop, realprec);
   for (;;)
     {
+      MPFR_BLOCK_DECL (flags);
+
       k = MPFR_INT_CEIL_LOG2 (Prec) - MPFR_LOG2_BITS_PER_MP_LIMB;
 
       /* now we have to extract */
@@ -238,11 +242,11 @@ mpfr_exp_3 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
       (*__gmp_free_func) (P, 3*(k+2)*sizeof(mpz_t));
       (*__gmp_free_func) (mult, 2*(k+2)*sizeof(mp_prec_t));
 
-      mpfr_clear_flags ();
-      for (loop = 0; loop < shift_x; loop++)
-        mpfr_mul (tmp, tmp, tmp, GMP_RNDD);
+      MPFR_BLOCK (flags,
+                  for (loop = 0; loop < shift_x; loop++)
+                    mpfr_mul (tmp, tmp, tmp, GMP_RNDD));
 
-      if (MPFR_UNLIKELY (mpfr_overflow_p ()))
+      if (MPFR_OVERFLOW (flags))
         {
           /* We hack to set a FP number outside the valid range so that
              mpfr_check_range properly generates an overflow */
@@ -251,15 +255,11 @@ mpfr_exp_3 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
           inexact = 1;
           break;
         }
-      else if (MPFR_UNLIKELY (mpfr_underflow_p ()))
+      else if (MPFR_UNDERFLOW (flags))
         {
-          /* We hack to set a FP number outside the valid range so that
-             mpfr_check_range properly generates an underflow.
-             Note that the range has been increased to allow a safe
-             detection of underflow (MPFR_EMIN_MIN-3 in exp.c) even for
-             RNDN */
-          mpfr_setmax (y, MPFR_EMIN_MIN-2);
-          inexact = -1;
+          inexact = mpfr_underflow (y, rnd_mode, 1);
+          MPFR_SAVE_EXPO_UPDATE_FLAGS (expo, MPFR_FLAGS_INEXACT
+                                       | MPFR_FLAGS_UNDERFLOW);
           break;
         }
       else if (mpfr_can_round (tmp, realprec, GMP_RNDD, GMP_RNDZ,
@@ -279,5 +279,6 @@ mpfr_exp_3 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
   mpfr_clear (tmp);
   mpfr_clear (t);
   mpfr_clear (x_copy);
+  MPFR_SAVE_EXPO_FREE (expo);
   return inexact;
 }

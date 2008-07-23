@@ -1,5 +1,5 @@
-Copyright 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
-Contributed by the Spaces project, INRIA Lorraine.
+Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -15,10 +15,41 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA.
 
 ##############################################################################
+
+Changes from versions 2.3.* to version 2.4.0:
+- Changes in the behavior of mpfr_strtofr and in its documentation
+  concerning particular cases where the code and the documentation
+  did not match.
+- New functions:
+  * between a MPFR number and a double: mpfr_add_d, mpfr_sub_d,
+    mpfr_d_sub, mpfr_mul_d, mpfr_div_d, mpfr_d_div,
+  * formatted input/output:
+    mpfr_printf, mpfr_fprintf, mpfr_vprintf, mpfr_vfprintf,
+    mpfr_sprintf, mpfr_snprintf, mpfr_vsprintf, mpfr_vsnprintf,
+    mpfr_asprintf, mpfr_vasprintf.
+  * mpfr_sinh_cosh, mpfr_li2, mpfr_modf, mpfr_fmod, mpfr_rec_sqrt.
+- Configure test for TLS support.
+
+Changes from versions 2.2.* to version 2.3.0:
+- The mpfr.info file is now installed in the share subdirectory
+  (as required by the Filesystem Hierarchy Standard); see output
+  of "./configure --help".
+- The shared library is now enabled by default. If the MPFR build
+  fails on your platform, try the --disable-shared configure option
+  to disable the shared library.
+- Thread-safe support with Microsoft Visual compiler.
+- New functions mpfr_j0, mpfr_j1, mpfr_jn, mpfr_y0, mpfr_y1, mpfr_yn,
+  mpfr_lgamma, mpfr_remainder, mpfr_remquo, mpfr_fms, mpfr_signbit,
+  mpfr_setsign, mpfr_copysign, mpfr_get_patches.
+- Functions mpfr_sin, mpfr_cos and mpfr_sin_cos improved (argument
+  reduction).
+- More detailed MPFR manual.
+- Improved tests (make check).
+- Bug fixes.
 
 Changes from versions 2.1.* to version 2.2.0:
 - Bug fixes.

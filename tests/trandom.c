@@ -1,6 +1,7 @@
 /* Test file for the various mpfr_random fonctions.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,12 +17,11 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "mpfr-test.h"
 
@@ -32,12 +32,15 @@ test_random (long nbtests, mp_prec_t prec, int verbose)
   int *tab, size_tab, k;
   double d, av = 0, var = 0, chi2 = 0, th;
 
-  mpfr_init2(x, prec);
-
   size_tab = (nbtests >= 1000 ? nbtests / 50 : 20);
-  tab = (int *) malloc (size_tab * sizeof(int));
-  for (k = 0; k < size_tab; ++k)
-    tab[k] = 0;
+  tab = (int *) calloc (size_tab, sizeof(int));
+  if (tab == NULL)
+    {
+      fprintf (stderr, "trandom: can't allocate memory in test_random\n");
+      exit (1);
+    }
+
+  mpfr_init2(x, prec);
 
   for (k = 0; k < nbtests; k++)
     {
@@ -54,7 +57,7 @@ test_random (long nbtests, mp_prec_t prec, int verbose)
     }
 
   av /= nbtests;
-  var = (var /nbtests) - av*av;
+  var = (var / nbtests) - av*av;
 
   th = (double) nbtests / size_tab;
 
@@ -86,14 +89,17 @@ test_random2 (long nbtests, mp_prec_t prec, int verbose)
   int *tab, size_tab, k, sh, xn;
   double d, av = 0, var = 0, chi2 = 0, th;
 
+  size_tab = (nbtests >= 1000 ? nbtests / 50 : 20);
+  tab = (int *) calloc (size_tab, sizeof(int));
+  if (tab == NULL)
+    {
+      fprintf (stderr, "trandom: can't allocate memory in test_random2\n");
+      exit (1);
+    }
+
   mpfr_init2 (x, prec);
   xn = 1 + (prec - 1) / mp_bits_per_limb;
   sh = xn * mp_bits_per_limb - prec;
-
-  size_tab = (nbtests >= 1000 ? nbtests / 50 : 20);
-  tab = (int *) malloc (size_tab * sizeof(int));
-  for (k = 0; k < size_tab; ++k)
-    tab[k] = 0;
 
   for (k = 0; k < nbtests; k++)
     {
@@ -105,6 +111,15 @@ test_random2 (long nbtests, mp_prec_t prec, int verbose)
           mpfr_print_binary (x); puts ("");
           exit (1);
         }
+
+      /* check that the number is normalized */
+      if (! (MPFR_MANT(x)[MPFR_LIMB_SIZE(x) - 1] >> (BITS_PER_MP_LIMB - 1)))
+        {
+          printf ("Error: mpfr_random2() returns unnormalized numbers:\n");
+          mpfr_print_binary (x); puts ("");
+          exit (1);
+        }
+
       /* check that exponent is in correct range */
       if (mpfr_get_exp (x) != 0)
         {
@@ -120,7 +135,10 @@ test_random2 (long nbtests, mp_prec_t prec, int verbose)
 
   /* test size=0 */
   mpfr_random2 (x, 0, 0);
-  MPFR_ASSERTN(mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS(x));
+  MPFR_ASSERTN (mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS (x));
+  mpfr_set_si (x, -1, GMP_RNDN); /* x is negative */
+  mpfr_random2 (x, 0, 0);
+  MPFR_ASSERTN (mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS (x));
 
   /* test size < 0 */
   mpfr_random2 (x, -1, 0);
@@ -134,7 +152,7 @@ test_random2 (long nbtests, mp_prec_t prec, int verbose)
     }
 
   av /= nbtests;
-  var = (var /nbtests) - av*av;
+  var = (var / nbtests) - av*av;
 
   th = (double)nbtests / size_tab;
   printf("Average = %.5f\nVariance = %.5f\n", av, var);
@@ -160,25 +178,24 @@ test_urandomb (long nbtests, mp_prec_t prec, int verbose)
 {
   mpfr_t x;
   int *tab, size_tab, k, sh, xn;
-  gmp_randstate_t state;
   double d, av = 0, var = 0, chi2 = 0, th;
   mp_exp_t emin;
+
+  size_tab = (nbtests >= 1000 ? nbtests / 50 : 20);
+  tab = (int *) calloc (size_tab, sizeof(int));
+  if (tab == NULL)
+    {
+      fprintf (stderr, "trandom: can't allocate memory in test_urandomb\n");
+      exit (1);
+    }
 
   mpfr_init2 (x, prec);
   xn = 1 + (prec - 1) / mp_bits_per_limb;
   sh = xn * mp_bits_per_limb - prec;
 
-  size_tab = (nbtests >= 1000 ? nbtests / 50 : 20);
-  tab = (int *) malloc (size_tab * sizeof(int));
-  for (k = 0; k < size_tab; ++k)
-    tab[k] = 0;
-
-  gmp_randinit (state, GMP_RAND_ALG_LC, 128);
-  gmp_randseed_ui (state, time(NULL));
-
   for (k = 0; k < nbtests; k++)
     {
-      mpfr_urandomb (x, state);
+      mpfr_urandomb (x, RANDS);
       /* check that lower bits are zero */
       if (MPFR_MANT(x)[0] & MPFR_LIMB_MASK(sh))
         {
@@ -194,7 +211,7 @@ test_urandomb (long nbtests, mp_prec_t prec, int verbose)
   emin = mpfr_get_emin ();
   set_emin (1); /* the generated number in [0,1[ is not in the exponent
                         range, except if it is zero */
-  k = mpfr_urandomb (x, state);
+  k = mpfr_urandomb (x, RANDS);
   if (MPFR_IS_ZERO(x) == 0 && (k == 0 || mpfr_nan_p (x) == 0))
     {
       printf ("Error in mpfr_urandomb, expected NaN, got ");
@@ -204,7 +221,6 @@ test_urandomb (long nbtests, mp_prec_t prec, int verbose)
   set_emin (emin);
 
   mpfr_clear (x);
-  gmp_randclear (state);
   if (!verbose)
     {
       free(tab);
@@ -212,7 +228,7 @@ test_urandomb (long nbtests, mp_prec_t prec, int verbose)
     }
 
   av /= nbtests;
-  var = (var /nbtests) - av*av;
+  var = (var / nbtests) - av * av;
 
   th = (double)nbtests / size_tab;
   printf("Average = %.5f\nVariance = %.5f\n", av, var);
@@ -241,7 +257,6 @@ main (int argc, char *argv[])
   mp_prec_t prec;
   int verbose = 0;
 
-  MPFR_TEST_USE_RANDS ();
   tests_start_mpfr ();
 
   if (argc > 1)

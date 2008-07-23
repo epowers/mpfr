@@ -1,6 +1,7 @@
 /* mpfr_sec - secant function = 1/cos.
 
-Copyright 2005 Free Software Foundation, Inc.
+Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,13 +17,18 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define FUNCTION mpfr_sec
 #define INVERSE  mpfr_cos
 #define ACTION_NAN(y) do { MPFR_SET_NAN(y); MPFR_RET_NAN; } while (1)
 #define ACTION_INF(y) do { MPFR_SET_NAN(y); MPFR_RET_NAN; } while (1)
-#define ACTION_ZERO(y,x) return mpfr_set_ui (y, 1, GMP_RNDN)
+#define ACTION_ZERO(y,x) return mpfr_set_ui (y, 1, rnd_mode)
+/* for x near 0, sec(x) = 1 + x^2/2 + ..., more precisely |sec(x)-1| < x^2
+   for |x| <= 1. */
+#define ACTION_TINY(y,x,r) \
+  MPFR_FAST_COMPUTE_IF_SMALL_INPUT(y, __gmpfr_one, -2 * MPFR_GET_EXP (x), 0, \
+                                   1, r, inexact = _inexact; goto end)
 
 #include "gen_inverse.h"

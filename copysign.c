@@ -1,6 +1,7 @@
-/* mpfr_copysign -- Produce a value with the magnitude of x and sign of y
+/* mpfr_copysign -- Produce a value with the magnitude of x and sign bit of y
 
-Copyright 2001, 2002, 2003, 2004 Free Software Foundation.
+Copyright 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,24 +17,22 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include "mpfr-impl.h"
 
  /*
-   The computation of z with magnitude of x and sign of y
-   z = sign(y) * abs(x)
+   The computation of z with magnitude of x and sign of y:
+   z = (-1)^signbit(y) * abs(x), i.e. with the same sign bit as y,
+   even if z is a NaN.
+   Note: This function implements copysign from the IEEE-754 standard
+   when no rounding occurs (e.g. if PREC(z) >= PREC(x)).
  */
 
+#undef mpfr_copysign
 int
-mpfr_copysign (mpfr_ptr z, mpfr_srcptr x ,mpfr_srcptr y , mp_rnd_t rnd_mode)
+mpfr_copysign (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
 {
-  if (MPFR_UNLIKELY( MPFR_IS_NAN(y)))
-    {
-      MPFR_SET_NAN(z);
-      MPFR_RET_NAN;
-    }
-  else
-    return mpfr_set4(z, x, rnd_mode, MPFR_SIGN(y));
+  return mpfr_set4 (z, x, rnd_mode, MPFR_SIGN (y));
 }

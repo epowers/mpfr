@@ -1,7 +1,8 @@
 /* mpfr_set_d -- convert a machine double precision float to
                  a multiple precision floating-point number
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004  Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -17,7 +18,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <string.h> /* For memcmp if _GMP_IEEE_FLOAT == 0 */
@@ -176,7 +177,9 @@ mpfr_set_d (mpfr_ptr r, double d, mp_rnd_t rnd_mode)
            We can't use d==+0.0 since it should be always true,
            so we check that the memory representation of d is the
            same than +0.0. etc */
-        double poszero = +0.0, negzero = -0.0;
+        /* FIXME: consider the case where +0.0 or -0.0 may have several
+           representations. */
+        double poszero = +0.0, negzero = DBL_NEG_ZERO;
         if (memcmp(&d, &poszero, sizeof(double)) == 0)
           MPFR_SET_POS(r);
         else if (memcmp(&d, &negzero, sizeof(double)) == 0)
@@ -242,7 +245,7 @@ mpfr_set_d (mpfr_ptr r, double d, mp_rnd_t rnd_mode)
     MPN_ZERO (tmpmant, k);
 
   /* don't use MPFR_SET_EXP here since the exponent may be out of range */
-  MPFR_EXP(tmp) -= cnt + k * BITS_PER_MP_LIMB;
+  MPFR_EXP(tmp) -= (mp_exp_t) (cnt + k * BITS_PER_MP_LIMB);
 
   /* tmp is exact since PREC(tmp)=53 */
   inexact = mpfr_set4 (r, tmp, rnd_mode, signd);

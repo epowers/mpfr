@@ -1,6 +1,7 @@
 /* mpfr_fac_ui -- factorial of a non-negative integer
 
-Copyright 2001, 2004, 2005 Free Software Foundation, Inc.
+Copyright 2001, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #define MPFR_NEED_LONGLONG_H
@@ -26,6 +27,8 @@ MA 02110-1301, USA. */
 
     n!=prod^{n}_{i=1}i
  */
+
+/* FIXME: efficient problems with large arguments; see comments in gamma.c. */
 
 int
 mpfr_fac_ui (mpfr_ptr y, unsigned long int x, mp_rnd_t rnd_mode)
@@ -43,8 +46,8 @@ mpfr_fac_ui (mpfr_ptr y, unsigned long int x, mp_rnd_t rnd_mode)
   MPFR_ZIV_DECL (loop);
 
   /***** test x = 0  and x == 1******/
-  if (MPFR_UNLIKELY (x <=  1))
-    return mpfr_set_ui (y, 1, GMP_RNDN); /* 0! = 1 and 1! = 1 */
+  if (MPFR_UNLIKELY (x <= 1))
+    return mpfr_set_ui (y, 1, rnd_mode); /* 0! = 1 and 1! = 1 */
 
   MPFR_SAVE_EXPO_MARK (expo);
 

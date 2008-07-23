@@ -1,6 +1,7 @@
 /* Test file for mpfr_trunc, mpfr_ceil, mpfr_floor.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -16,7 +17,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
 #include <stdio.h>
@@ -34,7 +35,7 @@ main (void)
 
   tests_start_mpfr ();
 
-  mpfr_inits2(SIZEX, x, y, z, t, y2, z2, t2, NULL);
+  mpfr_inits2 (SIZEX, x, y, z, t, y2, z2, t2, (mpfr_ptr) 0);
 
   mpfr_set_str1 (x, "0.5");
   mpfr_ceil(y, x);
@@ -97,7 +98,7 @@ main (void)
               printf("\n");
               printf("round(x, RNDD) = "); mpfr_print_binary(y2);
               printf("\n");
-              exit(-1);
+              exit(1);
             }
 
           if (!mpfr_eq(z, z2, k))
@@ -108,7 +109,7 @@ main (void)
               printf("\n");
               printf("round(x, RNDZ) = "); mpfr_print_binary(z2);
               printf("\n");
-              exit(-1);
+              exit(1);
             }
 
           if (!mpfr_eq(y, y2, k))
@@ -119,13 +120,13 @@ main (void)
               printf("\n");
               printf("round(x, RNDU) = "); mpfr_print_binary(t2);
               printf("\n");
-              exit(-1);
+              exit(1);
             }
           MPFR_EXP(x)++;
         }
     }
 
-  mpfr_clears(x, y, z, t, y2, z2, t2, NULL);
+  mpfr_clears (x, y, z, t, y2, z2, t2, (mpfr_ptr) 0);
 
   tests_end_mpfr ();
   return 0;

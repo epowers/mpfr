@@ -1,5 +1,5 @@
-Copyright 1999, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
-Contributed by the Spaces project, INRIA Lorraine.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the MPFR Library.
 
@@ -15,7 +15,7 @@ License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with the MPFR Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Place, Fifth Floor, Boston,
+the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA.
 
 ##############################################################################
@@ -25,11 +25,25 @@ Probably many bugs.
 Known bugs:
 
 * The overflow/underflow exceptions may be badly handled in some functions;
-  specially when the intermediary internal results have exponent which 
-  exceeds the hardware limit (2^30 for a 32 bits CPU, and 2^62 for a 64 bits 
-  CPU).
+  specially when the intermediary internal results have exponent which
+  exceeds the hardware limit (2^30 for a 32 bits CPU, and 2^62 for a 64 bits
+  CPU) or the exact result is close to an overflow/underflow threshold.
+
+* Under Linux/x86 with the traditional FPU, some functions do not work
+  if the FPU rounding precision has been changed to single (this is a
+  bad practice and should be useless, but one never knows what other
+  software will do).
+
+* Some functions do not use MPFR_SAVE_EXPO_* macros, thus do not behave
+  correctly in a reduced exponent range.
 
 Potential bugs:
+
+* Possible incorrect results due to internal underflow, which can lead to
+  a huge loss of accuracy while the error analysis doesn't take that into
+  account. If the underflow occurs at the last function call (just before
+  the MPFR_CAN_ROUND), the result should be correct (or MPFR gets into an
+  infinite loop). TODO: check the code and the error analysis.
 
 * Possible integer overflows on some machines.
 
@@ -40,7 +54,9 @@ Potential bugs:
 
 * Possible infinite loop in some functions for particular cases: when
   the exact result is an exactly representable number or the middle of
-  consecutive two such numbers (for example, erf).
+  consecutive two such numbers. However for non-algebraic functions, it is
+  believed that no such case exists, except the well-known cases like cos(0)=1,
+  exp(0)=1, and so on, and the x^y function when y is an integer or y=1/2^k.
 
 * The mpfr_set_ld function may be quite slow if the long double type has an
   exponent of more than 15 bits.
@@ -50,24 +66,5 @@ Potential bugs:
 * Error analysis for some functions may be incorrect (out-of-date due
   to modifications in the code?).
 
-
-Problems due to compiler bugs:
-
-* on some architectures (for example alpha-dec-osf), gcc 3.3 wrongly
-  compares "long double" floating-point numbers, with optimization level
-  1 or higher. This bug can be detected by the following program:
-
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <float.h>
-  int
-  main ()
-  {
-    long double d;
-    d = 1.0; while (d < LDBL_MAX / 2.0) d += d;
-    if (d == (long double) 0.0)
-      printf ("d equals 0.0\n");
-  }
-
-  This results in a problem in the mpfr_set_ld function. A workaround is
-  to compile set_ld.c with -O0 (no optimization).
+* Possible use of non-portable feature (pre-C99) of the integer division
+  with negative result.
