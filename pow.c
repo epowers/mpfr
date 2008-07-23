@@ -154,8 +154,8 @@ is_odd (mpfr_srcptr y)
   return 1;
 }
 
-/* Assumes that the exponent range has already been extended
-   and if y is an integer, then the result is not exact. */
+/* Assumes that the exponent range has already been extended and if y is
+   an integer, then the result is not exact in unbounded exponent range. */
 int
 mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
                   mp_rnd_t rnd_mode, int y_is_integer, mpfr_save_expo_t *expo)
