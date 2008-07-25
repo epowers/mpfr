@@ -308,7 +308,47 @@ tst (void)
 }
 
 static void
-underflow_up (int extended_emin)
+underflow_up1 (int extended_emin)
+{
+  mpfr_t delta, x, y, z;
+  mp_exp_t n;
+  int inex;
+  int i;
+
+  n = mpfr_get_emin ();
+  if (n < LONG_MIN)
+    return;
+
+  mpfr_init2 (delta, 2);
+  inex = mpfr_set_ui_2exp (delta, 1, -2, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+
+  mpfr_init2 (x, 8);
+  inex = mpfr_set_ui (x, 2, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+
+  mpfr_init2 (y, sizeof (long) * CHAR_BIT + 4);
+  inex = mpfr_set_si (y, n, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+
+  mpfr_init2 (z, 32);
+
+  for (i = 0; i <= 12; i++)
+    {
+      /* Test 2^(emin - i/4).
+       * --> Underflow iff i > 4.
+       * --> Zero iff i >= 8.
+       */
+
+      inex = mpfr_sub (y, y, delta, GMP_RNDN);
+      MPFR_ASSERTN (inex == 0);
+    }
+
+  mpfr_clears (delta, x, y, z, (mpfr_ptr) 0);
+}
+
+static void
+underflow_up2 (int extended_emin)
 {
   mpfr_t x, y, z, z0, eps;
   mp_exp_t n;
@@ -347,7 +387,7 @@ underflow_up (int extended_emin)
       inex = mpfr_pow (z, x, y, (mp_rnd_t) rnd);
       if (__gmpfr_flags != ufinex)
         {
-          printf ("Error in underflow_up for %s",
+          printf ("Error in underflow_up2 for %s",
                   mpfr_print_rnd_mode ((mp_rnd_t) rnd));
           if (extended_emin)
             printf (" and extended emin");
@@ -360,12 +400,19 @@ underflow_up (int extended_emin)
         (mpfr_nextabove (z0), 1) : -1;
       sprintf (sy, "%lu", (unsigned long) n);
       cmpres (0, x, sy, (mp_rnd_t) rnd, z0, expected_inex, z, inex,
-              extended_emin ? "underflow_up and extended emin" :
-              "underflow_up");
+              extended_emin ? "underflow_up2 and extended emin" :
+              "underflow_up2");
       test_others (NULL, sy, (mp_rnd_t) rnd, x, y, z, inex);
     }
 
   mpfr_clears (x, y, z, z0, eps, (mpfr_ptr) 0);
+}
+
+static void
+underflow_up (int extended_emin)
+{
+  underflow_up1 (extended_emin);
+  underflow_up2 (extended_emin);
 }
 
 static void
