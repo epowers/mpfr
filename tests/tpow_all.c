@@ -61,12 +61,17 @@ err (const char *s, int i, int j, int rnd, mpfr_srcptr z, int inex)
 static void
 cmpres (int spx, const void *px, const char *sy, mp_rnd_t rnd,
         mpfr_srcptr z1, int inex1, mpfr_srcptr z2, int inex2,
-        const char *s)
+        unsigned int flags1, const char *s)
 {
-  if (MPFR_IS_NAN (z1) && MPFR_IS_NAN (z2))
-    return;
-  if (mpfr_equal_p (z1, z2) && SAME_SIGN (inex1, inex2))
-    return;
+  unsigned int flags2 = __gmpfr_flags;
+
+  if (flags1 == flags2)
+    {
+      if (MPFR_IS_NAN (z1) && MPFR_IS_NAN (z2))
+        return;
+      if (mpfr_equal_p (z1, z2) && SAME_SIGN (inex1, inex2))
+        return;
+    }
 
   printf ("Error with %s\nx = ", s);
   if (spx)
@@ -79,10 +84,10 @@ cmpres (int spx, const void *px, const char *sy, mp_rnd_t rnd,
   printf ("y = %s, %s\n", sy, mpfr_print_rnd_mode (rnd));
   printf ("Expected ");
   mpfr_out_str (stdout, 16, 0, z1, GMP_RNDN);
-  printf (", inex = %d\n", SIGN (inex1));
+  printf (", inex = %d, flags = %u\n", SIGN (inex1), flags1);
   printf ("Got      ");
   mpfr_out_str (stdout, 16, 0, z2, GMP_RNDN);
-  printf (", inex = %d\n", SIGN (inex2));
+  printf (", inex = %d, flags = %u\n", SIGN (inex2), flags2);
   if (all_cmpres_errors != 0)
     all_cmpres_errors = -1;
   else
@@ -103,7 +108,8 @@ is_odd (mpfr_srcptr x)
    rounding mode. */
 static void
 test_others (const void *sx, const char *sy, mp_rnd_t rnd,
-             mpfr_srcptr x, mpfr_srcptr y, mpfr_srcptr z1, int inex1)
+             mpfr_srcptr x, mpfr_srcptr y, mpfr_srcptr z1,
+             int inex1, unsigned int flags)
 {
   mpfr_t z2;
   int inex2;
@@ -116,7 +122,8 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
 
   __gmpfr_flags = MPFR_FLAGS_ALL;
   inex2 = mpfr_pow (z2, x, y, rnd);
-  cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, "mpfr_pow, flags set");
+  cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
+          "mpfr_pow, flags set");
 
   /* If y is an integer that fits in an unsigned long and is not -0,
      we can test mpfr_pow_ui. */
@@ -127,11 +134,11 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
 
       mpfr_clear_flags ();
       inex2 = mpfr_pow_ui (z2, x, yy, rnd);
-      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, flags,
               "mpfr_pow_ui, flags cleared");
       __gmpfr_flags = MPFR_FLAGS_ALL;
       inex2 = mpfr_pow_ui (z2, x, yy, rnd);
-      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
               "mpfr_pow_ui, flags set");
 
       /* If x is an integer that fits in an unsigned long and is not -0,
@@ -143,11 +150,11 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
 
           mpfr_clear_flags ();
           inex2 = mpfr_ui_pow_ui (z2, xx, yy, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, flags,
                   "mpfr_ui_pow_ui, flags cleared");
           __gmpfr_flags = MPFR_FLAGS_ALL;
           inex2 = mpfr_ui_pow_ui (z2, xx, yy, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
                   "mpfr_ui_pow_ui, flags set");
         }
     }
@@ -165,11 +172,11 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
 
           mpfr_clear_flags ();
           inex2 = mpfr_pow_si (z2, x, yy, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, flags,
                   "mpfr_pow_si, flags cleared");
           __gmpfr_flags = MPFR_FLAGS_ALL;
           inex2 = mpfr_pow_si (z2, x, yy, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
                   "mpfr_pow_si, flags set");
         }
 
@@ -178,11 +185,11 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
       mpfr_get_z (yyy, y, GMP_RNDN);
       mpfr_clear_flags ();
       inex2 = mpfr_pow_z (z2, x, yyy, rnd);
-      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, flags,
               "mpfr_pow_z, flags cleared");
       __gmpfr_flags = MPFR_FLAGS_ALL;
       inex2 = mpfr_pow_z (z2, x, yyy, rnd);
-      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
               "mpfr_pow_z, flags set");
       mpz_clear (yyy);
     }
@@ -196,11 +203,11 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
 
       mpfr_clear_flags ();
       inex2 = mpfr_ui_pow (z2, xx, y, rnd);
-      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, flags,
               "mpfr_ui_pow, flags cleared");
       __gmpfr_flags = MPFR_FLAGS_ALL;
       inex2 = mpfr_ui_pow (z2, xx, y, rnd);
-      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+      cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
               "mpfr_ui_pow, flags set");
 
       /* If x = 2, we can test mpfr_exp2. */
@@ -208,11 +215,11 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
         {
           mpfr_clear_flags ();
           inex2 = mpfr_exp2 (z2, y, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, flags,
                   "mpfr_exp2, flags cleared");
           __gmpfr_flags = MPFR_FLAGS_ALL;
           inex2 = mpfr_exp2 (z2, y, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
                   "mpfr_exp2, flags set");
         }
 
@@ -221,11 +228,11 @@ test_others (const void *sx, const char *sy, mp_rnd_t rnd,
         {
           mpfr_clear_flags ();
           inex2 = mpfr_exp10 (z2, y, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, flags,
                   "mpfr_exp10, flags cleared");
           __gmpfr_flags = MPFR_FLAGS_ALL;
           inex2 = mpfr_exp10 (z2, y, rnd);
-          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2,
+          cmpres (spx, sx, sy, rnd, z1, inex1, z2, inex2, MPFR_FLAGS_ALL,
                   "mpfr_exp10, flags set");
         }
     }
@@ -248,6 +255,7 @@ tst (void)
       RND_LOOP (rnd)
         {
           int exact, inex;
+          unsigned int flags;
 
           if (mpfr_set_str (x, val[i], 10, GMP_RNDN) ||
               mpfr_set_str (y, val[j], 10, GMP_RNDN))
@@ -257,6 +265,7 @@ tst (void)
             }
           mpfr_clear_flags ();
           inex = mpfr_pow (z, x, y, (mp_rnd_t) rnd);
+          flags = __gmpfr_flags;
           if (mpfr_underflow_p ())
             err ("got underflow", i, j, rnd, z, inex);
           if (mpfr_overflow_p ())
@@ -328,7 +337,7 @@ tst (void)
               if ((MPFR_IS_NEG (x) && is_odd (y)) ^ MPFR_IS_NEG (z))
                 err ("wrong sign", i, j, rnd, z, inex);
             }
-          test_others (val[i], val[j], (mp_rnd_t) rnd, x, y, z, inex);
+          test_others (val[i], val[j], (mp_rnd_t) rnd, x, y, z, inex, flags);
         }
   mpfr_clears (x, y, z, tmp, (mpfr_ptr) 0);
 }
@@ -409,26 +418,17 @@ underflow_up2 (int extended_emin)
       int expected_inex;
       char sy[256];
 
-      mpfr_clear_flags ();
-      inex = mpfr_pow (z, x, y, (mp_rnd_t) rnd);
-      if (__gmpfr_flags != ufinex)
-        {
-          printf ("Error in underflow_up2 for %s",
-                  mpfr_print_rnd_mode ((mp_rnd_t) rnd));
-          if (extended_emin)
-            printf (" and extended emin");
-          printf ("\n");
-          printf ("got %u instead of %u\n", __gmpfr_flags, ufinex);
-          exit (1);
-        }
       mpfr_set_ui (z0, 0, GMP_RNDN);
       expected_inex = rnd == GMP_RNDN || rnd == GMP_RNDU ?
         (mpfr_nextabove (z0), 1) : -1;
       sprintf (sy, "%lu", (unsigned long) n);
-      cmpres (0, x, sy, (mp_rnd_t) rnd, z0, expected_inex, z, inex,
+
+      mpfr_clear_flags ();
+      inex = mpfr_pow (z, x, y, (mp_rnd_t) rnd);
+      cmpres (0, x, sy, (mp_rnd_t) rnd, z0, expected_inex, z, inex, ufinex,
               extended_emin ? "underflow_up2 and extended emin" :
               "underflow_up2");
-      test_others (NULL, sy, (mp_rnd_t) rnd, x, y, z, inex);
+      test_others (NULL, sy, (mp_rnd_t) rnd, x, y, z, inex, ufinex);
     }
 
   mpfr_clears (x, y, z, z0, eps, (mpfr_ptr) 0);
