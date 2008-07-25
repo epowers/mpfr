@@ -212,6 +212,8 @@ mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
 
           MPFR_ASSERTN (!k_non_zero);
           MPFR_ASSERTN (!MPFR_IS_NAN (t));
+
+          /* Real underflow? */
           if (MPFR_IS_ZERO (t))
             {
               /* Underflow. We computed rndn(exp(t)), where t >= y*ln|x|.
@@ -225,20 +227,25 @@ mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
               break;
             }
 
-          /* Overflow. */
-          /* Note: we can probably use a low precision for this test. */
-          mpfr_log (t, absx, GMP_RNDD);            /* ln|x| */
-          mpfr_mul (t, y, t, GMP_RNDD);            /* y*ln|x| */
-          MPFR_BLOCK (flags2, mpfr_exp (t, t, GMP_RNDD));  /* exp(y*ln|x|)*/
-          if (MPFR_OVERFLOW (flags2))
+          /* Real overflow? */
+          if (MPFR_IS_INF (t))
             {
-              /* We have computed a lower bound on |x|^y, and it overflowed.
-                 Therefore we have a real overflow on |x|^y. */
-              inexact = mpfr_overflow (z, rnd_mode, MPFR_SIGN_POS);
-              if (expo != NULL)
-                MPFR_SAVE_EXPO_UPDATE_FLAGS (*expo, MPFR_FLAGS_INEXACT
-                                             | MPFR_FLAGS_OVERFLOW);
-              break;
+              /* Note: we can probably use a low precision for this test. */
+              mpfr_log (t, absx, GMP_RNDD);            /* ln|x| */
+              mpfr_mul (t, y, t, GMP_RNDD);            /* y * ln|x| */
+              MPFR_BLOCK (flags2, mpfr_exp (t, t, GMP_RNDD));
+              /* t = exp(y * ln|x|) */
+              if (MPFR_OVERFLOW (flags2))
+                {
+                  /* We have computed a lower bound on |x|^y, and it
+                     overflowed. Therefore we have a real overflow
+                     on |x|^y. */
+                  inexact = mpfr_overflow (z, rnd_mode, MPFR_SIGN_POS);
+                  if (expo != NULL)
+                    MPFR_SAVE_EXPO_UPDATE_FLAGS (*expo, MPFR_FLAGS_INEXACT
+                                                 | MPFR_FLAGS_OVERFLOW);
+                  break;
+                }
             }
 
           k_non_zero = 1;
