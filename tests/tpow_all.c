@@ -58,6 +58,18 @@ err (const char *s, int i, int j, int rnd, mpfr_srcptr z, int inex)
   exit (1);
 }
 
+/* Arguments:
+ *   spx: non-zero if px is a stringm zero if px is a MPFR number.
+ *   px: value of x (string or MPFR number).
+ *   sy: value of y (string).
+ *   rnd: rounding mode.
+ *   z1: expected result (null pointer if unknown pure FP value).
+ *   inex1: expected ternary value (if z1 is not a null pointer).
+ *   z2: computed result.
+ *   inex2: computed ternary value.
+ *   flags1: expected flags (computed flags in __gmpfr_flags).
+ *   s: string about the context.
+ */
 static void
 cmpres (int spx, const void *px, const char *sy, mp_rnd_t rnd,
         mpfr_srcptr z1, int inex1, mpfr_srcptr z2, int inex2,
@@ -67,9 +79,14 @@ cmpres (int spx, const void *px, const char *sy, mp_rnd_t rnd,
 
   if (flags1 == flags2)
     {
-      if (MPFR_IS_NAN (z1) && MPFR_IS_NAN (z2))
-        return;
-      if (mpfr_equal_p (z1, z2) && SAME_SIGN (inex1, inex2))
+      if (z1 == NULL)
+        {
+          if (MPFR_IS_PURE_FP (z2))
+            return;
+        }
+      else if (SAME_SIGN (inex1, inex2) &&
+               ((MPFR_IS_NAN (z1) && MPFR_IS_NAN (z2)) ||
+                mpfr_equal_p (z1, z2)))
         return;
     }
 
@@ -83,8 +100,15 @@ cmpres (int spx, const void *px, const char *sy, mp_rnd_t rnd,
     }
   printf ("y = %s, %s\n", sy, mpfr_print_rnd_mode (rnd));
   printf ("Expected ");
-  mpfr_out_str (stdout, 16, 0, z1, GMP_RNDN);
-  printf (", inex = %d, flags = %u\n", SIGN (inex1), flags1);
+  if (z1 == NULL)
+    {
+      printf ("pure FP value, flags = %u\n", flags1);
+    }
+  else
+    {
+      mpfr_out_str (stdout, 16, 0, z1, GMP_RNDN);
+      printf (", inex = %d, flags = %u\n", SIGN (inex1), flags1);
+    }
   printf ("Got      ");
   mpfr_out_str (stdout, 16, 0, z2, GMP_RNDN);
   printf (", inex = %d, flags = %u\n", SIGN (inex2), flags2);
@@ -345,9 +369,10 @@ tst (void)
 static void
 underflow_up1 (int extended_emin)
 {
-  mpfr_t delta, x, y, z;
+  mpfr_t delta, x, y, z, z0;
   mp_exp_t n;
   int inex;
+  int rnd;
   int i;
 
   n = mpfr_get_emin ();
@@ -366,20 +391,49 @@ underflow_up1 (int extended_emin)
   inex = mpfr_set_si (y, n, GMP_RNDN);
   MPFR_ASSERTN (inex == 0);
 
+  mpfr_init2 (z0, 2);
+  mpfr_set_ui (z0, 0, GMP_RNDN);
+
   mpfr_init2 (z, 32);
 
   for (i = 0; i <= 12; i++)
     {
+      unsigned int flags = 0;
+      char sy[16];
+
       /* Test 2^(emin - i/4).
        * --> Underflow iff i > 4.
-       * --> Zero iff i >= 8.
+       * --> Zero in GMP_RNDN iff i >= 8.
        */
+
+      if (i != 0 && i != 4)
+        flags |= MPFR_FLAGS_INEXACT;
+      if (i > 4)
+        flags |= MPFR_FLAGS_UNDERFLOW;
+
+      sprintf (sy, "emin - %d/4", i);
+
+      RND_LOOP (rnd)
+        {
+          int zero;
+
+          zero = (i > 4 && (rnd == GMP_RNDZ || rnd == GMP_RNDD)) ||
+            (i >= 8 && rnd == GMP_RNDN);
+
+          mpfr_clear_flags ();
+          inex = mpfr_pow (z, x, y, (mp_rnd_t) rnd);
+          cmpres (1, "2", sy, (mp_rnd_t) rnd,
+                  zero ? z0 : (mpfr_ptr) NULL, -1, z, inex, flags,
+                  extended_emin ? "underflow_up1 and extended emin" :
+                  "underflow_up1");
+          test_others ("2", sy, (mp_rnd_t) rnd, x, y, z, inex, flags);
+        }
 
       inex = mpfr_sub (y, y, delta, GMP_RNDN);
       MPFR_ASSERTN (inex == 0);
     }
 
-  mpfr_clears (delta, x, y, z, (mpfr_ptr) 0);
+  mpfr_clears (delta, x, y, z, z0, (mpfr_ptr) 0);
 }
 
 static void
