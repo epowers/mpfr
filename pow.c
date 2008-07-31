@@ -309,6 +309,7 @@ mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
       inex2 = mpfr_mul_2si (z, z, mpfr_get_si (k, GMP_RNDN), rnd_mode);
       if (inex2)  /* underflow or overflow */
         {
+          /* FIXME: possible double rounding problem (add a test first). */
           inexact = inex2;
           if (expo != NULL)
             MPFR_SAVE_EXPO_UPDATE_FLAGS (*expo, __gmpfr_flags);
