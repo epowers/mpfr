@@ -170,6 +170,10 @@ mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
   mp_exp_t err, exp_te;                      /* error */
   MPFR_ZIV_DECL (ziv_loop);
 
+
+  MPFR_LOG_FUNC (("x[%#R]=%R y[%#R]=%R rnd=%d", x, x, y, y, rnd_mode),
+                 ("z[%#R]=%R inexact=%d", z, z, inexact));
+
   /* We put the absolute value of x in absx, pointing to the significand
      of x to avoid allocating memory for the significand of absx. */
   MPFR_ALIAS(absx, x, /*sign=*/ 1, /*EXP=*/ MPFR_EXP(x));
@@ -506,6 +510,7 @@ mpfr_pow (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
       MPFR_SAVE_EXPO_FREE (expo);
       if (overflow)
         {
+          MPFR_LOG_MSG (("early overflow detection\n", 0));
           negative = MPFR_SIGN(x) < 0 && is_odd (y);
           return mpfr_overflow (z, rnd_mode, negative ? -1 : 1);
         }
@@ -529,6 +534,7 @@ mpfr_pow (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
       if (underflow)
         {
           /* warning: mpfr_underflow rounds away from 0 for GMP_RNDN */
+          MPFR_LOG_MSG (("early underflow detection\n", 0));
           negative = MPFR_SIGN(x) < 0 && is_odd (y);
           return mpfr_underflow (z, (rnd_mode == GMP_RNDN) ? GMP_RNDZ :
                                  rnd_mode, negative ? -1 : 1);
@@ -547,6 +553,7 @@ mpfr_pow (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
     {
       mpz_t zi;
 
+      MPFR_LOG_MSG (("special code for y not too large integer\n", 0));
       mpz_init (zi);
       mpfr_get_z (zi, y, GMP_RNDN);
       inexact = mpfr_pow_z (z, x, zi, rnd_mode);
@@ -565,6 +572,7 @@ mpfr_pow (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
         mpfr_t tmp;
         int sgnx = MPFR_SIGN (x);
 
+        MPFR_LOG_MSG (("special case (+/-2^b)^Y\n", 0));
         /* now x = +/-2^b, so x^y = (+/-1)^y*2^(b*y) is exact whenever b*y is
            an integer */
         MPFR_SAVE_EXPO_MARK (expo);
