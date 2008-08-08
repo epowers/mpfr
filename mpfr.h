@@ -242,7 +242,7 @@ __MPFR_DECLSPEC void mpfr_set_default_prec _MPFR_PROTO((mpfr_prec_t));
 __MPFR_DECLSPEC mp_prec_t mpfr_get_default_prec _MPFR_PROTO((void));
 
 __MPFR_DECLSPEC int mpfr_set_d _MPFR_PROTO ((mpfr_ptr, double, mpfr_rnd_t));
-#if MPFR_WANT_DECIMAL_FLOATS
+#ifdef MPFR_WANT_DECIMAL_FLOATS
 __MPFR_DECLSPEC int mpfr_set_decimal64 _MPFR_PROTO ((mpfr_ptr, _Decimal64,
                                                      mp_rnd_t));
 #endif
@@ -302,7 +302,7 @@ __MPFR_DECLSPEC uintmax_t mpfr_get_uj _MPFR_PROTO ((mpfr_srcptr, mpfr_rnd_t));
 
 __MPFR_DECLSPEC mp_exp_t mpfr_get_z_exp _MPFR_PROTO ((mpz_ptr, mpfr_srcptr));
 __MPFR_DECLSPEC double mpfr_get_d _MPFR_PROTO ((mpfr_srcptr, mpfr_rnd_t));
-#if MPFR_WANT_DECIMAL_FLOATS
+#ifdef MPFR_WANT_DECIMAL_FLOATS
 __MPFR_DECLSPEC _Decimal64 mpfr_get_decimal64 _MPFR_PROTO ((mpfr_srcptr,
                                                            mp_rnd_t));
 #endif
@@ -718,6 +718,11 @@ __MPFR_DECLSPEC int    mpfr_custom_get_kind   _MPFR_PROTO ((mpfr_srcptr));
 /* When using GCC, optimize certain common comparisons and affectations.
    + Remove ICC since it defines __GNUC__ but produces a
      huge number of warnings if you use this code.
+     VL: I couldn't reproduce a single warning when enabling these macros
+     with icc 10.1 20080212 on Itanium. But with this version, __ICC isn't
+     defined (__INTEL_COMPILER is, though), so that these macros are enabled
+     anyway. Checking with other ICC versions is needed. Possibly detect
+     whether warnings are produced or not with a configure test.
    + Remove C++ too, since it complains too much. */
 #if defined (__GNUC__) && !defined(__ICC) && !defined(__cplusplus)
 #if (__GNUC__ >= 2)
