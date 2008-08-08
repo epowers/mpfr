@@ -39,6 +39,9 @@ mpfr_pow_pos_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd, int cr)
   MPFR_ZIV_DECL (loop);
   MPFR_BLOCK_DECL (flags);
 
+  MPFR_LOG_FUNC (("x[%#R]=%R z=? rnd=%d cr=%d", x, x, rnd, cr),
+                 ("y[%#R]=%R inexact=%d", y, y, inexact));
+
   MPFR_ASSERTD (mpz_sgn (z) != 0);
 
   if (MPFR_UNLIKELY (mpz_cmpabs_ui (z, 1) == 0))
@@ -97,8 +100,11 @@ mpfr_pow_pos_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd, int cr)
 
   /* Check Overflow */
   if (MPFR_OVERFLOW (flags))
-    inexact = mpfr_overflow (y, rnd, mpz_odd_p (absz) ?
-                             MPFR_SIGN (x) : MPFR_SIGN_POS);
+    {
+      MPFR_LOG_MSG (("overflow\n", 0));
+      inexact = mpfr_overflow (y, rnd, mpz_odd_p (absz) ?
+                               MPFR_SIGN (x) : MPFR_SIGN_POS);
+    }
   /* Check Underflow */
   else if (MPFR_UNDERFLOW (flags))
     {
@@ -128,8 +134,11 @@ mpfr_pow_pos_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd, int cr)
           __gmpfr_flags = MPFR_FLAGS_INEXACT | MPFR_FLAGS_UNDERFLOW;
         }
       else
-        inexact = mpfr_underflow (y, rnd, mpz_odd_p (absz) ?
-                                  MPFR_SIGN (x) : MPFR_SIGN_POS);
+        {
+          MPFR_LOG_MSG (("underflow\n", 0));
+          inexact = mpfr_underflow (y, rnd, mpz_odd_p (absz) ?
+                                    MPFR_SIGN (x) : MPFR_SIGN_POS);
+        }
     }
   else
     inexact = mpfr_set (y, res, rnd);
@@ -156,6 +165,9 @@ mpfr_pow_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd)
   int   inexact;
   mpz_t tmp;
   MPFR_SAVE_EXPO_DECL (expo);
+
+  MPFR_LOG_FUNC (("x[%#R]=%R z=? rnd=%d", x, x, rnd),
+                 ("y[%#R]=%R inexact=%d", y, y, inexact));
 
   /* x^0 = 1 for any x, even a NaN */
   if (MPFR_UNLIKELY (mpz_sgn (z) == 0))
@@ -207,10 +219,12 @@ mpfr_pow_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd)
     {
       mp_exp_t expx = MPFR_EXP (x); /* warning: x and y may be the same
                                        variable */
+
+      MPFR_LOG_MSG (("x^n with x power of two\n", 0));
       mpfr_set_si (y, mpz_odd_p (z) ? MPFR_INT_SIGN(x) : 1, rnd);
       MPFR_ASSERTD (MPFR_IS_FP (y));
       mpz_init (tmp);
-      mpz_mul_si (tmp, z, expx-1);
+      mpz_mul_si (tmp, z, expx - 1);
       MPFR_ASSERTD (MPFR_GET_EXP (y) == 1);
       mpz_add_ui (tmp, tmp, 1);
       inexact = 0;
@@ -224,12 +238,16 @@ mpfr_pow_z (mpfr_ptr y, mpfr_srcptr x, mpz_srcptr z, mp_rnd_t rnd)
            *     result is <= 2^(emin-2).
            * NOTE: y is a power of 2 and inexact = 0!
            */
-          if (rnd == GMP_RNDN && mpz_cmp_si (tmp, __gmpfr_emin-1) < 0)
+          MPFR_LOG_MSG (("underflow\n", 0));
+          if (rnd == GMP_RNDN && mpz_cmp_si (tmp, __gmpfr_emin - 1) < 0)
             rnd = GMP_RNDZ;
           inexact = mpfr_underflow (y, rnd, MPFR_SIGN (y));
         }
       else if (MPFR_UNLIKELY (mpz_cmp_si (tmp, __gmpfr_emax) > 0))
-        inexact = mpfr_overflow (y, rnd, MPFR_SIGN (y));
+        {
+          MPFR_LOG_MSG (("overflow\n", 0));
+          inexact = mpfr_overflow (y, rnd, MPFR_SIGN (y));
+        }
       else
         MPFR_SET_EXP (y, mpz_get_si (tmp));
       mpz_clear (tmp);
