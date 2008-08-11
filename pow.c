@@ -264,6 +264,7 @@ mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
           mpfr_log2 (k, absx, GMP_RNDN);
           mpfr_mul (k, y, k, GMP_RNDN);
           mpfr_round (k, k);
+          MPFR_LOG_VAR (k);
           /* |y| < 2^Ntmin, therefore |k| < 2^Nt. */
           continue;
         }
@@ -307,13 +308,34 @@ mpfr_pow_general (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y,
   if (k_non_zero)
     {
       int inex2;
+      long lk;
 
+      /* The rounded result in an unbounded exponent range is z * 2^k. As
+       * MPFR chooses underflow after rounding, the mpfr_mul_2si below will
+       * correctly detect underflows and overflows. However, in rounding to
+       * nearest, if z * 2^k = 2^(emin - 2), then the double rounding may
+       * affect the result. We need to cope with that before overwriting z.
+       * If inexact >= 0, then the real result is <= 2^(emin - 2), so that
+       * o(2^(emin - 2)) = +0 is correct. If inexact < 0, then the real
+       * result is > 2^(emin - 2) and we need to round to 2^(emin - 1).
+       */
       MPFR_ASSERTN (MPFR_EMAX_MAX <= LONG_MAX);
+      lk = mpfr_get_si (k, GMP_RNDN);
+      if (rnd_mode == GMP_RNDN && inexact < 0 &&
+          MPFR_GET_EXP (z) + lk == __gmpfr_emin - 1 && mpfr_powerof2_raw (z))
+        {
+          /* Rounding to nearest, real result > z * 2^k = 2^(emin - 2),
+           * underflow case: as the minimum precision is > 1, we will
+           * obtain the correct result and exceptions by replacing z by
+           * nextabove(z).
+           */
+          MPFR_ASSERTN (MPFR_PREC_MIN > 1);
+          mpfr_nextabove (z);
+        }
       mpfr_clear_flags ();
-      inex2 = mpfr_mul_2si (z, z, mpfr_get_si (k, GMP_RNDN), rnd_mode);
+      inex2 = mpfr_mul_2si (z, z, lk, rnd_mode);
       if (inex2)  /* underflow or overflow */
         {
-          /* FIXME: possible double rounding problem (add a test first). */
           inexact = inex2;
           if (expo != NULL)
             MPFR_SAVE_EXPO_UPDATE_FLAGS (*expo, __gmpfr_flags);

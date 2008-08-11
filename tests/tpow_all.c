@@ -436,6 +436,22 @@ underflow_up1 (int extended_emin)
   mpfr_clears (delta, x, y, z, z0, (mpfr_ptr) 0);
 }
 
+/* With pow.c r5497, the following test fails on a 64-bit Linux machine
+ * due to a double-rounding problem when rescaling the result:
+ *   Error with underflow_up2 and extended emin
+ *   x = 7.fffffffffffffff0@-1,
+ *   y = 4611686018427387904, GMP_RNDN
+ *   Expected 1.0000000000000000@-1152921504606846976, inex = 1, flags = 9
+ *   Got      0, inex = -1, flags = 9
+ * With pow_ui.c r5423, the following test fails on a 64-bit Linux machine
+ * as underflows and overflows are not handled correctly (the approximation
+ * error is ignored):
+ *   Error with mpfr_pow_ui, flags cleared
+ *   x = 7.fffffffffffffff0@-1,
+ *   y = 4611686018427387904, GMP_RNDN
+ *   Expected 1.0000000000000000@-1152921504606846976, inex = 1, flags = 9
+ *   Got      0, inex = -1, flags = 9
+ */
 static void
 underflow_up2 (int extended_emin)
 {
