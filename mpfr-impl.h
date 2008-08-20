@@ -567,8 +567,18 @@ typedef unsigned long int  mpfr_uexp_t;
 #ifndef mp_exp_unsigned_t
 # define mp_exp_unsigned_t mpfr_uexp_t
 #endif
-#define mpfr_get_exp_t(x,r) mpfr_get_si((x),(r))
-#define mpfr_set_exp_t(x,e,r) mpfr_set_si((x),(e),(r))
+
+#if MPFR_EXP_MIN >= LONG_MIN && MPFR_EXP_MAX <= LONG_MAX
+typedef long int mpfr_eexp_t;
+# define mpfr_get_exp_t(x,r) mpfr_get_si((x),(r))
+# define mpfr_set_exp_t(x,e,r) mpfr_set_si((x),(e),(r))
+#elif defined (_MPFR_H_HAVE_INTMAX_T)
+typedef intmax_t mpfr_eexp_t;
+# define mpfr_get_exp_t(x,r) mpfr_get_sj((x),(r))
+# define mpfr_set_exp_t(x,e,r) mpfr_set_sj((x),(e),(r))
+#else
+# error "Cannot define mpfr_get_exp_t and mpfr_set_exp_t"
+#endif
 
 /* Invalid exponent value (to track bugs...) */
 #define MPFR_EXP_INVALID \
@@ -1546,6 +1556,9 @@ __MPFR_DECLSPEC int       __gmpfr_int_ceil_log2 _MPFR_PROTO ((unsigned long));
 __MPFR_DECLSPEC int mpfr_exp_2 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,mp_rnd_t));
 __MPFR_DECLSPEC int mpfr_exp_3 _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,mp_rnd_t));
 __MPFR_DECLSPEC int mpfr_powerof2_raw _MPFR_PROTO ((mpfr_srcptr));
+
+__MPFR_DECLSPEC int mpfr_pow_general _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
+                           mpfr_srcptr, mp_rnd_t, int, mpfr_save_expo_t *));
 
 __MPFR_DECLSPEC void mpfr_setmax _MPFR_PROTO ((mpfr_ptr, mp_exp_t));
 __MPFR_DECLSPEC void mpfr_setmin _MPFR_PROTO ((mpfr_ptr, mp_exp_t));

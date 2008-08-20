@@ -1243,6 +1243,97 @@ bug20071218 (void)
   mpfr_clears (x, y, z, t, (mpfr_ptr) 0);
 }
 
+/* With revision 5429, this gives:
+ *   pow.c:43:  assertion failed: !mpfr_integer_p (y)
+ * This is fixed in revision 5432.
+ */
+static void
+bug20080721 (void)
+{
+  mpfr_t x, y, z, t[2];
+  int inex;
+  int rnd;
+  int err = 0;
+
+  /* Note: input values have been chosen in a way to select the
+   * general case. If mpfr_pow is modified, in particular line
+   *     if (y_is_integer && (MPFR_GET_EXP (y) <= 256))
+   * make sure that this test still does what we want.
+   */
+  mpfr_inits2 (4913, x, y, (mpfr_ptr) 0);
+  mpfr_inits2 (8, z, t[0], t[1], (mpfr_ptr) 0);
+  mpfr_set_si (x, -1, GMP_RNDN);
+  mpfr_nextbelow (x);
+  mpfr_set_ui_2exp (y, 1, mpfr_get_prec (y) - 1, GMP_RNDN);
+  inex = mpfr_add_ui (y, y, 1, GMP_RNDN);
+  MPFR_ASSERTN (inex == 0);
+  mpfr_set_str_binary (t[0], "-0.10101101e2");
+  mpfr_set_str_binary (t[1], "-0.10101110e2");
+  RND_LOOP (rnd)
+    {
+      int i, inex0;
+
+      i = (rnd == GMP_RNDN || rnd == GMP_RNDD);
+      inex0 = i ? -1 : 1;
+      mpfr_clear_flags ();
+      inex = mpfr_pow (z, x, y, (mp_rnd_t) rnd);
+      if (__gmpfr_flags != MPFR_FLAGS_INEXACT || ! SAME_SIGN (inex, inex0)
+          || MPFR_IS_NAN (z) || mpfr_cmp (z, t[i]) != 0)
+        {
+          unsigned int flags = __gmpfr_flags;
+
+          printf ("Error in bug20080721 with %s\n",
+                  mpfr_print_rnd_mode ((mp_rnd_t) rnd));
+          printf ("expected ");
+          mpfr_out_str (stdout, 2, 0, t[i], GMP_RNDN);
+          printf (", inex = %d, flags = %u\n", inex0, MPFR_FLAGS_INEXACT);
+          printf ("got      ");
+          mpfr_out_str (stdout, 2, 0, z, GMP_RNDN);
+          printf (", inex = %d, flags = %u\n", inex, flags);
+          err = 1;
+        }
+    }
+  mpfr_clears (x, y, z, t[0], t[1], (mpfr_ptr) 0);
+  if (err)
+    exit (1);
+}
+
+/* The following test fails in r5552 (32-bit and 64-bit). This is due to:
+ *   mpfr_log (t, absx, GMP_RNDU);
+ *   mpfr_mul (t, y, t, GMP_RNDU);
+ * in pow.c, that is supposed to compute an upper bound on exp(y*ln|x|),
+ * but this is incorrect if y is negative.
+ */
+static void
+bug20080820 (void)
+{
+  mp_exp_t emin;
+  mpfr_t x, y, z1, z2;
+
+  emin = mpfr_get_emin ();
+  mpfr_set_emin (MPFR_EMIN_MIN);
+  mpfr_init2 (x, 80);
+  mpfr_init2 (y, sizeof (mp_exp_t) * CHAR_BIT + 32);
+  mpfr_init2 (z1, 2);
+  mpfr_init2 (z2, 80);
+  mpfr_set_ui (x, 2, GMP_RNDN);
+  mpfr_nextbelow (x);
+  mpfr_set_exp_t (y, mpfr_get_emin () - 2, GMP_RNDN);
+  mpfr_nextabove (y);
+  mpfr_pow (z1, x, y, GMP_RNDN);
+  mpfr_pow (z2, x, y, GMP_RNDN);
+  /* As x > 0, the rounded value of x^y to nearest in precision p is equal
+     to 0 iff x^y <= 2^(emin - 2). In particular, this does not depend on
+     the precision p. Hence the following test. */
+  if (MPFR_IS_ZERO (z1) && MPFR_NOTZERO (z2))
+    {
+      printf ("Error in bug20080820\n");
+      exit (1);
+    }
+  mpfr_clears (x, y, z1, z2, (mpfr_ptr) 0);
+  set_emin (emin);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -1268,6 +1359,8 @@ main (int argc, char **argv)
   bug20071104 ();
   bug20071128 ();
   bug20071218 ();
+  bug20080721 ();
+  bug20080820 ();
 
   test_generic (2, 100, 100);
   test_generic_ui (2, 100, 100);
