@@ -23,6 +23,8 @@ MA 02110-1301, USA.
 Changes from version 2.3.1 to version 2.3.2:
 - Bug fixes.
 - Improved MPFR manual.
+- Behavior of mpfr_check_range changed: if the value is an inexact
+  infinity, the overflow flag is set (in case it was lost).
 
 Changes from version 2.3.0 to version 2.3.1:
 - Changes in the behavior of mpfr_strtofr and in its documentation
