@@ -73,18 +73,25 @@ To make a release (for the MPFR team):
   0) Make sure that the mpfr-longlong.h file (from GMP's longlong.h) and
      the libtool-related files (config.guess, etc.) are up-to-date. An
      "autoreconf -f -i" may be necessary.
+
   1) Generate the default thresholds on different architectures
      with "make tune" and put them in mparam_h.in (make sure to
      use the latest release of GMP).
+
   2) Check the version and change the suffix to "rc1", "rc2", etc. with
      update-version for the release candidates; remove the suffix for
      the final release.
      Update the libtool version too (see Makefile.am).
      Update the date in mpfr.texi.
+
   3) Update the NEWS file.
      Update the FAQ.html file with update-faq (and check it).
-  4) Update the ChangeLog file with "TZ=UTC svn log -rHEAD:0 -v".
+
+  4) Update the ChangeLog file with "TZ=UTC svn log -rHEAD:0 -v" in
+     UTF-8 locales, e.g. "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+
   5) Generate the release version with "make dist", but see below.
+
   6) Test the release version on different machines, with and without
      --enable-assert (--enable-assert, though doing more checks, may
      hide bugs due to the fact that <stdio.h> is always included) with
@@ -93,16 +100,26 @@ To make a release (for the MPFR team):
      able to get the memory leak errors), with and without -DXDEBUG in
      $CFLAGS, with and without gmp internal files, with and without
      GMP built as a shared library, with and without srcdir equal to
-     objdir (../mpfr/configure --srcdir=/users/spaces/pelissip/mpfr/),
-     with and without "-std=c99 -O3 -D_XOPEN_SOURCE=500", with and
-     without "-ansi" (which allows to turn off features that are
-     incompatible with ISO C90), with and without --enable-thread-safe,
-     in various FPU precisions (double, double extended and single) if
-     the platform supports that (e.g. under Linux/x86), and in various
-     locales (LC_ALL=tr_TR in particular, if installed). On x86, test
-     with -m96bit-long-double and -m128bit-long-double. Test with both
-     "make check" and the worst cases. Try also with gcc's -fno-common
-     option.
+     objdir (../mpfr/configure --srcdir=/users/spaces/pelissip/mpfr/).
+
+     Try different gcc versions with different options: with and without
+     "-std=c99 -O3 -D_XOPEN_SOURCE=500", with and without "-ansi" (which
+     allows to turn off features that are incompatible with ISO C90),
+     with and without --enable-thread-safe, in various FPU precisions
+     (double, double extended and single) if the platform supports that
+     (e.g. under Linux/x86), and in various locales (LC_ALL=tr_TR in
+     particular, if installed). On x86, test with -m96bit-long-double
+     and -m128bit-long-double. Try also with gcc's -fno-common option.
+
+     Try different compilers (even C++ compilers), e.g. g++, icc, opencc
+     (x86_64 machines), tcc <http://bellard.org/tcc/>.
+
+     Test with both "make check" and the worst cases.
+
+     Check that there are no abnormal regressions in the timings (both
+     for 100, 1000, 10000 digits, http://mpfr.org/mpfr-current/timings.html,
+     and for small precision, using the mbench program, see mpfr/mbench).
+
      Test the library interface compatibility by running the test suite
      compiled against an old library version and dynamically linked with
      the new library version: for instance, build the shared library of
@@ -110,9 +127,11 @@ To make a release (for the MPFR team):
      the build directory of the old version, do something like:
      (cd .libs && ln -nsf ../../mpfr-new/.libs/libmpfr.so.1.* libmpfr.so.1)
      then "make check".
+
   7) For the release itself (not the release candidates), if there are
      no problems, create a tag with:
        svn cp .../mpfr/branches/x.y .../mpfr/tags/x.y.z
+
   8) Update the version with the update-version script to indicate the
      next version (use the "dev" suffix).
 
@@ -125,6 +144,9 @@ patch patch-libtool needs to be applied, e.g.:
   2. autoconf
   3. ./configure
   4. make dist
+
+Another libtool bug (with icc) to be fixed before the next MPFR releases:
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=485421
 
 ===========================================================================
 
@@ -210,9 +232,14 @@ produce illegal codes with the first form.
    =====================================================================
 
 Don't use "near" and "far" as variable names since they are "Keywords"
-for some C compiler (Old DOS compiler). Also don't use "pm" which is used
+for some C compiler (Old DOS compiler). Also don't use "pm", which is used
 by the C compiler 'sharp' to design variables that should be stored in the
-flash memory.
+flash memory. Don't use "new", which is reserved in C++.
+
+   =====================================================================
+
+Avoid variable names "l", "I" and "O", which look like "1" and "0" with
+some fonts.
 
    =====================================================================
 
@@ -241,6 +268,20 @@ use 0 (possibly casted to the target pointer type).
 
    ====================================================================
 
+Use locale-dependent functions when the result needs to depend on the
+locales, e.g. the fractional point in mpfr_out_str.
+
+Conversely, do not use locale-dependent functions when the result must
+not depend on the locales. In particular, the alphanumeric characters
+used in number strings (as created by mpfr_get_str) must be those of
+the required characters from the basic character set (see ISO C99
+standard Section 5.2.1 "Character sets"). And tolower(letter) does
+not necessarily return the corresponding lowercase letter from these
+required characters. For instance, tolower('I') returns a dotless 'i'
+in Turkish locales.
+
+   ====================================================================
+
 In the tests, do not use `mpfr_set_d` (except when testing it), as the
 result will depend on the floating-point arithmetic of the system;
 this has shown many problems in the past and problems may still occur
@@ -260,6 +301,10 @@ switched, thanks to
 
   $ svn status
       S  tests
+
+In case of failure, freeing the memory explicitly is not necessary.
+We do this in case of success just to be able to detect memory leaks
+in MPFR.
 
    ====================================================================
 
@@ -284,6 +329,13 @@ Do not use TMP_DECL / TMP_ALLOC, ... but MPFR_TMP_DECL, MPFR_TMP_ALLOC, ...
 
 Do not use C99-only features, such as empty macro arguments or C++-style
 comments.
+
+   ====================================================================
+
+When testing a "boolean" macro M (i.e. which is normally either equal
+to 1 or undefined), do not use #if M, but #ifdef M or #if defined(M).
+With icc, the form #if M triggers a warning ("remark #193: zero used
+for undefined preprocessing identifier").
 
 ===========================================================================
 
@@ -330,7 +382,9 @@ To achieve this, theses macros have been added:
 +++ MPFR_LOG_MSG(x)
  Log another message (a warning for example)
 Example:
- MPFR_LOG_MSG (("WARNING: Unchecked code\n"));
+ MPFR_LOG_MSG (("WARNING: Unchecked code\n", 0));
+The 0 is here a dummy value, because there must be at least an argument
+after the format string.
 
 +++ MPFR_LOG_BEGIN(x)
  Add this macro at the beginning of a function.
@@ -427,7 +481,7 @@ mpfr_toto (mpfr_ptr rop, mpfr_srcptr op, mp_rnd_t rnd)
   for (;;)                               /* Infinite loop */
     {
       [Compute an estimation of the function and]
-      [ an estimation of the error].
+      [an estimate of the error.]
       if (MPFR_CAN_ROUND (...))          /* If we can round, quit the loop */
         break;
       MPFR_ZIV_NEXT (loop, prec);        /* Increase used precision */
@@ -446,6 +500,25 @@ Make sure that Ziv loops cannot increase the precision forever because of
 internal exception. Otherwise one gets either a segmentation fault (with
 limited stack size) or an assertion failure (with unlimited stack size,
 e.g. with "make check").
+
+Exception handling (overflow/underflow in particular):
+  * Warning: To detect exceptions and/or possible error loss due to
+    internal exceptions, testing whether some variable is singular with
+    MPFR_IS_SINGULAR is generally not sufficient! Indeed, in case of
+    overflow (resp. underflow), the value may be rounded (in absolute
+    value) to the largest finite number (resp. to the smallest non-zero
+    number, possible even in round-to-nearest mode).
+  * The MPFR_BLOCK* macros can be useful, e.g.
+      {
+        MPFR_BLOCK_DECL (flags);
+        /* ... */
+        MPFR_BLOCK (flags, /* expression or statements */)
+        /* ... */
+        if (MPFR_OVERFLOW (flags))
+          { /* case of overflow in expression or statements */ }
+        /* ... */
+      }
+    See mpfr-impl.h (search for MPFR_BLOCK) for more information.
 
 ===========================================================================
 
@@ -487,3 +560,63 @@ Bit Twiddling Hacks - Sean Eron Anderson maintain a list of tricks to get
 efficient code on <http://graphics.stanford.edu/~seander/bithacks.html>.
 WARNING: some of those tricks may not take into account possible overflows,
 and may not be portable.
+
+===========================================================================
+
+MPFR manual (mpfr.texi):
+  * Use "significand", not "mantissa".
+  * Use "@minus{}" for the minus character, not "-".
+  * Follow the English typography, not the French one!
+
+===========================================================================
+
+Running "make" outputs a lot of information, and warnings are not very
+visible. The following tool "eet" allows a copy of warning messages to
+be output to a different window (e.g. xterm or zenity):
+
+  http://www.vinc17.org/unix/#eet
+
+Direct link to the tarball: http://www.vinc17.org/unix/eet.tar.bz2
+
+===========================================================================
+
+Be careful when avoiding "'var' may be used uninitialized in this function"
+warnings from gcc. Initializing such variables to a dummy value has several
+drawbacks:
+  * this may prevent other tools (that do static or dynamic analysis) from
+    detecting bugs;
+  * this makes code maintenance more difficult (e.g. when modifying the
+    code, one may more easily forget a real initialization);
+  * this makes the compiler add useless code (though this should not be
+    significant).
+
+The INITIALIZED macro can be used to avoid such warnings with gcc, e.g.
+
+  int INITIALIZED(i);
+
+It uses the "int i = i;" pseudo-initialization trick, disabled with other
+compilers as this is undefined behavior. See:
+
+    http://gcc.gnu.org/bugzilla/show_bug.cgi?id=36296
+
+If a dummy initialization must be added, use preferably an "invalid" value
+(e.g. NULL for pointers, or a value that can be checked with MPFR_ASSERTN
+before using it) that could make the program abort instead of returning an
+incorrect value in case of a bug in MPFR.
+
+===========================================================================
+
+Avoid mixing signed and unsigned types, in particular mp_exp_t, which is
+signed, and mpfr_prec_t (mp_prec_t), which is unsigned, as this can lead
+signed types to be converted into unsigned types. If such a signed type
+contains a negative value, the result will probably be incorrect. In
+general, you will need to cast a mpfr_prec_t into a mp_exp_t.
+
+Note that such bugs are difficult to detect because they may depend on
+the platform (e.g., on LP64, 32-bit unsigned int + 64-bit long is OK,
+but on ILP32, 32-bit int + 32-bit unsigned long is incorrect), but also
+on the input values. So, do not rely on tests very much. However, if
+a test works on 32 bits but fails on 64 bits in the extended exponent
+range (or conversely), the cause may be related to the integer types
+(e.g. a signness problem or an integer overflow due to different type
+sizes).
