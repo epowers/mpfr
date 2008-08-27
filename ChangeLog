@@ -1,4 +1,550 @@
 ------------------------------------------------------------------------
+r5597 | vlefevre | 2008-08-27 08:45:05 +0000 (Wed, 27 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/Makefile.am
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.2-rc1.
+Makefile.am: incremented revision for -version-info.
+------------------------------------------------------------------------
+r5596 | vlefevre | 2008-08-27 08:40:59 +0000 (Wed, 27 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: updated the month.
+------------------------------------------------------------------------
+r5594 | vlefevre | 2008-08-26 14:11:41 +0000 (Tue, 26 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/README.dev
+
+README.dev: update from the trunk (except __GMP_CC/__GMP_CFLAGS).
+------------------------------------------------------------------------
+r5591 | vlefevre | 2008-08-26 13:13:34 +0000 (Tue, 26 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3
+
+Added algorithms.out to svn:ignore property.
+------------------------------------------------------------------------
+r5586 | vlefevre | 2008-08-24 23:09:47 +0000 (Sun, 24 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/tests/tgeneric.c
+
+tests/tgeneric.c: changed the way a warning with gcc 4.2+ is avoided,
+as suggested by Manuel López-Ibáñez on GCC bug 36299. [merge -c5585]
+------------------------------------------------------------------------
+r5583 | vlefevre | 2008-08-21 10:20:00 +0000 (Thu, 21 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/tests/tsqr.c
+
+tests/tsqr.c: corrected function definitions.
+------------------------------------------------------------------------
+r5573 | vlefevre | 2008-08-21 01:28:48 +0000 (Thu, 21 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/algorithms.tex
+
+algorithms.tex: replaced "towards" by "toward" for consistency with
+the MPFR manual and the standards.
+------------------------------------------------------------------------
+r5571 | vlefevre | 2008-08-21 01:23:51 +0000 (Thu, 21 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/algorithms.tex
+
+algorithms.tex: corrected English usage, spelling and typography
+in the section on mpfr_hypot.
+------------------------------------------------------------------------
+r5569 | vlefevre | 2008-08-20 23:47:03 +0000 (Wed, 20 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/NEWS
+
+NEWS: added a link for the bug fixes.
+------------------------------------------------------------------------
+r5568 | vlefevre | 2008-08-20 22:55:52 +0000 (Wed, 20 Aug 2008) | 14 lines
+Changed paths:
+   M /branches/2.3/BUGS
+   M /branches/2.3/algorithms.tex
+   M /branches/2.3/hypot.c
+   M /branches/2.3/tests/thypot.c
+
+Merged changesets concerning mpfr_hypot, from trunk: 5291, 5292, 5297,
+5299, 5301, 5302, 5308, 5310, 5311, 5319, 5336, 5464, 5465, 5473, 5563,
+5564, 5566. Details:
+* hypot.c: rewrite, fixing the following bugs:
+  - the inexact flag was not always set as required;
+  - mpfr_hypot could loop on tiny values due to internal underflow;
+  - for generic overflows, the overflow flag was lost (note: this
+    bug is independent of the bug fixed in r5546 since the overflow
+    does not come after a can_round).
+* tests/thypot.c:
+  - changed custom random tests to tgeneric ones;
+  - added testcases for the above bugs.
+* algorithms.tex: mpfr_hypot proof rewritten.
+* BUGS: added a bug concerning mpfr_hypot.
+------------------------------------------------------------------------
+r5567 | vlefevre | 2008-08-20 22:36:01 +0000 (Wed, 20 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/algorithms.tex
+
+algorithms.tex: use hyperref.
+------------------------------------------------------------------------
+r5562 | vlefevre | 2008-08-20 19:47:23 +0000 (Wed, 20 Aug 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/tests/tpow_all.c
+
+tests/tpow_all.c:
+  * In cmpres(), if z1 and z2 were both zeros, their sign wasn't tested.
+  * Added test of mpfr_sqr and mpfr_sqrt.
+------------------------------------------------------------------------
+r5560 | vlefevre | 2008-08-20 18:38:36 +0000 (Wed, 20 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: added a paragraph on MPFR internal data.
+------------------------------------------------------------------------
+r5558 | vlefevre | 2008-08-20 15:59:49 +0000 (Wed, 20 Aug 2008) | 47 lines
+Changed paths:
+   M /branches/2.3/mpfr-impl.h
+   M /branches/2.3/pow.c
+   M /branches/2.3/pow_si.c
+   M /branches/2.3/pow_ui.c
+   M /branches/2.3/pow_z.c
+   M /branches/2.3/tests/tpow.c
+   M /branches/2.3/tests/tpow_all.c
+   M /branches/2.3/tests/tpow_z.c
+
+Fixed various bugs in functions mpfr_pow, mpfr_pow_ui, mpfr_pow_si and
+mpfr_pow_z (overflow and underflow handling, and mpfr_pow(z, x, y, rnd)
+with integer |y| >= 2^256) and added testcases for these bugs (and more)
+by merging
+  -r5313:5318 -r5415:5417 -r5426:5434 -c5445 -c5455 -c5505
+  -r5529:5533 -r5534:5544 -r5546:5557
+from the trunk. Details:
+* pow.c:
+  - Moved the general case from mpfr_pow() to a new internal function
+    mpfr_pow_general().
+  - Fixed overflow/underflow handling.
+  - Fixed a bug in mpfr_pow(z, x, y, rnd) that occurred with integer
+    |y| >= 2^256 (unless overflow or underflow had been detected).
+  - Added log messages.
+* mpfr-impl.h: added mpfr_pow_general prototype.
+* pow_z.c:
+  - Fixed overflow/underflow handling.
+    + The underflow cases in rounding to nearest are now handled by
+      calling mpfr_pow_general(), which can scale the result thus
+      decide whether the rounded result should be 0 or nextabove(0).
+      To avoid the exact cases of x^y with y integer (not supported
+      by mpfr_pow_general()), rounding is done in precision 2 (this
+      is also faster!).
+    + If z < 0, internally evaluate X^Z rounded towards 1 (or -1) to
+      avoid a spurious overflow/underflow, where X = 1/x and Z = -z.
+  - Added log messages.
+* pow_si.c:
+  - Fixed overflow/underflow handling for n < 0.
+  - Added log messages.
+* pow_ui.c:
+  - Swapped parameters x and y for consistency (-> y = x^n).
+  - Fixed the internal overflows and underflows (which could yield
+    spurious overflows/underflows and incorrect results) by using
+    mpfr_pow_z.
+  - Added log messages.
+* tests/tpow.c:
+  - Added specific testcase for the bug with integer |y| >= 2^256.
+  - Added specific testcase for a bug from r4940 (the rounding modes
+    to compute an upper bound on exp(y*ln|x|) are incorrect); this
+    bug could affect only underflow cases and possibly cases near
+    overflow.
+* tests/tpow_all.c:
+  - Added several tests of all power functions in MPFR or equivalent
+    (including mpfr_ui_div, mpfr_exp2 and mpfr_exp10), in particular
+    in underflow and overflow cases.
+* tests/tpow_z.c:
+  - Added specific testcase for the mpfr_pow_z bug with z < 0.
+------------------------------------------------------------------------
+r5546 | vlefevre | 2008-08-20 04:12:36 +0000 (Wed, 20 Aug 2008) | 8 lines
+Changed paths:
+   M /branches/2.3/NEWS
+   M /branches/2.3/exceptions.c
+   M /branches/2.3/mpfr.texi
+
+Fixed the following problem:
+  The overflow flag can be lost in many functions called with the
+  maximum exponent equal to MPFR_EMAX_MAX (this is the default on
+  32-bit machines) when the temporary result (in a higher precision)
+  is representable but once rounded, it yields an overflow.
+This needed a slight change of behavior of the mpfr_check_range function
+(defined in exceptions.c). Described this change in mpfr.texi and NEWS.
+[Merged changeset 5545 from the trunk.]
+------------------------------------------------------------------------
+r5529 | vlefevre | 2008-08-15 21:46:31 +0000 (Fri, 15 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/pow_si.c
+
+pow_si.c: fixed Ziv's iteration by using MPFR_ZIV_NEXT.
+[svn merge -c5490 .../mpfr/trunk/]
+------------------------------------------------------------------------
+r5528 | vlefevre | 2008-08-15 17:31:26 +0000 (Fri, 15 Aug 2008) | 5 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: additions related to MPFR caches.
+  * Added Section "Memory Handling" mentioning caches.
+  * Added call to mpfr_free_cache in the first example.
+  * Updated description of function mpfr_free_cache.
+[merged changeset 5527 from the trunk]
+------------------------------------------------------------------------
+r5526 | vlefevre | 2008-08-14 10:43:59 +0000 (Thu, 14 Aug 2008) | 14 lines
+Changed paths:
+   M /branches/2.3/exp.c
+   M /branches/2.3/exp3.c
+   M /branches/2.3/exp_2.c
+   M /branches/2.3/tests/texp.c
+
+Merged the changesets on exp.c, exp_2.c, exp3.c and tests/texp.c
+since 2008-06-10 from the trunk (-r5456:5475 for exp.c, -r5385:5523
+for exp_2.c, -r5468:5469 for exp3.c, -r5449:5525 for tests/texp.c).
+  * exp.c: fixed the overflow/underflow detection. Not all
+    overflow/underflow cases are detected (this would be too
+    complex), but we no longer get false positives, and both
+    exp_2.c and exp3.c now correctly handle the other cases.
+  * exp_2.c: fixed an assertion failure due to a cancellation that
+    occurs when x is very close to a multiple of log(2); fixed the
+    overflow/underflow detection; fixed the error bound (one could
+    get incorrectly rounded results - see bug20080731 in texp.c);
+    improved code; fixed a log message; added more logging.
+  * exp3.c: fixed internal underflow case; added logging support.
+  * tests/texp.c: added tests (that triggered the above bugs).
+------------------------------------------------------------------------
+r5521 | vlefevre | 2008-08-12 22:47:59 +0000 (Tue, 12 Aug 2008) | 5 lines
+Changed paths:
+   M /branches/2.3/div_2si.c
+   M /branches/2.3/div_2ui.c
+   M /branches/2.3/mul_2si.c
+   M /branches/2.3/tests/tmul_2exp.c
+
+Fixed double-rounding problem in mpfr_mul_2si, mpfr_div_2si
+and mpfr_div_2ui rounded to nearest when the rounded result
+in unbounded exponent range is 2^(emin - 2): the returned
+result was zero instead of non-zero. Added testcases.
+[Merged changesets 5503 5510 5511 5512 5517 from the trunk]
+------------------------------------------------------------------------
+r5520 | vlefevre | 2008-08-12 22:30:29 +0000 (Tue, 12 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/tests/tdiv.c
+
+tests/tdiv.c: completed underflow test by testing negative results too
+(merged changeset 5519 from the trunk).
+------------------------------------------------------------------------
+r5518 | vlefevre | 2008-08-12 22:17:51 +0000 (Tue, 12 Aug 2008) | 5 lines
+Changed paths:
+   M /branches/2.3/div.c
+   M /branches/2.3/tests/tdiv.c
+
+Fixed underflow bug in mpfr_div, which occurs in rounding to nearest
+when the rounded result in unbounded exponent range is 2^(emin - 2)
+and corresponding inex > 0: one got a non-zero result instead of +/-0.
+Added testcase to tests/tdiv.c.
+[merge -r5513:5516 tests/tdiv.c, merge -c5515 div.c from the trunk]
+------------------------------------------------------------------------
+r5484 | vlefevre | 2008-08-05 08:02:48 +0000 (Tue, 05 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/configure.in
+
+configure.in: dist-lzma needs automake 1.10.1.
+------------------------------------------------------------------------
+r5482 | vlefevre | 2008-08-04 08:40:52 +0000 (Mon, 04 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/configure.in
+
+configure.in: "make dist" generates lzma-compressed tarball too.
+------------------------------------------------------------------------
+r5426 | vlefevre | 2008-07-20 00:41:09 +0000 (Sun, 20 Jul 2008) | 6 lines
+Changed paths:
+   M /branches/2.3/pow_si.c
+   M /branches/2.3/pow_ui.c
+   M /branches/2.3/pow_z.c
+   M /branches/2.3/tests
+   M /branches/2.3/tests/Makefile.am
+   A /branches/2.3/tests/tpow_all.c (from /trunk/tests/tpow_all.c:5424)
+   M /branches/2.3/tests/tpow_z.c
+
+Fixed a bug in pow_ui.c and pow_z.c: NaN^0 returned NaN instead of 1
+(see documentation). Affected functions: mpfr_pow_ui, mpfr_pow_si and
+mpfr_pow_z (but not mpfr_pow). Added new test file tests/tpow_all.c
+to test all the MPFR power functions on simple and special values. In
+tests/tpow_z.c, fixed NaN^0 test. In pow_si.c, corrected a comment.
+[svn merge -r5422:5425 .../mpfr/trunk]
+------------------------------------------------------------------------
+r5422 | vlefevre | 2008-07-19 17:31:41 +0000 (Sat, 19 Jul 2008) | 9 lines
+Changed paths:
+   M /branches/2.3/add1sp.c
+   M /branches/2.3/fma.c
+   M /branches/2.3/fms.c
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/mul.c
+   M /branches/2.3/pow.c
+   M /branches/2.3/sub1sp.c
+   M /branches/2.3/tests/tabs.c
+   M /branches/2.3/tests/tacosh.c
+   M /branches/2.3/tests/tadd.c
+   M /branches/2.3/tests/tadd1sp.c
+   M /branches/2.3/tests/tadd_ui.c
+   M /branches/2.3/tests/tagm.c
+   M /branches/2.3/tests/tatan.c
+   M /branches/2.3/tests/tcomparisons.c
+   M /branches/2.3/tests/tconst_log2.c
+   M /branches/2.3/tests/tconst_pi.c
+   M /branches/2.3/tests/tcos.c
+   M /branches/2.3/tests/tcot.c
+   M /branches/2.3/tests/tdiv.c
+   M /branches/2.3/tests/terf.c
+   M /branches/2.3/tests/texp.c
+   M /branches/2.3/tests/tfma.c
+   M /branches/2.3/tests/tfms.c
+   M /branches/2.3/tests/tget_str.c
+   M /branches/2.3/tests/tgmpop.c
+   M /branches/2.3/tests/tinternals.c
+   M /branches/2.3/tests/tlog.c
+   M /branches/2.3/tests/tmul.c
+   M /branches/2.3/tests/tmul_2exp.c
+   M /branches/2.3/tests/tnext.c
+   M /branches/2.3/tests/tpow.c
+   M /branches/2.3/tests/tpow_z.c
+   M /branches/2.3/tests/tset_si.c
+   M /branches/2.3/tests/tset_sj.c
+   M /branches/2.3/tests/tsi_op.c
+   M /branches/2.3/tests/tsin.c
+   M /branches/2.3/tests/tsin_cos.c
+   M /branches/2.3/tests/tsqr.c
+   M /branches/2.3/tests/tsub1sp.c
+   M /branches/2.3/tests/tsub_ui.c
+   M /branches/2.3/tests/tsum.c
+   M /branches/2.3/tests/ttrunc.c
+   M /branches/2.3/tests/tui_div.c
+   M /branches/2.3/tests/tui_sub.c
+   M /branches/2.3/tests/tzeta.c
+
+Merged changeset 5290 from the trunk (except tests/tests.c):
+For the terminating null pointer of the functions mpfr_inits,
+mpfr_inits2, mpfr_clears, always use the type mpfr_ptr (no longer
+void *). Updated the description of these functions in the manual
+(mpfr.texi). The reason is that the C standard does not guarantee
+that (void *) 0 has the same representation as a null pointer to
+a structure (and even the same size). In most C implementations,
+the representations are the same, but one never knows (dynamical
+checking is also always possible)...
+------------------------------------------------------------------------
+r5421 | vlefevre | 2008-07-19 16:39:59 +0000 (Sat, 19 Jul 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: some changes from the trunk, in particular the Contributors
+and References sections.
+------------------------------------------------------------------------
+r5420 | vlefevre | 2008-07-19 16:35:24 +0000 (Sat, 19 Jul 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/AUTHORS
+
+Copied AUTHORS file from the trunk:
+  * Now in UTF-8.
+  * Added Philippe Théveny (some of his patches have been backported).
+------------------------------------------------------------------------
+r5419 | vlefevre | 2008-07-19 16:11:48 +0000 (Sat, 19 Jul 2008) | 1 line
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: forgot the case x^(±0). [svn merge -c5418 .../mpfr/trunk]
+------------------------------------------------------------------------
+r5415 | vlefevre | 2008-07-19 15:01:46 +0000 (Sat, 19 Jul 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/acinclude.m4
+
+acinclude.m4: merged changesets 4985 to 4989 from the trunk to check
+the availability of headers <locale.h> and <string.h>, and of function
+memmove. [svn merge -r4984:4989 .../mpfr/trunk]
+------------------------------------------------------------------------
+r5414 | vlefevre | 2008-07-19 14:40:25 +0000 (Sat, 19 Jul 2008) | 12 lines
+Changed paths:
+   M /branches/2.3/mpfr-gmp.c
+   M /branches/2.3/mpfr-gmp.h
+   M /branches/2.3/tests/mpfr-test.h
+   M /branches/2.3/tests/reuse.c
+   M /branches/2.3/tests/tadd.c
+   M /branches/2.3/tests/tadd_ui.c
+   M /branches/2.3/tests/tagm.c
+   M /branches/2.3/tests/tcan_round.c
+   M /branches/2.3/tests/tcbrt.c
+   M /branches/2.3/tests/tcmp.c
+   M /branches/2.3/tests/tdiv.c
+   M /branches/2.3/tests/tdiv_ui.c
+   M /branches/2.3/tests/tests.c
+   M /branches/2.3/tests/tgamma.c
+   M /branches/2.3/tests/tget_f.c
+   M /branches/2.3/tests/tmul.c
+   M /branches/2.3/tests/tmul_ui.c
+   M /branches/2.3/tests/tout_str.c
+   M /branches/2.3/tests/tpow.c
+   M /branches/2.3/tests/tpow_z.c
+   M /branches/2.3/tests/trandom.c
+   M /branches/2.3/tests/troot.c
+   M /branches/2.3/tests/tset_d.c
+   M /branches/2.3/tests/tset_f.c
+   M /branches/2.3/tests/tset_ld.c
+   M /branches/2.3/tests/tset_q.c
+   M /branches/2.3/tests/tset_si.c
+   M /branches/2.3/tests/tset_sj.c
+   M /branches/2.3/tests/tset_str.c
+   M /branches/2.3/tests/tset_z.c
+   M /branches/2.3/tests/tsi_op.c
+   M /branches/2.3/tests/tstrtofr.c
+   M /branches/2.3/tests/tsub.c
+   M /branches/2.3/tests/tsub_ui.c
+   M /branches/2.3/tests/tui_sub.c
+
+Merged changesets 4953, 4955, 4956, 5347 and 5007 from the trunk: code
+clean-up that fixes possible problems on particular platforms. Changes:
+  * [mpfr-gmp.{c,h}] Function mpfr_init_gmp_rand is no longer defined.
+    It was private (not documented) and used only in the tests.
+    User code that calls it is broken and may fail as a consequence.
+  * [tests] Support 16-bit int's such as on TI-92.
+  * [tests] No longer use non-reentrant functions such as mpz_random.
+  * [tests] Avoid mpn_random, which leaks memory.
+  * [tests] Completed a test in tset_f.c.
+  * [tests] As a consequence, the tests are performed on different data
+    (even though the default seed is the same).
+This will also make backport of patches easier.
+------------------------------------------------------------------------
+r5404 | vlefevre | 2008-06-18 13:59:17 +0000 (Wed, 18 Jun 2008) | 1 line
+Changed paths:
+   M /branches/2.3/NEWS
+
+NEWS file update.
+------------------------------------------------------------------------
+r5403 | vlefevre | 2008-06-18 13:54:12 +0000 (Wed, 18 Jun 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/tests/tgeneric.c
+
+tgeneric.c: avoid a warning with gcc 4.2+ about a test that is always
+true (the style of the code is now a bit better too). [merge -c5335]
+------------------------------------------------------------------------
+r5402 | vlefevre | 2008-06-18 13:48:35 +0000 (Wed, 18 Jun 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/mpfrlint
+   M /branches/2.3/update-version
+
+Copied mpfrlint and update-version scripts from the trunk,
+and merged -r5363:5375 from the trunk, without the paragraph
+on <stdarg.h> / <varargs.h> / va_list.
+------------------------------------------------------------------------
+r5401 | vlefevre | 2008-06-16 22:08:13 +0000 (Mon, 16 Jun 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/INSTALL
+
+INSTALL: updated GMP's URL (the old one no longer worked), using
+http://www.gnu.org/software/gmp/ as suggested by Karl Berry (see
+GNU policies).
+
+------------------------------------------------------------------------
+r5399 | vlefevre | 2008-06-13 13:55:08 +0000 (Fri, 13 Jun 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+mpfr.texi: changed the license for the inclusion of the manual in Debian
+(see <http://www.debian.org/vote/2006/vote_001>).
+
+------------------------------------------------------------------------
+r5397 | vlefevre | 2008-06-11 14:09:24 +0000 (Wed, 11 Jun 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/sum.c
+
+sum.c:
+  * Completed a comment about T ** and const T ** mismatch.
+  * Removed a useless and misleading const that makes icc complain.
+
+------------------------------------------------------------------------
+r5388 | vlefevre | 2008-06-10 14:17:29 +0000 (Tue, 10 Jun 2008) | 4 lines
+Changed paths:
+   M /branches/2.3/mpfr-impl.h
+
+mpfr-impl.h: generate an error (with a clear error message) with g++ and
+--enable-logging since compilation fails (--enable-logging is mainly for
+testing and is already incompatible with threading support anyway).
+
+------------------------------------------------------------------------
+r5363 | vlefevre | 2008-06-03 09:07:50 +0000 (Tue, 03 Jun 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/mpfr.h
+
+mpfr.h: fixed a comment.
+
+------------------------------------------------------------------------
+r5354 | vlefevre | 2008-05-08 01:17:04 +0000 (Thu, 08 May 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/acinclude.m4
+
+acinclude.m4: locally add -I$srcdir to CPPFLAGS for the thread-safe test
+(fixes bug #5556).
+
+------------------------------------------------------------------------
+r5352 | vlefevre | 2008-04-10 08:34:24 +0000 (Thu, 10 Apr 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/INSTALL
+
+INSTALL: added a paragraph about -ffast-math / -fast compiler options.
+
+------------------------------------------------------------------------
+r5250 | vlefevre | 2008-02-01 11:43:13 +0000 (Fri, 01 Feb 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/mpfr.texi
+
+Added parentheses to avoid ambiguity (suggested by Keith Briggs).
+[svn merge -c5249 svn+ssh://gforge/svn/mpfr/trunk/]
+
+------------------------------------------------------------------------
+r5243 | vlefevre | 2008-01-30 12:31:05 +0000 (Wed, 30 Jan 2008) | 3 lines
+Changed paths:
+   M /branches/2.3/INSTALL
+   M /branches/2.3/mpfr.texi
+
+Document how to produce PDF and HTML versions of the manual.
+[svn merge -c5242 svn+ssh://gforge/svn/mpfr/trunk/]
+
+------------------------------------------------------------------------
+r5234 | vlefevre | 2008-01-29 09:09:36 +0000 (Tue, 29 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/INSTALL
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/tests/tversion.c
+   M /branches/2.3/version.c
+
+Updated version to 2.3.2-dev.
+
+------------------------------------------------------------------------
+r5232 | vlefevre | 2008-01-29 08:50:02 +0000 (Tue, 29 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/tests/tversion.c
+   M /branches/2.3/version.c
+
+Release: MPFR 2.3.1.
+
+------------------------------------------------------------------------
+r5227 | vlefevre | 2008-01-23 17:04:36 +0000 (Wed, 23 Jan 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update (with "TZ=UTC svn log -rHEAD:0 -v").
+
+------------------------------------------------------------------------
 r5226 | vlefevre | 2008-01-23 17:03:59 +0000 (Wed, 23 Jan 2008) | 4 lines
 Changed paths:
    M /branches/2.3/tests/mpfr-test.h
@@ -3120,7 +3666,7 @@ r4538 | vlefevre | 2007-06-12 09:17:33 +0000 (Tue, 12 Jun 2007) | 3 lines
 Changed paths:
    M /trunk/tests/tgeneric.c
 
-tgeneric.c: check the function on large arguments (�maximum_value)
+tgeneric.c: check the function on large arguments (±maximum_value)
 when the MPFR_CHECK_MAX environment variable is defined.
 
 ------------------------------------------------------------------------
@@ -3657,7 +4203,7 @@ r4470 | vlefevre | 2007-05-28 02:12:05 +0000 (Mon, 28 May 2007) | 3 lines
 Changed paths:
    M /trunk/tests/tgeneric.c
 
-tgeneric.c: check the function on tiny arguments (�2^(emin-1)) when
+tgeneric.c: check the function on tiny arguments (±2^(emin-1)) when
 the MPFR_CHECK_TINY environment variable is defined.
 
 ------------------------------------------------------------------------
@@ -11368,7 +11914,7 @@ Changed paths:
    M /trunk/mpfr.texi
    M /trunk/tests/thypot.c
 
-hypot(�oo, NaN) now returns +oo, as in ISO C99 (wasn't documented).
+hypot(±oo, NaN) now returns +oo, as in ISO C99 (wasn't documented).
 
 ------------------------------------------------------------------------
 r3575 | pelissip | 2005-05-17 14:09:21 +0000 (Tue, 17 May 2005) | 2 lines
@@ -21273,7 +21819,7 @@ Changed paths:
    A /trunk/tests/tinits.c
 
 New functions mpfr_inits, mpfr_inits2 and mpfr_clears to initialize or
-free several floating-point numbers (written by Patrick P�lissier).
+free several floating-point numbers (written by Patrick Pélissier).
 
 ------------------------------------------------------------------------
 r2408 | lefevre | 2003-09-09 16:09:42 +0000 (Tue, 09 Sep 2003) | 4 lines
