@@ -1,4 +1,51 @@
 ------------------------------------------------------------------------
+r5611 | vlefevre | 2008-09-03 23:38:59 +0000 (Wed, 03 Sep 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.2-rc1 again (the assertion failure in tpow_z
+was due to a bug in GMP 4.1.4).
+------------------------------------------------------------------------
+r5610 | vlefevre | 2008-09-02 15:09:59 +0000 (Tue, 02 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/README
+
+Updated README file.
+------------------------------------------------------------------------
+r5608 | vlefevre | 2008-09-01 11:51:57 +0000 (Mon, 01 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/README.dev
+   D /branches/2.3/patch-libtool
+
+Removed patch-libtool and updated README.dev as libtool has been fixed.
+------------------------------------------------------------------------
+r5603 | vlefevre | 2008-08-27 16:33:57 +0000 (Wed, 27 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Set version back to dev as an assertion failure occurs in tpow_z on
+Linux/powerpc (but not on 32-bit Mac OS X / ppc).
+------------------------------------------------------------------------
+r5601 | vlefevre | 2008-08-27 11:03:08 +0000 (Wed, 27 Aug 2008) | 1 line
+Changed paths:
+   A /branches/2.3/patch-aclocal-icc (from /trunk/patch-aclocal-icc:5600)
+
+Added patch-aclocal-icc from the trunk.
+------------------------------------------------------------------------
+r5598 | vlefevre | 2008-08-27 08:48:27 +0000 (Wed, 27 Aug 2008) | 1 line
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r5597 | vlefevre | 2008-08-27 08:45:05 +0000 (Wed, 27 Aug 2008) | 2 lines
 Changed paths:
    M /branches/2.3/Makefile.am
