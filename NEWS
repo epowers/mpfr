@@ -25,6 +25,12 @@ Changes from version 2.3.1 to version 2.3.2:
 - Improved MPFR manual.
 - Behavior of mpfr_check_range changed: if the value is an inexact
   infinity, the overflow flag is set (in case it was lost).
+- Function mpfr_init_gmp_rand (only defined when building MPFR without
+  the --with-gmp-build configure option) is no longer defined at all.
+  This function was private and not documented, and was used only in
+  the MPFR test suite. User code that calls it is regarded as broken
+  and may fail as a consequence. Running the old test suite against
+  MPFR 2.3.2 may also fail.
 
 Changes from version 2.3.0 to version 2.3.1:
 - Changes in the behavior of mpfr_strtofr and in its documentation
