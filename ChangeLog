@@ -1,4 +1,60 @@
 ------------------------------------------------------------------------
+r5625 | vlefevre | 2008-09-12 13:31:19 +0000 (Fri, 12 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/tests/tversion.c
+   M /branches/2.3/version.c
+
+Updated version to 2.3.2.
+------------------------------------------------------------------------
+r5624 | vlefevre | 2008-09-12 13:29:44 +0000 (Fri, 12 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/tests/tpow_z.c
+
+tests/tpow_z.c: fixed bug20080904. [svn merge -c5623 .../trunk]
+------------------------------------------------------------------------
+r5622 | vlefevre | 2008-09-08 00:07:01 +0000 (Mon, 08 Sep 2008) | 5 lines
+Changed paths:
+   M /branches/2.3/pow.c
+   M /branches/2.3/tests/tpow_z.c
+
+pow.c: fixed a bug in mpfr_pow_general() that can occur after the
+rescaling needed to detect whether some intermediate underflow or
+overflow was a real or a spurious exception.
+tests/tpow_z.c: testcase.
+[svn merge -r5617:5620 svn+ssh://gforge/svn/mpfr/trunk/]
+------------------------------------------------------------------------
+r5621 | vlefevre | 2008-09-06 10:20:19 +0000 (Sat, 06 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/VERSION
+   M /branches/2.3/configure.in
+   M /branches/2.3/mpfr.h
+   M /branches/2.3/mpfr.texi
+   M /branches/2.3/version.c
+
+Updated version to 2.3.2-dev.
+------------------------------------------------------------------------
+r5617 | vlefevre | 2008-09-05 09:05:54 +0000 (Fri, 05 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/configure.in
+
+configure.in: updated a comment (for the next automake version).
+------------------------------------------------------------------------
+r5615 | vlefevre | 2008-09-05 09:03:41 +0000 (Fri, 05 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/NEWS
+
+NEWS: added a note about mpfr_init_gmp_rand (removed in r5414).
+------------------------------------------------------------------------
+r5612 | vlefevre | 2008-09-03 23:41:24 +0000 (Wed, 03 Sep 2008) | 1 line
+Changed paths:
+   M /branches/2.3/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r5611 | vlefevre | 2008-09-03 23:38:59 +0000 (Wed, 03 Sep 2008) | 2 lines
 Changed paths:
    M /branches/2.3/VERSION
