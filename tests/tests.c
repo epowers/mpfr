@@ -3,20 +3,20 @@
 Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -69,6 +69,14 @@ MA 02110-1301, USA. */
  *   make check CFLAGS="-g -O2 -ffloat-store -DMPFR_FPU_PREC=_FPU_SINGLE"
  *
  * i.e. just add -DMPFR_FPU_PREC=... to the CFLAGS found in Makefile.
+ *
+ * Notes:
+ *   + SSE2 (used to implement double's on x86_64, and possibly on x86
+ *     too, depending on the compiler configuration and flags) is not
+ *     affected by the dynamic precision.
+ *   + When the FPU is set to single precision, the behavior of MPFR
+ *     functions that have a native floating-point type (float, double,
+ *     long double) as argument or return value is not guaranteed.
  */
 
 #include <fpu_control.h>
@@ -474,7 +482,7 @@ tests_default_random (mpfr_ptr x, int pos, mp_exp_t emin, mp_exp_t emax)
      exponent range (see below), so that underflow/overflow checks
      can be done on 64-bit machines. */
 
-  mpfr_random (x);
+  mpfr_urandomb (x, RANDS);
   if (MPFR_IS_PURE_FP (x) && (emin >= 1 || (randlimb () & 1)))
     {
       mp_exp_t e;

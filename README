@@ -1,28 +1,28 @@
 Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify it
+The GNU MPFR Library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License (either version 2.1
 of the License, or, at your option, any later version) and the GNU General
 Public License as published by the Free Software Foundation (most of MPFR is
 under the former, some under the latter).
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA.
 
 ##############################################################################
 
-The MPFR distribution contains the following files:
-(This does not apply to code retrieved by CVS.)
+The GNU MPFR distribution contains the following files:
+(This does not apply to code retrieved by Subversion.)
 
 AUTHORS         - the authors of the library
 BUGS            - bugs in MPFR - please read this file!
@@ -36,7 +36,7 @@ NEWS            - new features with respect to previous versions
 PATCHES         - empty file (until patches are applied)
 README          - this file
 TODO            - what remains to do (any help is welcome!)
-VERSION         - version of MPFR (next release version if taken from CVS)
+VERSION         - version of MPFR (next release version if taken by Subversion)
 ac*.m4          - automatic configuration files
 ansi2knr.*      - convert ANSI C to Kernighan & Ritchie C (source and man page)
 *.c             - source files
@@ -48,6 +48,7 @@ fdl.texi        - the GNU Free Documentation License
 get_patches.sh  - rebuild get_patches.c when patches have been applied
 install-sh      - installation file
 ltmain.sh       - auxiliary installation file
+m4/             - directory containing additional configuration files
 missing         - auxiliary installation file
 mparam_h.in     - header file template
 mpfr.info       - info file for MPFR

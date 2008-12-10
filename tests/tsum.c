@@ -3,20 +3,20 @@
 Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -117,7 +117,7 @@ test_sort (mp_prec_t f, unsigned long n)
 
   for (i = 0; i < n; i++)
     {
-      mpfr_random (tab[i]);
+      mpfr_urandomb (tab[i], RANDS);
       tabtmp[i] = tab[i];
     }
 
@@ -155,7 +155,7 @@ test_sum (mp_prec_t f, unsigned long n)
 
   /* First Uniform */
   for (i = 0; i < n; i++)
-    mpfr_random (tab[i]);
+    mpfr_urandomb (tab[i], RANDS);
   algo_exact (real_non_rounded, tab, n, f);
   for (rnd_mode = 0; rnd_mode < GMP_RND_MAX; rnd_mode++)
     {
@@ -173,7 +173,7 @@ test_sum (mp_prec_t f, unsigned long n)
   /* Then non uniform */
   for (i = 0; i < n; i++)
     {
-      mpfr_random (tab[i]);
+      mpfr_urandomb (tab[i], RANDS);
       mpfr_set_exp (tab[i], randlimb () %1000);
     }
   algo_exact (real_non_rounded, tab, n, f);

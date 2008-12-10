@@ -3,20 +3,20 @@
 Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -141,7 +141,7 @@ check_worst_cases (void)
 
   mpfr_set_prec (x, 13001);
   mpfr_set_prec (y, 13001);
-  mpfr_random (x);
+  mpfr_urandomb (x, RANDS);
   mpfr_exp_3 (y, x, GMP_RNDN);
   mpfr_exp_2 (x, x, GMP_RNDN);
   if (mpfr_cmp (x, y))
@@ -170,7 +170,7 @@ compare_exp2_exp3 (mp_prec_t p0, mp_prec_t p1)
       mpfr_set_prec (x, prec);
       mpfr_set_prec (y, prec);
       mpfr_set_prec (z, prec);
-      mpfr_random (x);
+      mpfr_urandomb (x, RANDS);
       rnd = RND_RAND ();
       mpfr_exp_2 (y, x, rnd);
       mpfr_exp_3 (z, x, rnd);
@@ -701,7 +701,8 @@ underflow_up (int extended_emin)
                   int err = 0;
 
                   mpfr_clear_flags ();
-                  inex = e3 ? exp_3 (y, x, rnd) : mpfr_exp (y, x, rnd);
+                  inex = e3 ? exp_3 (y, x, (mpfr_rnd_t) rnd)
+                    : mpfr_exp (y, x, (mpfr_rnd_t) rnd);
                   if (__gmpfr_flags != MPFR_FLAGS_INEXACT)
                     {
                       printf ("Incorrect flags in underflow_up, eps > 0, %s",
@@ -816,7 +817,8 @@ underflow_up (int extended_emin)
                        (rnd == GMP_RNDN && (i == 1 && j == 0)) ?
                        0 : MPFR_FLAGS_UNDERFLOW);
                     mpfr_clear_flags ();
-                    inex = e3 ? exp_3 (y, x, rnd) : mpfr_exp (y, x, rnd);
+                    inex = e3 ? exp_3 (y, x, (mpfr_rnd_t) rnd)
+                      : mpfr_exp (y, x, (mpfr_rnd_t) rnd);
                     if (__gmpfr_flags != flags)
                       {
                         printf ("Incorrect flags in underflow_up, %s",

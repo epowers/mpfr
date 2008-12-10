@@ -3,20 +3,20 @@
 Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -124,7 +124,12 @@ typedef __mpfr_struct mpfr_t[1];
 typedef __mpfr_struct *mpfr_ptr;
 typedef __gmp_const __mpfr_struct *mpfr_srcptr;
 
-/* For those who needs a direct access and fast access to the sign field */
+/* For those who need a direct and fast access to the sign field.
+   However it is not in the API, thus use it at your own risk: it might
+   not be supported, or change name, in further versions!
+   Unfortunately, it must be defined here (instead of MPFR's internal
+   header file mpfr-impl.h) because it is used by some macros below.
+*/
 #define MPFR_SIGN(x) ((x)->_mpfr_sign)
 
 /* Stack interface */
@@ -172,7 +177,7 @@ typedef enum {
    mpfr.h to be defined. If the user forgets to include the header, the mpfr
    function prototype in the user object file is not correct. In order to
    raise a linker error in that case, we change their internal name in the
-   mpfr library (prefixed by __gmpfr instead of mpfr)*/
+   GNU mpfr library (prefixed by __gmpfr instead of mpfr)*/
 #if defined (__cplusplus)
 extern "C" {
 #endif
@@ -324,7 +329,6 @@ __MPFR_DECLSPEC void mpfr_get_z _MPFR_PROTO ((mpz_ptr z, mpfr_srcptr f,
 __MPFR_DECLSPEC void mpfr_free_str _MPFR_PROTO ((char *));
 
 
-__MPFR_DECLSPEC void mpfr_random _MPFR_PROTO ((mpfr_ptr));
 __MPFR_DECLSPEC void mpfr_random2 _MPFR_PROTO ((mpfr_ptr,mp_size_t,mp_exp_t));
 __MPFR_DECLSPEC int mpfr_urandomb _MPFR_PROTO ((mpfr_ptr, gmp_randstate_t));
 

@@ -3,20 +3,20 @@
 Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -79,6 +79,24 @@ check_underflow (void)
   set_emax (emax);
 
   mpfr_clear (a);
+}
+
+/* Bug found by Christoph Lauter. */
+static void
+bug20081028 (void)
+{
+  mpfr_t x;
+  const char *s = "0.10000000000000000000000000000001E1";
+
+  mpfr_init2 (x, 32);
+  mpfr_set_str (x, "1.00000000000000000006", 10, GMP_RNDU);
+  if (! mpfr_greater_p (x, __gmpfr_one))
+    {
+      printf ("Error in bug20081028:\nExpected %s\nGot      ", s);
+      mpfr_dump (x);
+      exit (1);
+    }
+  mpfr_clear (x);
 }
 
 int
@@ -203,7 +221,7 @@ main (int argc, char *argv[])
     {
       mp_rnd_t rnd;
 
-      mpfr_random (x);
+      mpfr_urandomb (x, RANDS);
       rnd = RND_RAND ();
       logbase = (randlimb () % 5) + 1;
       base = 1 << logbase;
@@ -848,6 +866,7 @@ main (int argc, char *argv[])
   mpfr_clear (y);
 
   check_underflow ();
+  bug20081028 ();
 
   tests_end_mpfr ();
   return 0;

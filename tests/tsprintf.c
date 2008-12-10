@@ -4,18 +4,18 @@
 Copyright 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -197,7 +197,7 @@ decimal (void)
   check_sprintf ("                             0", "%30.0Rf", z);
   check_sprintf ("                        0.0000", "%30.4Rf", z);
   check_sprintf ("                             0", "%30.0Rg", z);
-  check_sprintf ("                        0.0000", "%30.4Rg", z);
+  check_sprintf ("                             0", "%30.4Rg", z);
   /* sign or space, pad with leading zeros */
   check_sprintf (" 000001.899347461279296875E+07", "% 030RE", x);
   check_sprintf (" 0000000000000000001.89935E+07", "% 030RG", x);
@@ -294,6 +294,18 @@ decimal (void)
   check_sprintf ("-3.051757812500000000000000000000e-05", "%.30Re", x);
   check_sprintf ("-3.05175781250000000000000000000e-05", "%#.30Rg", x);
   check_sprintf ("-0.000030517578125000000000000000", "%.30Rf", x);
+
+  /* bug 20081023 */
+  check_sprintf ("-3.0517578125e-05", "%.30Rg", x);
+  mpfr_set_str (x, "1.9999", 10, GMP_RNDN);
+  check_sprintf ("1.999900  ", "%-#10.7RG", x);
+  check_sprintf ("1.9999    ", "%-10.7RG", x);
+  mpfr_set_ui (x, 1, GMP_RNDN);
+  check_sprintf ("1.00000000000000000000000000000", "%#.30Rg", x);
+  check_sprintf ("1", "%.30Rg", x);
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  check_sprintf ("0.000000000000000000000000000000", "%#.30Rg", x);
+  check_sprintf ("0", "%.30Rg", x);
 
   mpfr_clears (x, z, (mpfr_ptr) 0);
   return 0;

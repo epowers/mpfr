@@ -3,20 +3,20 @@
 Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -302,7 +302,7 @@ check_hard (void)
             {
               do
                 {
-                  mpfr_random (q2);
+                  mpfr_urandomb (q2, RANDS);
                 }
               while (mpfr_cmp_ui (q2, 0) == 0);
             }
@@ -313,7 +313,7 @@ check_hard (void)
           mpfr_set_prec (v, precv);
           do
             {
-              mpfr_random (v);
+              mpfr_urandomb (v, RANDS);
             }
           while (mpfr_cmp_ui (v, 0) == 0);
           for (precu = precq; precu <= 10 * precq; precu += precq)
@@ -371,12 +371,12 @@ check_lowr (void)
     {
       do
         {
-          mpfr_random (z);
+          mpfr_urandomb (z, RANDS);
         }
       while (mpfr_cmp_ui (z, 0) == 0);
       do
         {
-          mpfr_random (tmp);
+          mpfr_urandomb (tmp, RANDS);
         }
       while (mpfr_cmp_ui (tmp, 0) == 0);
       mpfr_mul (x, z, tmp, GMP_RNDN); /* exact */
@@ -396,10 +396,10 @@ check_lowr (void)
   mpfr_set_prec (z2, 9);
   for (k = 1; k < KMAX; k++)
     {
-      mpfr_random (z);
+      mpfr_urandomb (z, RANDS);
       do
         {
-          mpfr_random (tmp);
+          mpfr_urandomb (tmp, RANDS);
         }
       while (mpfr_cmp_ui (tmp, 0) == 0);
       mpfr_mul (x, z, tmp, GMP_RNDN); /* exact */
@@ -455,12 +455,12 @@ check_lowr (void)
     {
       do
         {
-          mpfr_random(z);
+          mpfr_urandomb (z, RANDS);
         }
       while (mpfr_cmp_ui (z, 0) == 0);
       do
         {
-          mpfr_random (tmp);
+          mpfr_urandomb (tmp, RANDS);
         }
       while (mpfr_cmp_ui (tmp, 0) == 0);
       mpfr_mul(x, z, tmp, GMP_RNDN);
@@ -579,11 +579,11 @@ check_inexact (void)
   for (px=2; px<MAX_PREC; px++)
     {
       mpfr_set_prec (x, px);
-      mpfr_random (x);
+      mpfr_urandomb (x, RANDS);
       for (pu=2; pu<=MAX_PREC; pu++)
         {
           mpfr_set_prec (u, pu);
-          do { mpfr_random (u); } while (mpfr_cmp_ui (u, 0) == 0);
+          do { mpfr_urandomb (u, RANDS); } while (mpfr_cmp_ui (u, 0) == 0);
             {
               py = MPFR_PREC_MIN + (randlimb () % (MAX_PREC - MPFR_PREC_MIN));
               mpfr_set_prec (y, py);
@@ -778,9 +778,9 @@ consistency (void)
       mpfr_set_prec (y, py);
       mpfr_set_prec (z1, pz);
       mpfr_set_prec (z2, pz);
-      mpfr_random (x);
+      mpfr_urandomb (x, RANDS);
       do
-        mpfr_random (y);
+        mpfr_urandomb (y, RANDS);
       while (mpfr_zero_p (y));
       inex1 = mpfr_div (z1, x, y, rnd);
       MPFR_ASSERTN (!MPFR_IS_NAN (z1));

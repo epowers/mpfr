@@ -3,20 +3,20 @@
 Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -423,7 +423,7 @@ check_inexact (mp_prec_t p)
   mpfr_init2 (x, p);
   mpfr_init2 (y, p);
   mpfr_init2 (z, 2*p);
-  mpfr_random (x);
+  mpfr_urandomb (x, RANDS);
   rnd = RND_RAND ();
   inexact = test_sqrt (y, x, rnd);
   if (mpfr_mul (z, y, y, rnd)) /* exact since prec(z) = 2*prec(y) */
@@ -505,8 +505,8 @@ test_property1 (mp_prec_t p, mp_rnd_t r)
   mpfr_init2 (z, p);
   mpfr_init2 (t, p);
 
-  mpfr_random (x);
-  mpfr_random (y);
+  mpfr_urandomb (x, RANDS);
+  mpfr_urandomb (y, RANDS);
   mpfr_mul (z, x, x, r);
   mpfr_mul (t, x, x, r);
   mpfr_add (z, z, t, r);
@@ -537,7 +537,7 @@ test_property2 (mp_prec_t p, mp_rnd_t r)
   mpfr_init2 (x, p);
   mpfr_init2 (y, p);
 
-  mpfr_random (x);
+  mpfr_urandomb (x, RANDS);
   mpfr_mul (y, x, x, r);
   mpfr_sqrt (y, y, r);
   if (mpfr_cmp (y, x))

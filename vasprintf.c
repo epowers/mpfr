@@ -4,20 +4,20 @@
 Copyright 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -30,22 +30,15 @@ MA 02110-1301, USA. */
 #include <wchar.h>
 #endif
 
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
 #if defined (__cplusplus)
 #include <cstddef>
+#define __STDC_LIMIT_MACROS   /* SIZE_MAX defined with stdint.h inclusion */
 #else
 #include <stddef.h>             /* for ptrdiff_t */
 #endif
 
-/* SIZE_MAX should be defined in <stddef.h> but maybe not in cstddef.
-   But acinclude.m4 currently has a test for SIZE_MAX, which is defined
-   by a -DSIZE_MAX=... flag if need be. So, if the configure script is
-   run, the following will not be used. */
-#ifndef SIZE_MAX
-#define SIZE_MAX 65535
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
 #endif
 
 #include <string.h>             /* for strlen, memcpy and others */
@@ -1333,7 +1326,7 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
         /* thousands separator in integral part */
         np->thousands_sep = MPFR_THOUSANDS_SEPARATOR;
 
-      if (nsd == 0)
+      if (nsd == 0 || (spec_g && !spec.alt))
         /* compute how much non-zero digits in integral and fractional
            parts */
         {
@@ -1497,6 +1490,9 @@ partition_number (struct number_parts *np, mpfr_srcptr p,
       else
         /* p == 0 */
         {
+          /* note: for 'g' spec, zero is always displayed with 'f'-style with
+             precision spec.prec - 1 and the trailing zeros are removed unless
+             the flag '#' is used. */
           if (MPFR_IS_NEG (p))
             /* signed zero */
             np->sign = '-';
@@ -1521,11 +1517,13 @@ partition_number (struct number_parts *np, mpfr_srcptr p,
           str[1] = '\0';
           np->ip_ptr = register_string (np->sl, str);
 
-          if (spec.prec > 0)
+          if (spec.prec > 0
+              && ((spec.spec != 'g' && spec.prec != 'G') || spec.alt))
             /* fractional part */
             {
               np->point = MPFR_DECIMAL_POINT;
-              np->fp_trailing_zeros = spec.prec;
+              np->fp_trailing_zeros = (spec.spec == 'g' && spec.prec == 'G') ?
+                spec.prec - 1 : spec.prec;
             }
           else if (spec.alt)
             np->point = MPFR_DECIMAL_POINT;

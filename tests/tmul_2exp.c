@@ -3,20 +3,20 @@
 Copyright 1999, 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -82,16 +82,16 @@ underflow (mp_exp_t e)
                 mpfr_clear_flags ();
                 /* Do not use mpfr_div_ui to avoid the optimization
                    by mpfr_div_2si. */
-                inex1 = mpfr_div (z1, y, z1, rnd);
+                inex1 = mpfr_div (z1, y, z1, (mpfr_rnd_t) rnd);
                 flags1 = __gmpfr_flags;
 
               for (div = 0; div <= 2; div++)
                 {
                   mpfr_clear_flags ();
                   inex2 = div == 0 ?
-                    mpfr_mul_2si (z2, x, e - k, rnd) : div == 1 ?
-                    mpfr_div_2si (z2, x, k - e, rnd) :
-                    mpfr_div_2ui (z2, x, k - e, rnd);
+                    mpfr_mul_2si (z2, x, e - k, (mpfr_rnd_t) rnd) : div == 1 ?
+                    mpfr_div_2si (z2, x, k - e, (mpfr_rnd_t) rnd) :
+                    mpfr_div_2ui (z2, x, k - e, (mpfr_rnd_t) rnd);
                   flags2 = __gmpfr_flags;
                   if (flags1 == flags2 && SAME_SIGN (inex1, inex2) &&
                       mpfr_equal_p (z1, z2))
@@ -105,7 +105,7 @@ underflow (mp_exp_t e)
                     printf ("%ld", e);
                   printf (")\nwith %s, x = %d/16, prec = %d, k = %d, mpfr_%s",
                           div == 0 ? "mul_2si" : div == 1 ? "div_2si" :
-                          "div_2ui", i, prec, k, mpfr_print_rnd_mode (rnd));
+                          "div_2ui", i, prec, k, mpfr_print_rnd_mode ((mpfr_rnd_t) rnd));
                   printf ("\nExpected ");
                   mpfr_out_str (stdout, 16, 0, z1, GMP_RNDN);
                   printf (", inex = %d, flags = %u\n", SIGN (inex1), flags1);

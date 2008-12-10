@@ -3,20 +3,20 @@
 Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -78,8 +78,7 @@ mpfr_hypot (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
 
   N = MPFR_PREC (x);   /* Precision of input variable */
   Nz = MPFR_PREC (z);   /* Precision of output variable */
-  threshold =
-    rnd_mode == GMP_RNDN ? (MAX (N, Nz) + 1) <<1 : MAX (N, Nz) <<1;
+  threshold = (MAX (N, Nz) + (rnd_mode == GMP_RNDN ? 1 : 0)) << 1;
 
   /* Is |x| a suitable approximation to the precision Nz ?
      (see algorithms.tex for explanations) */
@@ -107,7 +106,8 @@ mpfr_hypot (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
               MPFR_SET_SIGN (z, 1);
               MPFR_RNDRAW_GEN (inexact, z, MPFR_MANT (x), N, rnd_mode, 1,
                                goto addoneulp,
-                               if (MPFR_UNLIKELY (++MPFR_EXP (z) > __gmpfr_emax))
+                               if (MPFR_UNLIKELY (++ MPFR_EXP (z) >
+                                                  __gmpfr_emax))
                                  return mpfr_overflow (z, rnd_mode, 1);
                                );
 
@@ -120,9 +120,6 @@ mpfr_hypot (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
 
   /* General case */
 
-  /* FIXME: the following algorithm is correct only for
-     diff_exp <= MPFR_EMAX_MAX - 2 */
-
   N = MAX (MPFR_PREC (x), MPFR_PREC (y));
 
   /* working precision */
@@ -134,8 +131,11 @@ mpfr_hypot (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
 
   MPFR_SAVE_EXPO_MARK (expo);
 
-  /* Scale x and y to avoid overflow/underflow in x^2 and y^2. */
-  sh = mpfr_get_emax()/2 -Ex -1;
+  /* Scale x and y to avoid overflow/underflow in x^2 and overflow in y^2
+     (as |x| >= |y|). The scaling of y can underflow only when the target
+     precision is huge, otherwise the case would already have been handled
+     by the diff_exp > threshold code. */
+  sh = mpfr_get_emax () / 2 - Ex - 1;
 
   MPFR_ZIV_INIT (loop, Nt);
   for (;;)
@@ -145,8 +145,8 @@ mpfr_hypot (mpfr_ptr z, mpfr_srcptr x, mpfr_srcptr y, mp_rnd_t rnd_mode)
       exact = mpfr_mul_2si (te, x, sh, GMP_RNDZ);
       exact |= mpfr_mul_2si (ti, y, sh, GMP_RNDZ);
       exact |= mpfr_sqr (te, te, GMP_RNDZ);
-      exact |= mpfr_sqr (ti, ti, GMP_RNDZ);
-      exact |= mpfr_add (t, te, ti, GMP_RNDZ);
+      /* Use fma in order to avoid underflow when diff_exp<=MPFR_EMAX_MAX-2 */
+      exact |= mpfr_fma (t, ti, ti, te, GMP_RNDZ);
       exact |= mpfr_sqrt (t, t, GMP_RNDZ);
 
       err = Nt < N ? 4 : 2;

@@ -3,20 +3,20 @@
 Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -42,7 +42,7 @@ check_inexact (void)
     {
       mpfr_set_prec (x, p);
       mpfr_set_prec (absx, p);
-      mpfr_random (x);
+      mpfr_urandomb (x, RANDS);
       if (randlimb () % 2)
         {
           mpfr_set (absx, x, GMP_RNDN);
@@ -138,7 +138,7 @@ check_cmp (int argc, char *argv[])
       mp_rnd_t rnd;
       int sign = SIGN_RAND ();
 
-      mpfr_random (x);
+      mpfr_urandomb (x, RANDS);
       MPFR_SET_SIGN (x, sign);
       rnd = RND_RAND ();
       mpfr_abs (y, x, rnd);

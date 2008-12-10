@@ -4,20 +4,20 @@
 Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -318,9 +318,16 @@ mpfr_rand_raw (mp_ptr mp, gmp_randstate_t rstate, unsigned long int nbits)
 
 #ifdef mp_get_memory_functions
 
-void * (*mpfr_allocate_func) (size_t);
-void * (*mpfr_reallocate_func) (void *,size_t, size_t);
-void   (*mpfr_free_func) (void *, size_t);
+/* putting 0 as initial values forces those symbols to be fully defined,
+   and always resolved, otherwise they are only tentatively defined, which
+   leads to problems on e.g. MacOS, cf
+   http://lists.gforge.inria.fr/pipermail/mpc-discuss/2008-November/000048.html
+   and http://software.intel.com/en-us/articles/intelr-fortran-compiler-for-mac-os-non_lazy_ptr-unresolved-references-from-linking
+   Note that using ranlib -c or libtool -c is another fix.
+*/
+void * (*mpfr_allocate_func) (size_t) = 0;
+void * (*mpfr_reallocate_func) (void *,size_t, size_t) = 0;
+void   (*mpfr_free_func) (void *, size_t) = 0;
 
 #endif
 

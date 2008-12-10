@@ -3,20 +3,20 @@
 Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
-This file is part of the MPFR Library.
+This file is part of the GNU MPFR Library.
 
-The MPFR Library is free software; you can redistribute it and/or modify
+The GNU MPFR Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation; either version 2.1 of the License, or (at your
 option) any later version.
 
-The MPFR Library is distributed in the hope that it will be useful, but
+The GNU MPFR Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the MPFR Library; see the file COPYING.LIB.  If not, write to
+along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
@@ -381,8 +381,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_nan (x);
-  mpfr_random (y);
-  mpfr_random (z);
+  mpfr_urandomb (y, RANDS);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_nan_p (s))
     {
@@ -391,8 +391,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_nan (y);
-  mpfr_random (x);
-  mpfr_random (z);
+  mpfr_urandomb (x, RANDS);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_nan_p(s))
     {
@@ -401,8 +401,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_nan (z);
-  mpfr_random (y);
-  mpfr_random (x);
+  mpfr_urandomb (y, RANDS);
+  mpfr_urandomb (x, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_nan_p (s))
     {
@@ -452,7 +452,7 @@ main (int argc, char *argv[])
 
   mpfr_set_inf (x, 1);
   mpfr_set_ui (y, 0, GMP_RNDN);
-  mpfr_random (z);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_nan_p (s))
     {
@@ -462,7 +462,7 @@ main (int argc, char *argv[])
 
   mpfr_set_inf (y, 1);
   mpfr_set_ui (x, 0, GMP_RNDN);
-  mpfr_random (z);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_nan_p (s))
     {
@@ -471,7 +471,7 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_inf (x, 1);
-  mpfr_random (y); /* always positive */
+  mpfr_urandomb (y, RANDS); /* always positive */
   mpfr_set_inf (z, -1);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_nan_p (s))
@@ -481,7 +481,7 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_inf (y, 1);
-  mpfr_random (x);
+  mpfr_urandomb (x, RANDS);
   mpfr_set_inf (z, -1);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_nan_p (s))
@@ -491,8 +491,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_inf (x, 1);
-  mpfr_random (y);
-  mpfr_random (z);
+  mpfr_urandomb (y, RANDS);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_inf_p (s) || mpfr_sgn (s) < 0)
     {
@@ -501,8 +501,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_inf (y, 1);
-  mpfr_random (x);
-  mpfr_random (z);
+  mpfr_urandomb (x, RANDS);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_inf_p (s) || mpfr_sgn (s) < 0)
     {
@@ -511,8 +511,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_inf (z, 1);
-  mpfr_random (x);
-  mpfr_random (y);
+  mpfr_urandomb (x, RANDS);
+  mpfr_urandomb (y, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (!mpfr_inf_p (s) || mpfr_sgn (s) < 0)
     {
@@ -521,8 +521,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_ui (x, 0, GMP_RNDN);
-  mpfr_random (y);
-  mpfr_random (z);
+  mpfr_urandomb (y, RANDS);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (mpfr_cmp (s, z))
     {
@@ -531,8 +531,8 @@ main (int argc, char *argv[])
     }
 
   mpfr_set_ui (y, 0, GMP_RNDN);
-  mpfr_random (x);
-  mpfr_random (z);
+  mpfr_urandomb (x, RANDS);
+  mpfr_urandomb (z, RANDS);
   mpfr_fma (s, x, y, z, GMP_RNDN);
   if (mpfr_cmp (s, z))
     {
@@ -564,9 +564,9 @@ main (int argc, char *argv[])
 
       for (n=0; n<N; n++)
         {
-          mpfr_random (x);
-          mpfr_random (y);
-          mpfr_random (z);
+          mpfr_urandomb (x, RANDS);
+          mpfr_urandomb (y, RANDS);
+          mpfr_urandomb (z, RANDS);
 
           if (randlimb () % 2)
             mpfr_neg (x, x, GMP_RNDN);
