@@ -82,10 +82,13 @@ MA 02110-1301, USA. */
 static const char num_to_text[] = "0123456789abcdef";
 
 /* some macro and functions for parsing format string */
+
+/* Read an integer; saturate to INT_MAX. */
 #define READ_INT(ap, format, specinfo, field, label_out)                \
   do {                                                                  \
     while (*(format))                                                   \
       {                                                                 \
+        int _i;                                                         \
         switch (*(format))                                              \
           {                                                             \
           case '0':                                                     \
@@ -98,15 +101,12 @@ static const char num_to_text[] = "0123456789abcdef";
           case '7':                                                     \
           case '8':                                                     \
           case '9':                                                     \
-            MPFR_ASSERTN (specinfo.field < INT_MAX / 10);               \
-            specinfo.field *= 10;                                       \
-            /* The test specinfo.field <= INT_MAX - *(format) + '0'     \
-               produces a trap with gcc 4.1.2 -ftrapv on a 32-bit machine, \
-               most probably gcc precomputes INT_MAX + '0' and then subtracts \
-               *(format), which clearly underflows. We thus prefer to do the \
-               check afterwards. */                                     \
-            specinfo.field += *(format) - '0';                          \
-            MPFR_ASSERTN (specinfo.field >= *(format) - '0');           \
+            specinfo.field = (specinfo.field <= INT_MAX / 10) ?         \
+              specinfo.field * 10 : INT_MAX;                            \
+            _i = *(format) - '0';                                       \
+            MPFR_ASSERTN (_i >= 0 && _i <= 9);                          \
+            specinfo.field = (specinfo.field <= INT_MAX - _i) ?         \
+              specinfo.field + _i : INT_MAX;                            \
             ++(format);                                                 \
             break;                                                      \
           case '*':                                                     \
