@@ -1,4 +1,64 @@
 ------------------------------------------------------------------------
+r5725 | thevenyp | 2008-12-12 14:45:07 +0000 (Fri, 12 Dec 2008) | 6 lines
+Changed paths:
+   M /branches/2.4/configure.in
+   M /branches/2.4/set_ld.c
+   M /branches/2.4/tests/tests.c
+   M /branches/2.4/tests/tgeneric.c
+   M /branches/2.4/tests/tset_ld.c
+   M /branches/2.4/vasprintf.c
+
+set_ld.c: rewrote exp computation.
+vasprintf.c: avoid a possible gcc 4.1.2 bug with -ftrapv.
+configure.in: remove line 'GCC='
+tests/tset_ld.c tests/tgeneric.c tests/tests.c: Code clean-up
+[merged -r5713:5722 from trunk]
+
+------------------------------------------------------------------------
+r5724 | vlefevre | 2008-12-12 14:08:44 +0000 (Fri, 12 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4
+
+Added "compile" to svn:ignore property (this file is installed by
+"automake --add-missing" due to AM_PROG_CC_C_O, added in r5710).
+------------------------------------------------------------------------
+r5715 | thevenyp | 2008-12-12 10:20:23 +0000 (Fri, 12 Dec 2008) | 4 lines
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: patch to MPFR_ASSERTN(...) call to avoid failure with gcc -ftrapv
+	     with gcc 4.1.2 (probably compiler error)
+[merged r5713 from trunk]
+
+------------------------------------------------------------------------
+r5714 | thevenyp | 2008-12-12 10:05:59 +0000 (Fri, 12 Dec 2008) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/Makefile.am
+   M /branches/2.4/tests/tmul.c
+
+Makefile.am, tmul.c: Rename macro __SRCDIR to MPFR_SRCDIR.
+[merged -c 5712 from trunk]
+
+------------------------------------------------------------------------
+r5711 | thevenyp | 2008-12-11 15:41:13 +0000 (Thu, 11 Dec 2008) | 5 lines
+Changed paths:
+   M /branches/2.4/configure.in
+   M /branches/2.4/tests/Makefile.am
+   M /branches/2.4/tests/tmul.c
+
+configure.in: Add AM_PROG_CC_C_O needed by tmul_CPPFLAGS.
+tests/Makefile.am: Add tmul.dat in EXTRA_DIST and pass srcdir to tmul.c through tmul_CPPFLAGS.
+tests/tmul.c: Add path to tmul.dat.
+[merged -c 5710 from trunk]
+
+------------------------------------------------------------------------
+r5709 | thevenyp | 2008-12-11 10:44:37 +0000 (Thu, 11 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: Updated.
+
+------------------------------------------------------------------------
 r5708 | thevenyp | 2008-12-11 10:36:57 +0000 (Thu, 11 Dec 2008) | 2 lines
 Changed paths:
    M /branches/2.4/NEWS
