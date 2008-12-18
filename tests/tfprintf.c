@@ -30,9 +30,33 @@ MA 02110-1301, USA. */
 #include <stdint.h>
 #endif
 
+#ifdef HAVE_QUAD_T
+#include <sys/types.h>
+#endif
+
 #include "mpfr-test.h"
 
 #if MPFR_VERSION >= MPFR_VERSION_NUM(2,4,0)
+
+#define QUOTE(X) NAME(X)
+#define NAME(X) #X
+
+#define check_length(num_test, var, value, var_spec)                    \
+  if ((var) != (value))                                                 \
+    {                                                                   \
+      printf ("Error in test #%d: mpfr_vfprintf printed %"QUOTE(var_spec) \
+              " characters instead of %d\n", (num_test), (var), (value)); \
+      exit (1);                                                         \
+    }
+
+#define check_length_with_cmp(num_test, var, value, cmp, var_spec)      \
+  if (cmp != 0)                                                         \
+    {                                                                   \
+      mpfr_printf ("Error in test #%d, mpfr_vfprintf printed %"         \
+                   QUOTE(var_spec)" characters instead of %d\n",        \
+                   (num_test), (var), (value));                         \
+      exit (1);                                                         \
+    }
 
 /* limit for random precision in random() */
 const int prec_max_printf = 5000;
@@ -46,6 +70,7 @@ check (FILE *fout, char *fmt, mpfr_t x)
                    fmt, x);
       exit (1);
     }
+  fputc ('\n', fout);
 }
 
 static void
@@ -63,6 +88,7 @@ check_vfprintf (FILE *fout, char *fmt, ...)
     }
 
   va_end (ap);
+  fputc ('\n', fout);
 }
 
 static void
@@ -128,17 +154,7 @@ check_mixed (FILE *fout)
   long double ld = -1.25;
 
   ptrdiff_t p = 1;
-  size_t si = 1;
-
-#ifdef HAVE_LONG_LONG
-  long long llo = -1;
-  unsigned long long ullo = -1;
-#endif
-
-#ifdef _MPFR_H_HAVE_INTMAX_T
-  intmax_t im = -1;
-  uintmax_t uim = 1;
-#endif
+  size_t sz = 1;
 
   mpz_t mpz;
   mpq_t mpq;
@@ -163,54 +179,82 @@ check_mixed (FILE *fout)
 
   limb[0] = limb[1] = limb[2] = ~ (mp_limb_t) 0;
 
-  check_vfprintf (fout, "a. %Ra, b. %hhu, c. %u, d. %lx%hhn\n", mpfr, uch, ui,
+  check_vfprintf (fout, "a. %Ra, b. %hhu, c. %u, d. %lx%hhn", mpfr, uch, ui,
                   ulo, &uch);
-  MPFR_ASSERTN (uch == 28);
-  check_vfprintf (fout, "a. %hhi, b. %Rb, c. %u, d. %li%ln\n", sch, mpfr, i,
+  check_length (1, uch, 28, hhu);
+  check_vfprintf (fout, "a. %hhi, b. %Rb, c. %u, d. %li%ln", sch, mpfr, i,
                   lo, &ulo);
-  MPFR_ASSERTN (ulo == 37);
-  check_vfprintf (fout, "a. %hi, b. %*f, c. %Re%hn\n", ush, 3, f, mpfr, &ush);
-  MPFR_ASSERTN (ush == 29);
-  check_vfprintf (fout, "a. %hi, b. %e, c. %#.2Rf%n\n", sh, d, mpfr, &i);
-  MPFR_ASSERTN (i == 33);
-  check_vfprintf (fout, "a. %R*A, b. %Fe, c. %i%zn\n", rnd, mpfr, mpf, si,
-                  &si);
-  MPFR_ASSERTN (si == 34);
-  check_vfprintf (fout, "a. %Pu, b. %c, c. %Lf, d. %Zi%Zn\n", prec, ch, ld,
+  check_length (2, ulo, 37, lu);
+  check_vfprintf (fout, "a. %hi, b. %*f, c. %Re%hn", ush, 3, f, mpfr, &ush);
+  check_length (3, ush, 29, hu);
+  check_vfprintf (fout, "a. %hi, b. %e, c. %#.2Rf%n", sh, d, mpfr, &i);
+  check_length (4, i, 33, d);
+  check_vfprintf (fout, "a. %R*A, b. %Fe, c. %i%zn", rnd, mpfr, mpf, sz,
+                  &sz);
+  check_length (5, sz, 34, zu);
+  check_vfprintf (fout, "a. %Pu, b. %c, c. %Lf, d. %Zi%Zn", prec, ch, ld,
                   mpz, &mpz);
-  MPFR_ASSERTN (mpz_cmp_ui (mpz, 31) == 0);
-  check_vfprintf (fout, "%% a. %#.0RNg, b. %Qx%Rn, c. %td, d. %p\n", mpfr, mpq,
+  check_length_with_cmp (6, mpz, 31, mpz_cmp_ui (mpz, 31), Zi);
+  check_vfprintf (fout, "%% a. %#.0RNg, b. %Qx%Rn, c. %td, d. %p", mpfr, mpq,
                   &mpfr, p, &i);
-  MPFR_ASSERTN (mpfr_cmp_ui (mpfr, 16) == 0);
+  check_length_with_cmp (7, mpfr, 16, mpfr_cmp_ui (mpfr, 16), Rg);
 
-  check_vfprintf (fout, "a. %Mx b. %Re%Mn\n", limb[0], mpfr, &limb[0]);
-  MPFR_ASSERTN (limb[0] == 14 + BITS_PER_MP_LIMB / 4);
-  MPFR_ASSERTN (limb[1] == ~ (mp_limb_t) 0);
-  MPFR_ASSERTN (limb[2] == ~ (mp_limb_t) 0);
+  check_vfprintf (fout, "a. %Mx b. %Re%Mn", limb[0], mpfr, &limb[0]);
+  if (limb[0] != 14 + BITS_PER_MP_LIMB / 4 || limb[1] != ~ (mp_limb_t) 0
+      || limb[2] != ~ (mp_limb_t) 0)
+    {
+      printf ("Error in test #8: mpfr_vfprintf did not print %u characters"
+              " as expected\n", 14 + BITS_PER_MP_LIMB / 4);
+      exit (1);
+    }
 
   limb[0] = ~ (mp_limb_t) 0;
   /* we tell vfprintf that limb array is 2 cells wide
      and check it doesn't go through */
-  check_vfprintf (fout, "a. %Re .b %Nx%Nn\n", mpfr, limb, limb_size, limb,
+  check_vfprintf (fout, "a. %Re .b %Nx%Nn", mpfr, limb, limb_size, limb,
                   limb_size - 1);
-  MPFR_ASSERTN (limb[0] == 14 + 3 * BITS_PER_MP_LIMB / 4);
-  MPFR_ASSERTN (limb[1] == (mp_limb_t) 0);
-  MPFR_ASSERTN (limb[2] == ~ (mp_limb_t) 0);
+  if (limb[0] != 14 + 3 * BITS_PER_MP_LIMB / 4 || limb[1] != (mp_limb_t) 0
+      || limb[2] != ~ (mp_limb_t) 0)
+    {
+      printf ("Error in test #9: mpfr_vfprintf did not print %u characters"
+              " as expected\n", 14 + BITS_PER_MP_LIMB / 4);
+      exit (1);
+    }
 
 #ifdef HAVE_LONG_LONG
-  check_vfprintf (fout, "a. %Re, b. %llx%Qn\n", mpfr, ullo, &mpq);
-  MPFR_ASSERTN (mpq_cmp_ui (mpq, 31, 1) == 0);
-  check_vfprintf (fout, "a. %lli, b. %Rf%Fn\n", llo, mpfr, &mpf);
-  MPFR_ASSERTN (mpf_cmp_ui (mpf, 12) == 0);
-  check_vfprintf (fout, "a. %qi, b. %Rf%qn\n", llo, mpfr, &ullo);
-  MPFR_ASSERTN (ullo == 12);
+  {
+    long long llo = -1;
+    unsigned long long ullo = 1;
+
+    check_vfprintf (fout, "a. %Re, b. %llx%Qn", mpfr, ullo, &mpq);
+    check_length_with_cmp (11, mpq, 16, mpq_cmp_ui (mpq, 16, 1), Qu);
+    check_vfprintf (fout, "a. %lli, b. %Rf%Fn", llo, mpfr, &mpf);
+    check_length_with_cmp (12, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);
+  }
+#endif
+
+#ifdef HAVE_QUAD_T
+  {
+    quad_t q = -1;
+    u_quad_t uq = 1;
+
+    check_vfprintf (fout, "a. %Re, b. %qx%Qn", mpfr, uq, &mpq);
+    check_length_with_cmp (21, mpq, 16, mpq_cmp_ui (mpq, 16, 1), Qu);
+    check_vfprintf (fout, "a. %qi, b. %Rf%Fn", q, mpfr, &mpf);
+    check_length_with_cmp (22, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);    
+  }
 #endif
 
 #ifdef _MPFR_H_HAVE_INTMAX_T
-  check_vfprintf (fout, "a. %*RA, b. %ji%Qn\n", 10, mpfr, im, &mpq);
-  MPFR_ASSERTN (mpq_cmp_ui (mpq, 20, 1) == 0);
-  check_vfprintf (fout, "a. %.*Re, b. %jx%Fn\n", 10, mpfr, uim, &mpf);
-  MPFR_ASSERTN (mpf_cmp_ui (mpf, 25) == 0);
+  {
+    intmax_t im = -1;
+    uintmax_t uim = 1;
+
+    check_vfprintf (fout, "a. %*RA, b. %ji%Qn", 10, mpfr, im, &mpq);
+    check_length_with_cmp (31, mpq, 20, mpq_cmp_ui (mpq, 20, 1), Qu);
+    check_vfprintf (fout, "a. %.*Re, b. %jx%Fn", 10, mpfr, uim, &mpf);
+    check_length_with_cmp (32, mpf, 25, mpf_cmp_ui (mpf, 25), Fg);
+  }
 #endif
 
   mpfr_clear (mpfr);

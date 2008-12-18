@@ -307,6 +307,17 @@ decimal (void)
   check_sprintf ("0.000000000000000000000000000000", "%#.30Rg", x);
   check_sprintf ("0", "%.30Rg", x);
 
+  /* following tests with precision 53 bits */
+  mpfr_set_prec (x, 53);
+
+  /* Exponent zero has a plus sign */
+  mpfr_set_str (x, "-9.95645044213728791504536275169812142849e-01", 10, GMP_RNDN);
+  check_sprintf ("-1.0e+00", "%- #0.1Re", x);
+
+  /* Decimal point and no figure after it with '#' flag and 'G' style */
+  mpfr_set_str (x, "-9.90597761233942053494e-01", 10, GMP_RNDN);
+  check_sprintf ("-1.", "%- #0.1RG", x);
+
   mpfr_clears (x, z, (mpfr_ptr) 0);
   return 0;
 }
@@ -547,9 +558,9 @@ locale_da_DK (void)
 static int
 random_double (void)
 {
-  int i;
-  mpfr_t x;
-  double y;
+  mpfr_t x; /* random regular mpfr float */
+  double y; /* regular double float (equal to x) */
+
   char flag[] =
     {
       '-',
@@ -570,23 +581,33 @@ random_double (void)
               regular numbers */
       'G',
     };
+  int spec; /* random index in specifier[] */
+  int prec; /* random value for precision field */
+
+  /* in the format string for mpfr_t variable, the maximum length is
+     reached by something like "%-+ #0'.*Rf", that is 12 characters. */
+#define FMT_MPFR_SIZE 12
+  char fmt_mpfr[FMT_MPFR_SIZE];
+  char *ptr_mpfr;
+
+  /* in the format string for double variable, the maximum length is
+     reached by something like "%-+ #0'.*f", that is 11 characters. */
+#define FMT_SIZE 11
+  char fmt[FMT_SIZE];
+  char *ptr;
+
+  int xi;
+  char *xs;
+  int yi;
+  char *ys;
+
+  int i, j, jmax;
 
   mpfr_init2 (x, MPFR_LDBL_MANT_DIG);
 
   for (i = 0; i < 1000; ++i)
     {
-      int j, jmax, spec, prec;
-#define FMT_MPFR_SIZE 12
-      char fmt_mpfr[FMT_MPFR_SIZE]; /* at most something like "%-+ #0'.*Rf" */
-      char *ptr_mpfr = fmt_mpfr;
-#define FMT_SIZE 11
-      char fmt[FMT_SIZE]; /* at most something like "%-+ #0'.*f" */
-      char *ptr = fmt;
-      int xi;
-      char *xs;
-      int yi;
-      char *ys;
-
+      /* 1. random double */
       do
         {
           y = DBL_RAND ();
@@ -600,9 +621,19 @@ random_double (void)
       if (randlimb () % 2 == 0)
         y = -y;
 
+      mpfr_set_d (x, y, GMP_RNDN);
+      if (y != mpfr_get_d (x, GMP_RNDN))
+        /* conversion error: skip this one */
+        continue;
+
+      /* 2. build random format strings fmt_mpfr and fmt */
+      ptr_mpfr = fmt_mpfr;
+      ptr = fmt;
       *ptr_mpfr++ = *ptr++ = '%';
+      /* random specifier 'e', 'f', 'g', 'E', 'F', or 'G' */
       spec = (int) (randlimb() % 6);
-      jmax = (spec == 0 || spec == 3) ? 5 : 6; /* no ' flag with %e */
+      /* random flags, but no ' flag with %e */
+      jmax = (spec == 0 || spec == 3) ? 5 : 6;
       for (j = 0; j < jmax; j++)
         {
           if (randlimb() % 3 == 0)
@@ -621,38 +652,37 @@ random_double (void)
         prec = (int) (randlimb() % 10);
       else
         prec = (int) (randlimb() % prec_max_printf);
-      if (i == 0) /* bug on icc found on June 10, 2008 */
-        {
-          y = -9.95645044213728791504536275169812142849e-01;
-          strcpy (fmt_mpfr, "%- #0.*Re");
-          strcpy (fmt,      "%- #0.*e");
-          prec = 1;
-        }
 
-      mpfr_set_d (x, y, GMP_RNDN);
-
-      if (y != mpfr_get_d (x, GMP_RNDN))
-        /* conversion error: skip this one */
-        continue;
-
+      /* 3. calls and checks */
+      /* the double float case is handled by the libc asprintf through
+         gmp_asprintf */
       xi = mpfr_asprintf (&xs, fmt_mpfr, prec, x);
       yi = mpfr_asprintf (&ys, fmt, prec, y);
 
       /* test if XS and YS differ, beware that ISO C99 doesn't specify
-         the sign of a null exponent, while mpfr always uses '+' */
+         the sign of a zero exponent (the C99 rationale says: "The sign
+         of a zero exponent in %e format is unspecified.  The committee
+         knows of different implementations and choose not to require
+         implementations to document their behaviour in this case
+         (by making this be implementation defined behaviour).  Most
+         implementations use a "+" sign, e.g., 1.2e+00; but there is at
+         least one implementation that uses the sign of the unlimited
+         precision result, e.g., the 0.987 would be 9.87e-01, so could
+         end up as 1e-00 after rounding to one digit of precision."),
+         while mpfr always uses '+' */
       if (xi != yi
           || ((strcmp (xs, ys) != 0)
               && (spec == 1 || spec == 4
-                  || ((strstr (xs, "e+00") == NULL)
-                      && (strstr (xs, "E+00") == NULL))
-                  || ((strstr (ys, "e-00") == NULL)
-                      && (strstr (ys, "E-00") == NULL))
-                  || (strncmp (xs, ys, xi - 3)))))
+                  || ((strstr (xs, "e+00") == NULL
+                       || strstr (ys, "e-00") == NULL)
+                      && (strstr (xs, "E+00") == NULL
+                          || strstr (ys, "E-00") == NULL)))))
         {
           mpfr_printf ("Error in mpfr_asprintf(\"%s\", %d, %Re)\n",
                        fmt_mpfr, prec, x);
           printf ("expected: %s\n", ys);
           printf ("     got: %s\n", xs);
+          printf ("xi=%d yi=%d spec=%d\n", xi, yi, spec);
 
           exit (1);
         }
@@ -663,6 +693,78 @@ random_double (void)
 
   mpfr_clear (x);
   return 0;
+}
+
+static void
+bug20080610 ()
+{
+  /* bug on icc found on June 10, 2008 */
+  /* this is not a bug but a different implementation choice: ISO C99 doesn't
+     specify the sign of a zero exponent (see note in random_double above). */
+  mpfr_t x;
+  double y;
+  int xi;
+  char *xs;
+  int yi;
+  char *ys;
+
+  mpfr_init2 (x, MPFR_LDBL_MANT_DIG);
+
+  y = -9.95645044213728791504536275169812142849e-01;
+  mpfr_set_d (x, y, GMP_RNDN);
+
+  xi = mpfr_asprintf (&xs, "%- #0.*Re", 1, x);
+  yi = mpfr_asprintf (&ys, "%- #0.*e", 1, y);
+
+  if (xi != yi || strcmp (xs, ys) != 0)
+    {
+      printf ("Error in bug20080610\n");
+      printf ("expected: %s\n", ys);
+      printf ("     got: %s\n", xs);
+      printf ("xi=%d yi=%d\n", xi, yi);
+
+      exit (1);
+    }
+
+  mpfr_free_str (xs);
+  mpfr_free_str (ys);
+  mpfr_clear (x);
+}
+
+static void
+bug20081214 ()
+{
+ /* problem with glibc 2.3.6, December 14, 2008:
+    the system asprintf outputs "-1.0" instead of "-1.". */
+  mpfr_t x;
+  double y;
+  int xi;
+  char *xs;
+  int yi;
+  char *ys;
+
+  mpfr_init2 (x, MPFR_LDBL_MANT_DIG);
+
+  y = -9.90597761233942053494e-01;
+  mpfr_set_d (x, y, GMP_RNDN);
+
+  xi = mpfr_asprintf (&xs, "%- #0.*RG", 1, x);
+  yi = mpfr_asprintf (&ys, "%- #0.*G", 1, y);
+
+  if (xi != yi || strcmp (xs, ys) != 0)
+    {
+      mpfr_printf ("Error in bug20081214\n"
+                   "mpfr_asprintf(\"%- #0.*Re\", 1, %Re)\n", x);
+      printf ("expected: %s\n", ys);
+      printf ("     got: %s\n", xs);
+      printf ("xi=%d yi=%d\n", xi, yi);
+
+      exit (1);
+    }
+
+  mpfr_free_str (xs);
+  mpfr_free_str (ys);
+  mpfr_clear (x);
 }
 
 int
@@ -681,13 +783,20 @@ main (int argc, char **argv)
   binary ();
   decimal ();
   mixed ();
-  random_double ();
 
 #if defined(HAVE_LOCALE_H) && defined(HAVE_SETLOCALE)
   locale_da_DK ();
 
   setlocale (LC_ALL, locale);
 #endif
+
+  if (getenv ("MPFR_CHECK_LIBC_PRINTF"))
+    {
+      /* check against libc */
+      random_double ();
+      bug20081214 ();
+      bug20080610 ();
+    }
 
   tests_end_mpfr ();
   return 0;

@@ -21,6 +21,10 @@ along with the GNU MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /* The mpfr_printf-like functions are defined only if stdarg.h exists */
 #ifdef HAVE_STDARG
 
@@ -39,6 +43,10 @@ MA 02110-1301, USA. */
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
+
+#ifdef HAVE_QUAD_T
+#include <sys/types.h>
 #endif
 
 #include <string.h>             /* for strlen, memcpy and others */
@@ -127,6 +135,7 @@ enum arg_t
     SHORT_ARG,
     LONG_ARG,
     LONG_LONG_ARG,
+    QUAD_ARG,
     INTMAX_ARG,
     SIZE_ARG,
     PTRDIFF_ARG,
@@ -251,8 +260,8 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
         }
     case 'q':
       ++format;
-#ifdef HAVE_LONG_LONG
-      specinfo->arg_type = LONG_LONG_ARG;
+#ifdef HAVE_QUAD_T
+      specinfo->arg_type = QUAD_ARG;
 #else
       specinfo->arg_type = UNSUPPORTED;
 #endif
@@ -357,6 +366,15 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
 #define CASE_LONG_LONG_ARG(specinfo, ap)
 #endif
 
+#ifdef HAVE_QUAD_T
+#define CASE_QUAD_ARG(specinfo, ap)             \
+  case QUAD_ARG:                                \
+  (void) va_arg ((ap), quad_t);                 \
+  break;
+#else
+#define CASE_QUAD_ARG(specinfo, ap)
+#endif
+
 #define CONSUME_VA_ARG(specinfo, ap)            \
   do {                                          \
     switch ((specinfo).arg_type)                \
@@ -365,9 +383,10 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
       case SHORT_ARG:                           \
         (void) va_arg ((ap), int);              \
         break;                                  \
-        CASE_LONG_ARG (specinfo, ap)            \
-          CASE_LONG_LONG_ARG (specinfo, ap)     \
-          CASE_INTMAX_ARG (specinfo, ap)        \
+      CASE_LONG_ARG (specinfo, ap)              \
+      CASE_LONG_LONG_ARG (specinfo, ap)         \
+      CASE_QUAD_ARG(specinfo, ap)               \
+      CASE_INTMAX_ARG (specinfo, ap)            \
       case SIZE_ARG:                            \
         (void) va_arg ((ap), size_t);           \
         break;                                  \
@@ -1903,8 +1922,8 @@ mpfr_vasprintf (char **ptr, const char *fmt, va_list ap)
       else if (spec.spec == 'n')
         /* put the number of characters written so far in the location pointed
            by the next va_list argument; the types of pointer accepted are the
-           same as in GMP (except quad_t) plus pointer to a mpfr_t so as to be
-           able to accept the same format strings. */
+           same as in GMP (except unsupported quad_t) plus pointer to a mpfr_t
+           so as to be able to accept the same format strings. */
         {
           void *p;
           size_t nchar;
