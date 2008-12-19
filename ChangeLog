@@ -1,4 +1,103 @@
 ------------------------------------------------------------------------
+r5770 | thevenyp | 2008-12-19 15:12:51 +0000 (Fri, 19 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+VERSION, version.c, mpfr.h, mpfr.texi, configure.in: Updated version to 2.4.0-rc2.
+
+------------------------------------------------------------------------
+r5769 | vlefevre | 2008-12-18 16:00:58 +0000 (Thu, 18 Dec 2008) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+
+Deleted trailing spaces.
+------------------------------------------------------------------------
+r5767 | thevenyp | 2008-12-18 14:26:15 +0000 (Thu, 18 Dec 2008) | 19 lines
+Changed paths:
+   M /branches/2.4/INSTALL
+   M /branches/2.4/README.dev
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/nightly-test
+   M /branches/2.4/printf.c
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/vasprintf.c
+
+printf.c, vasprintf.c: include config.h if HAVE_CONFIG_H is defined, to solve
+  problem noticed by Brian Gladman
+vasprintf.c: Accept length modifier 'q' if HAVE_QUAD_T is defined (instead of
+  HAVE_LONG_LONG).
+acinclude.m4: Check for quad_t.
+tfprintf.c: more user-friendly messages and quad_t tests.
+tests/tsprintf.c: move bugs 20080610 and 20081214 outside the function
+  random_double and tests against libc's sprintf function are no more executed
+  unless the MPFR_CHECK_LIBC_PRINTF is defined. Add two regression tests.
+tests/tprintf.c: _MPFR_H_HAVE_INTMAX_T -> HAVE_STDINT_H for <stdint.h>. More
+  user-friendly messages. Warning: because stdout might be redirected, error
+  messages are printed to stderr. Add quad_t tests.
+README.dev: Add notice for new HAVE_QUAD_T macro.
+mpfr.texi: more explanations on the precision field for mpfr_printf.
+nightly-test: added MPFR_CHECK_LIBC_PRINTF
+INSTALL: untabify and remove trailing spaces
+
+(merge from trunk -r5732:5762)
+
+------------------------------------------------------------------------
+r5766 | thevenyp | 2008-12-18 13:48:42 +0000 (Thu, 18 Dec 2008) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tstrtofr.c
+
+tests/tstrtofr.c: fixed a test (in case |res| > 1).
+(merge from trunk -r5749:5751)
+
+------------------------------------------------------------------------
+r5765 | thevenyp | 2008-12-18 13:37:10 +0000 (Thu, 18 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: update from trunk (r5747).
+
+------------------------------------------------------------------------
+r5764 | thevenyp | 2008-12-18 13:33:39 +0000 (Thu, 18 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4/configure.in
+
+configure.in: update from trunk (r5739).
+
+------------------------------------------------------------------------
+r5763 | thevenyp | 2008-12-18 13:28:08 +0000 (Thu, 18 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4/INSTALL
+
+INSTALL: update from trunk (r 5729:5742).
+
+------------------------------------------------------------------------
+r5729 | vlefevre | 2008-12-12 16:05:29 +0000 (Fri, 12 Dec 2008) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: added the release name.
+------------------------------------------------------------------------
+r5728 | vlefevre | 2008-12-12 16:03:13 +0000 (Fri, 12 Dec 2008) | 1 line
+Changed paths:
+   M /branches/2.4/README
+
+README: update from the trunk (added "compile").
+------------------------------------------------------------------------
+r5726 | thevenyp | 2008-12-12 14:50:13 +0000 (Fri, 12 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: Updated.
+
+------------------------------------------------------------------------
 r5725 | thevenyp | 2008-12-12 14:45:07 +0000 (Fri, 12 Dec 2008) | 6 lines
 Changed paths:
    M /branches/2.4/configure.in
