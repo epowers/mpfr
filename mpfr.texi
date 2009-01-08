@@ -1924,8 +1924,8 @@ two:
 @end quotation
 The @samp{type} specifiers have the same restrictions as those mentioned in
 the GMP documentation, for instance, only @samp{h} and @samp{l} are portable;
-moreover, @samp{j}, @samp{ll}, or @samp{q} are not supported if your GMP
-library does not support them.
+moreover, @samp{M}, @samp{j}, @samp{ll}, or @samp{q} are not supported if your
+GMP library does not support them.
 The @samp{rounding} specifier is specific to @code{mpfr_t}
 parameter and shall not be used with other types. @code{mpfr_printf} accepts
 the same conversion specifier character @samp{conv} as @code{gmp_printf} plus
@@ -1947,8 +1947,8 @@ The @samp{R} type is used for a @code{mpfr_t} output and can be followed by
 a rounding specifier denoted by one of the following characters:
 @quotation
 @multitable {(space)} {MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM}
-@item @samp{D}  @tab round toward plus infinity
-@item @samp{U}  @tab round toward minus infinity
+@item @samp{U}  @tab round toward plus infinity
+@item @samp{D}  @tab round toward minus infinity
 @item @samp{Z}  @tab round toward zero
 @item @samp{N}  @tab round to nearest
 @item @samp{*}  @tab rounding mode (as a @code{mpfr_rnd_t}) indicated by the
