@@ -1,4 +1,137 @@
 ------------------------------------------------------------------------
+r5806 | thevenyp | 2009-01-13 13:40:19 +0000 (Tue, 13 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: Update coverage rate (since r5767, mpfr_asprintf is no more covered by default tests).
+
+------------------------------------------------------------------------
+r5805 | thevenyp | 2009-01-13 12:29:07 +0000 (Tue, 13 Jan 2009) | 7 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: typo.
+mpfr.texi: consistency changes and corrections concerning the "erange"
+flag (do not use @code{} as this is not an identifier, @emph{} is used
+as this is not an English word -- but @emph{} should probably be used
+too for the other flag names).
+[merge -r 5802:5804]
+
+------------------------------------------------------------------------
+r5802 | thevenyp | 2009-01-12 16:08:14 +0000 (Mon, 12 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: Fix typo. [merge -c 5800]
+
+------------------------------------------------------------------------
+r5799 | thevenyp | 2009-01-08 16:19:05 +0000 (Thu, 08 Jan 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tsprintf.c
+
+Removed useless #include of gmp.h from tests/tfprintf.c and
+tests/tsprintf.c for consistency.
+[merge -c 5794]
+
+------------------------------------------------------------------------
+r5798 | thevenyp | 2009-01-08 16:14:33 +0000 (Thu, 08 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/README.dev
+
+README.dev: suggest "-Wformat=2". [merge -c 5785]
+
+------------------------------------------------------------------------
+r5797 | thevenyp | 2009-01-08 16:12:42 +0000 (Thu, 08 Jan 2009) | 8 lines
+Changed paths:
+   M /branches/2.4/add1sp.c
+   M /branches/2.4/div.c
+   M /branches/2.4/sub1.c
+   M /branches/2.4/sub1sp.c
+   M /branches/2.4/zeta.c
+
+div.c: fixed types for fprintf when DEBUG and/or DEBUG2 is defined.
+add1sp.c: fixed types for printf when DEBUG is defined.
+sub1.c: fixed types for printf when DEBUG is defined.
+sub1sp.c: fixed types for printf when WANT_ASSERT >= 2 and
+when DEBUG is defined.
+zeta.c: fixed types for printf when DEBUG is defined.
+[merge from trunk r5777 r5778 r5780 r5782 r5783 r5784]
+
+------------------------------------------------------------------------
+r5796 | thevenyp | 2009-01-08 16:02:26 +0000 (Thu, 08 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: update copyright notice to 2009.
+
+------------------------------------------------------------------------
+r5793 | thevenyp | 2009-01-08 14:39:29 +0000 (Thu, 08 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+VERSION, version.c, mpfr.h, mpfr.texi, configure.in: Updated version to 2.4.0.
+
+------------------------------------------------------------------------
+r5792 | thevenyp | 2009-01-08 12:57:37 +0000 (Thu, 08 Jan 2009) | 6 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/vasprintf.c
+
+mpfr.texi: Fix wrong definition of rounding specifiers.
+mpfr.texi: Add a warning that gmp may not support 'M' specifier.
+tests/tfprintf.c: Make tests with 'M' specifier optional.
+vasprintf.c: Add warning comment about 'M' specifier.
+[merge from trunk r5787 r5788]
+
+------------------------------------------------------------------------
+r5791 | thevenyp | 2009-01-08 12:51:29 +0000 (Thu, 08 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/out_str.c
+
+out_str.c: added assert (check that base is in the required range). [merge -c 5786]
+
+------------------------------------------------------------------------
+r5790 | thevenyp | 2009-01-08 12:48:22 +0000 (Thu, 08 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/set_d64.c
+
+set_d64.c: set T[] to unsigned int (instead of int) since its values
+are printed with %u. [merge -c 5781]
+
+------------------------------------------------------------------------
+r5789 | thevenyp | 2009-01-08 12:41:17 +0000 (Thu, 08 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/mpfr-impl.h
+
+mpfr-impl.h: fixed MPFR_UNSIGNED_MINUS_MODULO logic and added missing
+parentheses. [merge -c 5779]
+
+------------------------------------------------------------------------
+r5776 | vlefevre | 2008-12-26 12:44:35 +0000 (Fri, 26 Dec 2008) | 1 line
+Changed paths:
+   M /branches/2.4/round_p.c
+
+round_p.c: fixed types for fprintf when WANT_ASSERT >= 2.
+------------------------------------------------------------------------
+r5773 | vlefevre | 2008-12-22 17:17:24 +0000 (Mon, 22 Dec 2008) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: improved documentation of %Pu in mpfr_printf. [merged -c5772]
+------------------------------------------------------------------------
+r5771 | thevenyp | 2008-12-19 15:15:01 +0000 (Fri, 19 Dec 2008) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: ChangeLog update (with LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v).
+
+------------------------------------------------------------------------
 r5770 | thevenyp | 2008-12-19 15:12:51 +0000 (Fri, 19 Dec 2008) | 2 lines
 Changed paths:
    M /branches/2.4/VERSION
