@@ -25,8 +25,12 @@ MA 02110-1301, USA. */
 #include <stdlib.h>
 #include <stddef.h>
 
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h> /* for intmax_t */
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
 #endif
 
 #ifdef HAVE_QUAD_T
@@ -210,12 +214,9 @@ check_mixed ()
 #ifdef HAVE_QUAD_T
   {
     quad_t q = -1;
-    u_quad_t uq = 1;
 
-    check_vprintf ("a. %Re, b. %qx%Qn", mpfr, uq, &mpq);
-    check_length_with_cmp (21, mpq, 16, mpq_cmp_ui (mpq, 16, 1), Qu);
     check_vprintf ("a. %qi, b. %Rf%Fn", q, mpfr, &mpf);
-    check_length_with_cmp (22, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);
+    check_length_with_cmp (21, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);
   }
 #endif
 
