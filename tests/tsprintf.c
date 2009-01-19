@@ -139,11 +139,10 @@ check_vsprintf (const char *expected, const char *fmt, ...)
   return n0;
 }
 
-
 static void
-native_types ()
+native_types (void)
 {
-  char c = 'a';
+  int c = 'a';
   int i = -1;
   unsigned int ui = 1;
   double d = -1.25;
@@ -538,11 +537,8 @@ mixed (void)
                   x);
   check_vsprintf ("-12345678.9, 121", "%.1Rf, %i", x, i);
   check_vsprintf ("-12345678, 1e240/45b352", "%.0R*f, %Qx", GMP_RNDZ, x, mpq);
-  check_vsprintf ("121, -12345678.875000000000, 1.290323", "%i, %.*Rf, %Ff",
-                  i, 12, x, mpf);
-  n1 = check_vsprintf ("00000010610209857723, -1.2345678875e+07, 0.032258",
-                       "%.*Zi, %R*e, %Lf%n", 20, mpz, rnd, x, d, &n2);
-
+  n1 = check_vsprintf ("121, -12345678.875000000000, 1.290323", "%i, %.*Rf, %Ff%n",
+                       i, 12, x, mpf, &n2);
   if (n1 != n2)
     {
       printf ("error in number of characters written by mpfr_vsprintf\n");
@@ -550,6 +546,12 @@ mixed (void)
       printf ("     got: %d\n", n1);
       exit (1);
     }
+
+#ifndef NPRINTF_L
+  check_vsprintf ("00000010610209857723, -1.2345678875e+07, 0.032258",
+                  "%.*Zi, %R*e, %Lf", 20, mpz, rnd, x, d);
+#endif
+
   mpf_clear (mpf);
   mpq_clear (mpq);
   mpz_clear (mpz);
@@ -743,7 +745,7 @@ random_double (void)
 }
 
 static void
-bug20080610 ()
+bug20080610 (void)
 {
   /* bug on icc found on June 10, 2008 */
   /* this is not a bug but a different implementation choice: ISO C99 doesn't
@@ -779,7 +781,7 @@ bug20080610 ()
 }
 
 static void
-bug20081214 ()
+bug20081214 (void)
 {
  /* problem with glibc 2.3.6, December 14, 2008:
     the system asprintf outputs "-1.0" instead of "-1.". */

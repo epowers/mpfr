@@ -34,10 +34,6 @@ MA 02110-1301, USA. */
 # endif
 #endif
 
-#ifdef HAVE_QUAD_T
-#include <sys/types.h>
-#endif
-
 #include "mpfr-test.h"
 
 #if MPFR_VERSION >= MPFR_VERSION_NUM(2,4,0)
@@ -144,7 +140,7 @@ check_special (FILE *fout)
 static void
 check_mixed (FILE *fout)
 {
-  char ch = 'a';
+  int ch = 'a';
   signed char sch = -1;
   unsigned char uch = 1;
   short sh = -1;
@@ -196,12 +192,21 @@ check_mixed (FILE *fout)
   check_vfprintf (fout, "a. %R*A, b. %Fe, c. %i%zn", rnd, mpfr, mpf, sz,
                   &sz);
   check_length (5, sz, 34, zu);
-  check_vfprintf (fout, "a. %Pu, b. %c, c. %Lf, d. %Zi%Zn", prec, ch, ld,
-                  mpz, &mpz);
-  check_length_with_cmp (6, mpz, 31, mpz_cmp_ui (mpz, 31), Zi);
-  check_vfprintf (fout, "%% a. %#.0RNg, b. %Qx%Rn, c. %td, d. %p", mpfr, mpq,
-                  &mpfr, p, &i);
+  check_vfprintf (fout, "a. %Pu, b. %c, c. %Zi%Zn", prec, ch, mpz, &mpz);
+  check_length_with_cmp (6, mpz, 17, mpz_cmp_ui (mpz, 17), Zi);
+  check_vfprintf (fout, "%% a. %#.0RNg, b. %Qx%Rn, c. %p", mpfr, mpq, &mpfr,
+                  &i);
   check_length_with_cmp (7, mpfr, 16, mpfr_cmp_ui (mpfr, 16), Rg);
+
+#ifndef NPRINTF_T
+  check_vfprintf (fout, "%% a. %RNg, b. %Qx, c. %td%tn", mpfr, mpq, p, &p);
+  check_length (8, p, 21, td);
+#endif
+
+#ifndef NPRINTF_L
+  check_vfprintf (fout, "a. %RA, b. %Lf, c. %QX%zn", mpfr, ld, mpq, &sz);
+  check_length (9, sz, 30, zu);
+#endif
 
 #if (__GNU_MP_VERSION * 10 + __GNU_MP_VERSION_MINOR) >= 42
   /* The 'M' specifier was added in gmp 4.2.0 */
@@ -209,7 +214,7 @@ check_mixed (FILE *fout)
   if (limb[0] != 14 + BITS_PER_MP_LIMB / 4 || limb[1] != ~ (mp_limb_t) 0
       || limb[2] != ~ (mp_limb_t) 0)
     {
-      printf ("Error in test #8: mpfr_vfprintf did not print %d characters"
+      printf ("Error in test #10: mpfr_vfprintf did not print %d characters"
               " as expected\n", 14 + (int) BITS_PER_MP_LIMB / 4);
       exit (1);
     }
@@ -222,7 +227,7 @@ check_mixed (FILE *fout)
   if (limb[0] != 14 + 3 * BITS_PER_MP_LIMB / 4 || limb[1] != (mp_limb_t) 0
       || limb[2] != ~ (mp_limb_t) 0)
     {
-      printf ("Error in test #9: mpfr_vfprintf did not print %d characters"
+      printf ("Error in test #11: mpfr_vfprintf did not print %d characters"
               " as expected\n", 14 + (int) BITS_PER_MP_LIMB / 4);
       exit (1);
     }
@@ -234,22 +239,13 @@ check_mixed (FILE *fout)
     unsigned long long ullo = 1;
 
     check_vfprintf (fout, "a. %Re, b. %llx%Qn", mpfr, ullo, &mpq);
-    check_length_with_cmp (11, mpq, 16, mpq_cmp_ui (mpq, 16, 1), Qu);
+    check_length_with_cmp (21, mpq, 16, mpq_cmp_ui (mpq, 16, 1), Qu);
     check_vfprintf (fout, "a. %lli, b. %Rf%Fn", llo, mpfr, &mpf);
-    check_length_with_cmp (12, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);
+    check_length_with_cmp (22, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);
   }
 #endif
 
-#ifdef HAVE_QUAD_T
-  {
-    quad_t q = -1;
-
-    check_vfprintf (fout, "a. %qi, b. %Rf%Fn", q, mpfr, &mpf);
-    check_length_with_cmp (21, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);
-  }
-#endif
-
-#ifdef _MPFR_H_HAVE_INTMAX_T
+#if defined(_MPFR_H_HAVE_INTMAX_T) && !defined(NPRINTF_J)
   {
     intmax_t im = -1;
     uintmax_t uim = 1;

@@ -41,12 +41,12 @@ MA 02110-1301, USA. */
 #include <stddef.h>             /* for ptrdiff_t */
 #endif
 
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
-#ifdef HAVE_QUAD_T
-#include <sys/types.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h> /* for intmax_t */
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
 #endif
 
 #include <string.h>             /* for strlen, memcpy and others */
@@ -258,17 +258,9 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
           specinfo->arg_type = LONG_ARG;
           break;
         }
-    case 'q':
-      ++format;
-#ifdef HAVE_QUAD_T
-      specinfo->arg_type = QUAD_ARG;
-#else
-      specinfo->arg_type = UNSUPPORTED;
-#endif
-      break;
     case 'j':
       ++format;
-#ifdef HAVE_STDINT_H
+#if defined(_MPFR_H_HAVE_INTMAX_T) && !defined(NPRINTF_J)
       specinfo->arg_type = INTMAX_ARG;
 #else
       specinfo->arg_type = UNSUPPORTED;
@@ -280,11 +272,19 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
       break;
     case 't':
       ++format;
+#ifndef NPRINTF_T
       specinfo->arg_type = PTRDIFF_ARG;
+#else
+      specinfo->arg_type = UNSUPPORTED;
+#endif     
       break;
     case 'L':
       ++format;
+#ifndef NPRINTF_L
       specinfo->arg_type = LONG_DOUBLE_ARG;
+#else
+      specinfo->arg_type = UNSUPPORTED;
+#endif
       break;
     case 'F':
       ++format;
@@ -324,14 +324,6 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
 /* some macros and functions filling the buffer */
 
 /* CONSUME_VA_ARG removes from va_list AP the type expected by SPECINFO */
-#ifdef HAVE_STDINT_H
-#define CASE_INTMAX_ARG(specinfo, ap)           \
-  case INTMAX_ARG:                              \
-  (void) va_arg ((ap), intmax_t);               \
-  break;
-#else
-#define CASE_INTMAX_ARG(specinfo, ap)
-#endif
 
 /* With a C++ compiler wchar_t and enumeration in va_list are converted to
    integer type : int, unsigned int, long or unsigned long (unfortunately,
@@ -357,6 +349,14 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
   break;
 #endif
 
+#if defined(_MPFR_H_HAVE_INTMAX_T)
+#define CASE_INTMAX_ARG(specinfo, ap)           \
+  case INTMAX_ARG:                              \
+  (void) va_arg ((ap), intmax_t);               \
+  break;
+#else
+#define CASE_INTMAX_ARG(specinfo, ap)
+#endif
 
 #ifdef HAVE_LONG_LONG
 #define CASE_LONG_LONG_ARG(specinfo, ap)        \
@@ -365,15 +365,6 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
   break;
 #else
 #define CASE_LONG_LONG_ARG(specinfo, ap)
-#endif
-
-#ifdef HAVE_QUAD_T
-#define CASE_QUAD_ARG(specinfo, ap)             \
-  case QUAD_ARG:                                \
-  (void) va_arg ((ap), quad_t);                 \
-  break;
-#else
-#define CASE_QUAD_ARG(specinfo, ap)
 #endif
 
 #define CONSUME_VA_ARG(specinfo, ap)            \
@@ -386,7 +377,6 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
         break;                                  \
       CASE_LONG_ARG (specinfo, ap)              \
       CASE_LONG_LONG_ARG (specinfo, ap)         \
-      CASE_QUAD_ARG(specinfo, ap)               \
       CASE_INTMAX_ARG (specinfo, ap)            \
       case SIZE_ARG:                            \
         (void) va_arg ((ap), size_t);           \
@@ -1951,7 +1941,7 @@ mpfr_vasprintf (char **ptr, const char *fmt, va_list ap)
               *(long long *) p = (long long) nchar;
               break;
 #endif
-#ifdef HAVE_STDINT_H
+#ifdef _MPFR_H_HAVE_INTMAX_T
             case INTMAX_ARG:
               *(intmax_t *) p = (intmax_t) nchar;
               break;
