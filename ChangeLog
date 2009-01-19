@@ -1,4 +1,22 @@
 ------------------------------------------------------------------------
+r5859 | thevenyp | 2009-01-19 19:58:00 +0000 (Mon, 19 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tcmp_d.c
+   M /branches/2.4/tests/tcmp_ld.c
+   M /branches/2.4/tests/tests.c
+   M /branches/2.4/tests/tset_d.c
+
+tcmp_d.c tset_d.c tcmp_ld.c: Remove tests with NaN when MPFR_NANISNAN is defined.
+tests.c: Add a warning in a comment that Isnan always returns 0 on systems where MPFR_NANISNAN is defined.
+
+------------------------------------------------------------------------
+r5858 | thevenyp | 2009-01-19 18:46:39 +0000 (Mon, 19 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: ChangeLog update (with LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v).
+
+------------------------------------------------------------------------
 r5857 | thevenyp | 2009-01-19 18:44:32 +0000 (Mon, 19 Jan 2009) | 2 lines
 Changed paths:
    M /branches/2.4/VERSION
