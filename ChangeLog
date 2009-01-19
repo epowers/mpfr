@@ -1,4 +1,158 @@
 ------------------------------------------------------------------------
+r5857 | thevenyp | 2009-01-19 18:44:32 +0000 (Mon, 19 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+VERSION, version.c, mpfr.h, mpfr.texi, configure.in: Updated version to 2.4.0-rc3.
+
+------------------------------------------------------------------------
+r5856 | thevenyp | 2009-01-19 18:31:25 +0000 (Mon, 19 Jan 2009) | 17 lines
+Changed paths:
+   M /branches/2.4/README.dev
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/vasprintf.c
+
+mpfr.texi: updated references to the GMP manual.
+mpfr.texi: improved "Formatted Output" Section.
+configure.in: Add MPFR_CHECK_PRINTF_SPEC when we can link with a gmp library.
+acinclude.m4: no quad_t detection.
+acinclude.m4: Check if the system supports intmax_t.
+acinclude.m4: Check if gmp_printf supports 'j', 'L' and 't'.
+README.dev: Remove HAVE_QUAD_T from the list of symbol.
+vasprintf.c: include header needed for intmax_t in the same way as gmp.
+vasprintf.c: no longer quad_t support.
+vasprintf.c: 'j' support if the system supports intmax_t and if the symbol NPRINTF_J is not defined.
+vasprintf.c: 'L' support if the symbol NPRINTF_L is not defined.
+vasprintf.c: 't' support if the symbol NPRINTF_T is not defined.
+tests/tsprintf.c: Do not check with long double if NPRINTF_L is defined.
+tests/tfprintf.c: Do not check with quad_t, do no check optional length modifiers.
+tests/tprintf.c:  Do not check with quad_t, do no check optional length modifiers.
+[merge -r 5800:5855 from trunk]
+
+------------------------------------------------------------------------
+r5854 | thevenyp | 2009-01-19 17:49:24 +0000 (Mon, 19 Jan 2009) | 7 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: don't -> do not, doesn't -> does not, won't -> will not.
+mpfr.texi: added a reference to a texinfo bug in a comment.
+mpfr.texi: added .info extension in cross-references, to avoid the bug
+reported here: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=484740
+mpfr.texi: typo in comment.
+[merge 5839 5841 5842 5843 from trunk]
+
+------------------------------------------------------------------------
+r5850 | thevenyp | 2009-01-19 16:34:42 +0000 (Mon, 19 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tests/tsprintf.c: check if native types are really processed by libc printf.
+[merge -c 5837 from trunk]
+
+------------------------------------------------------------------------
+r5849 | thevenyp | 2009-01-19 16:32:36 +0000 (Mon, 19 Jan 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/INSTALL
+   M /branches/2.4/configure.in
+
+INSTALL: Warn that --with-gmp, --with-gmp-include/--with-gmp-lib, and --with-gmp-build options are mutually exclusive.
+configure.in: Check and fail if --with-gmp, --with-gmp-include/--with-gmp-lib, or --with-gmp-build are use simultaneously.
+[merge -c 5834 from trunk]
+
+------------------------------------------------------------------------
+r5848 | thevenyp | 2009-01-19 16:26:29 +0000 (Mon, 19 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tests.c
+
+tests/tests.c: include <sys/fpu.h> only if need be.
+[merge -c 5833 from trunk]
+
+------------------------------------------------------------------------
+r5847 | thevenyp | 2009-01-19 16:21:14 +0000 (Mon, 19 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/fits_intmax.c
+   M /branches/2.4/fits_uintmax.c
+   M /branches/2.4/get_sj.c
+   M /branches/2.4/get_uj.c
+   M /branches/2.4/set_sj.c
+   M /branches/2.4/set_uj.c
+   M /branches/2.4/tests/tfits.c
+   M /branches/2.4/tests/tset_sj.c
+
+get_uj.c get_sj.c tests/tset_sj.c tests/tfits.c fits_intmax.c fits_uintmax.c set_uj.c set_sj.c: Use the same #include order for intmax_t as in gmp.
+[partial merge of r5825]
+
+------------------------------------------------------------------------
+r5846 | thevenyp | 2009-01-19 16:07:41 +0000 (Mon, 19 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tadd1sp.c
+   M /branches/2.4/tests/tsub1sp.c
+
+tests/tadd1sp.c, tests/tsub1sp.c: fixed function prototypes.
+[merge -c 5812 from trunk]
+
+------------------------------------------------------------------------
+r5845 | thevenyp | 2009-01-19 16:06:12 +0000 (Mon, 19 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tcan_round.c
+   M /branches/2.4/tests/tcmp2.c
+   M /branches/2.4/tests/teq.c
+   M /branches/2.4/tests/tests.c
+   M /branches/2.4/tests/texp.c
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tgamma.c
+   M /branches/2.4/tests/tpow.c
+   M /branches/2.4/tests/tpow_z.c
+   M /branches/2.4/tests/tset_str.c
+   M /branches/2.4/tests/tsqrt.c
+
+Fixed printf format strings. [merge 5809 5810 5811 5813 from trunk]
+
+------------------------------------------------------------------------
+r5832 | thevenyp | 2009-01-16 16:20:29 +0000 (Fri, 16 Jan 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+[mpfr.texi] fixed order -> kind (typo found by Luis Rivera, thanks)
+[mpfr.texi] made difference between mpfr_set_str and mpfr_strtofr clearer
+            (after remark from Luis Rivera)
+[merge -c 5829:5831 from trunk]
+
+------------------------------------------------------------------------
+r5829 | thevenyp | 2009-01-16 13:51:32 +0000 (Fri, 16 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+
+tfprintf.c tprintf.c: Test double with "%f" instead of "%e" so as to avoid failure due to exponent "e+000" on MS Windows.
+[merge -c 5828]
+
+------------------------------------------------------------------------
+r5824 | thevenyp | 2009-01-15 13:29:06 +0000 (Thu, 15 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+
+tfprintf.c tprintf.c: Fix included headers, type intmax_t may be defined in inttypes.h or in stdint.h (see autoconf manual 5.6.1 Portability of Headers) and remove tests with u_quad_t (on Solaris 10, quad_t exists but u_quad_t doesn't, bug reported by Michael Abshoff).
+[merge r5822 5823 from trunk]
+
+------------------------------------------------------------------------
+r5820 | thevenyp | 2009-01-15 09:37:19 +0000 (Thu, 15 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: ChangeLog update (with LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v).
+
+------------------------------------------------------------------------
 r5819 | vlefevre | 2009-01-15 02:27:11 +0000 (Thu, 15 Jan 2009) | 3 lines
 Changed paths:
    M /branches/2.4/BUGS
