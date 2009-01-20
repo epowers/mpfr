@@ -1,4 +1,36 @@
 ------------------------------------------------------------------------
+r5876 | vlefevre | 2009-01-20 00:45:54 +0000 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tconst_log2.c
+   M /branches/2.4/tests/tests.c
+   M /branches/2.4/tests/texp.c
+   M /branches/2.4/tests/tget_d.c
+   M /branches/2.4/tests/tget_d_2exp.c
+   M /branches/2.4/tests/tget_ld_2exp.c
+   M /branches/2.4/tests/tget_set_d64.c
+   M /branches/2.4/tests/tgmpop.c
+   M /branches/2.4/tests/toutimpl.c
+   M /branches/2.4/tests/tpow.c
+   M /branches/2.4/tests/tset.c
+   M /branches/2.4/tests/tset_sj.c
+   M /branches/2.4/tests/tsi_op.c
+   M /branches/2.4/tests/tsin.c
+   M /branches/2.4/tests/tstrtofr.c
+
+Added missing void's. [svn merge -c5875 .../mpfr/trunk]
+------------------------------------------------------------------------
+r5872 | vlefevre | 2009-01-20 00:32:23 +0000 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: deleted trailing spaces.
+------------------------------------------------------------------------
+r5871 | vlefevre | 2009-01-20 00:12:15 +0000 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r5870 | vlefevre | 2009-01-20 00:10:39 +0000 (Tue, 20 Jan 2009) | 4 lines
 Changed paths:
    M /branches/2.4/INSTALL
