@@ -1,4 +1,26 @@
 ------------------------------------------------------------------------
+r5870 | vlefevre | 2009-01-20 00:10:39 +0000 (Tue, 20 Jan 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/INSTALL
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/mpfr-impl.h
+   M /branches/2.4/tests/tcmp_d.c
+   M /branches/2.4/tests/tcmp_ld.c
+   M /branches/2.4/tests/tset_d.c
+   M /branches/2.4/tests/tset_ld.c
+
+Added warning messages related to the NAN != NAN test, and improved the
+tests when gcc -ffast-math is used (DOUBLE_ISNAN from mpfr-impl.h and
+Isnan_ld from tests/tset_ld.c were incorrect) in order to avoid spurious
+failures and undetected ones. [svn merge -r5861:5869 .../mpfr/trunk]
+------------------------------------------------------------------------
+r5861 | thevenyp | 2009-01-19 20:01:44 +0000 (Mon, 19 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: ChangeLog update (with LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v).
+
+------------------------------------------------------------------------
 r5859 | thevenyp | 2009-01-19 19:58:00 +0000 (Mon, 19 Jan 2009) | 3 lines
 Changed paths:
    M /branches/2.4/tests/tcmp_d.c
