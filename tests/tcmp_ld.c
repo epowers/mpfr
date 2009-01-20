@@ -67,13 +67,17 @@ main (void)
       exit (1);
     }
 
-#ifndef MPFR_NANISNAN
   /* Check NAN */
   mpfr_clear_erangeflag ();
   c = mpfr_cmp_ld (x, DBL_NAN);
   if (c != 0 || !mpfr_erangeflag_p ())
     {
       printf ("ERROR for NAN (1)\n");
+#ifdef MPFR_NANISNAN
+      printf ("The reason is that NAN == NAN. Please look at the configure "
+              "output\nand Section \"In case of problem\" of the INSTALL "
+              "file.\n");
+#endif
       exit (1);
     }
   mpfr_set_nan (x);
@@ -82,9 +86,13 @@ main (void)
   if (c != 0 || !mpfr_erangeflag_p ())
     {
       printf ("ERROR for NAN (2)\n");
+#ifdef MPFR_NANISNAN
+      printf ("The reason is that NAN == NAN. Please look at the configure "
+              "output\nand Section \"In case of problem\" of the INSTALL "
+              "file.\n");
+#endif
       exit (1);
     }
-#endif /*MPFR_NANISNAN */
 
   mpfr_clear(x);
 
