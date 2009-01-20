@@ -276,7 +276,7 @@ parse_arg_type (const char *format, struct printf_spec *specinfo)
       specinfo->arg_type = PTRDIFF_ARG;
 #else
       specinfo->arg_type = UNSUPPORTED;
-#endif     
+#endif
       break;
     case 'L':
       ++format;
