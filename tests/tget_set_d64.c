@@ -1,6 +1,6 @@
 /* Test file for mpfr_get_decimal64 and mpfr_set_decimal64.
 
-Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -49,7 +49,7 @@ print_decimal64 (_Decimal64 d)
 }
 
 static void
-check_inf_nan ()
+check_inf_nan (void)
 {
   mpfr_t  x, y;
   _Decimal64 d;

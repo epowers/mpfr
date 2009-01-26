@@ -1,6 +1,6 @@
 /* tprintf.c -- test file for mpfr_printf and mpfr_vprintf
 
-Copyright 2008 Free Software Foundation, Inc.
+Copyright 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 The GNU MPFR Library is free software; you can redistribute it and/or modify
@@ -25,12 +25,12 @@ MA 02110-1301, USA. */
 #include <stdlib.h>
 #include <stddef.h>
 
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
-#ifdef HAVE_QUAD_T
-#include <sys/types.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h> /* for intmax_t */
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
 #endif
 
 #include "mpfr-test.h"
@@ -96,7 +96,7 @@ check_vprintf (char *fmt, ...)
 }
 
 static void
-check_special ()
+check_special (void)
 {
   mpfr_t x;
 
@@ -142,9 +142,9 @@ check_special ()
 }
 
 static void
-check_mixed ()
+check_mixed (void)
 {
-  char ch = 'a';
+  int ch = 'a';
   signed char sch = -1;
   unsigned char uch = 1;
   short sh = -1;
@@ -185,15 +185,24 @@ check_mixed ()
   check_length (2, ulo, 37, lu);
   check_vprintf ("a. %hi, b. %*f, c. %Re%hn", ush, 3, f, mpfr, &ush);
   check_length (3, ush, 29, hu);
-  check_vprintf ("a. %hi, b. %e, c. %#.2Rf%n", sh, d, mpfr, &i);
-  check_length (4, i, 33, d);
+  check_vprintf ("a. %hi, b. %f, c. %#.2Rf%n", sh, d, mpfr, &i);
+  check_length (4, i, 29, d);
   check_vprintf ("a. %R*A, b. %Fe, c. %i%zn", rnd, mpfr, mpf, sz, &sz);
   check_length (5, sz, 34, zu);
-  check_vprintf ("a. %Pu, b. %c, c. %Lf, d. %Zi%Zn", prec, ch, ld, mpz, &mpz);
-  check_length_with_cmp (6, mpz, 31, mpz_cmp_ui (mpz, 31), Zi);
-  check_vprintf ("%% a. %#.0RNg, b. %Qx%Rn, c. %td, d. %p", mpfr, mpq, &mpfr,
-                 p, &i);
+  check_vprintf ("a. %Pu, b. %c, c. %RUG, d. %Zi%Zn", prec, ch, mpfr, mpz, &mpz);
+  check_length_with_cmp (6, mpz, 24, mpz_cmp_ui (mpz, 24), Zi);
+  check_vprintf ("%% a. %#.0RNg, b. %Qx%Rn c. %p", mpfr, mpq, &mpfr, &i);
   check_length_with_cmp (7, mpfr, 16, mpfr_cmp_ui (mpfr, 16), Rg);
+
+#ifndef NPRINTF_T
+  check_vprintf ("%% a. %RNg, b. %Qx, c. %td%tn", mpfr, mpq, p, &p);
+  check_length (8, p, 21, td);
+#endif
+
+#ifndef NPRINTF_L
+  check_vprintf ("a. %RA, b. %Lf, c. %QX%zn", mpfr, ld, mpq, &sz);
+  check_length (9, sz, 30, zu);
+#endif
 
 #ifdef HAVE_LONG_LONG
   {
@@ -207,19 +216,7 @@ check_mixed ()
   }
 #endif
 
-#ifdef HAVE_QUAD_T
-  {
-    quad_t q = -1;
-    u_quad_t uq = 1;
-
-    check_vprintf ("a. %Re, b. %qx%Qn", mpfr, uq, &mpq);
-    check_length_with_cmp (21, mpq, 16, mpq_cmp_ui (mpq, 16, 1), Qu);
-    check_vprintf ("a. %qi, b. %Rf%Fn", q, mpfr, &mpf);
-    check_length_with_cmp (22, mpf, 12, mpf_cmp_ui (mpf, 12), Fg);
-  }
-#endif
-
-#ifdef _MPFR_H_HAVE_INTMAX_T
+#if defined(_MPFR_H_HAVE_INTMAX_T) && !defined(NPRINTF_J)
   {
     intmax_t im = -1;
     uintmax_t uim = 1;

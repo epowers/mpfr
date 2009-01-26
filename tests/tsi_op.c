@@ -1,7 +1,7 @@
 /* Test file for mpfr_add_si, mpfr_sub_si, mpfr_si_sub, mpfr_mul_si,
    mpfr_div_si, mpfr_si_div
 
-Copyright 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2004, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -50,7 +50,7 @@ const struct {
 };
 
 static void
-check_invert ()
+check_invert (void)
 {
   mpfr_t x;
   mpfr_init2 (x, MPFR_PREC_MIN);

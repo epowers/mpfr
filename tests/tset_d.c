@@ -1,6 +1,6 @@
 /* Test file for mpfr_set_d and mpfr_get_d.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -31,7 +31,8 @@ main (int argc, char *argv[])
 {
   mpfr_t x, y, z;
   unsigned long k, n;
-  double d, dd;
+  volatile double d;
+  double dd;
 
   tests_start_mpfr ();
   mpfr_test_init ();
@@ -64,18 +65,41 @@ main (int argc, char *argv[])
 
   mpfr_init (x);
 
+  mpfr_set_nan (x);
+  d = mpfr_get_d (x, GMP_RNDN);
+  if (! DOUBLE_ISNAN (d))
+    {
+      printf ("ERROR for NAN (1)\n");
+#ifdef MPFR_NANISNAN
+      printf ("The reason is that NAN == NAN. Please look at the configure "
+              "output\nand Section \"In case of problem\" of the INSTALL "
+              "file.\n");
+#endif
+      exit (1);
+    }
+  mpfr_set_ui (x, 0, GMP_RNDN);
+  mpfr_set_d (x, d, GMP_RNDN);
+  if (! mpfr_nan_p (x))
+    {
+      printf ("ERROR for NAN (2)\n");
+#ifdef MPFR_NANISNAN
+      printf ("The reason is that NAN == NAN. Please look at the configure "
+              "output\nand Section \"In case of problem\" of the INSTALL "
+              "file.\n");
+#endif
+      exit (1);
+    }
+
   d = 0.0;
   mpfr_set_d (x, d, GMP_RNDN);
   MPFR_ASSERTN(mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_POS(x));
-  mpfr_set_d (x, -d, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_cmp_ui (x, 0) == 0 && MPFR_IS_NEG(x));
-
-  mpfr_set_nan (x);
-  d = mpfr_get_d (x, GMP_RNDN);
-  MPFR_ASSERTN (DOUBLE_ISNAN (d));
-  mpfr_set_ui (x, 0, GMP_RNDN);
+  d = -d;
   mpfr_set_d (x, d, GMP_RNDN);
-  MPFR_ASSERTN(mpfr_nan_p (x));
+  if (mpfr_cmp_ui (x, 0) != 0 || MPFR_IS_POS(x))
+    {
+      printf ("Error in mpfr_set_d on -0\n");
+      exit (1);
+    }
 
   mpfr_set_inf (x, 1);
   d = mpfr_get_d (x, GMP_RNDN);
@@ -164,6 +188,7 @@ main (int argc, char *argv[])
               d, mpfr_get_d1 (x));
       exit (1);
     }
+
   n = (argc==1) ? 500000 : atoi(argv[1]);
   for (k = 1; k <= n; k++)
     {

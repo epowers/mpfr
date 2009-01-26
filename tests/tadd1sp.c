@@ -1,6 +1,6 @@
 /* Test file for mpfr_add1sp.
 
-Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -25,8 +25,8 @@ MA 02110-1301, USA. */
 
 #include "mpfr-test.h"
 
-void check_special(void);
-void check_random(mpfr_prec_t p);
+static void check_special (void);
+static void check_random (mpfr_prec_t p);
 
 static void
 check_overflow (void)
@@ -57,7 +57,8 @@ check_overflow (void)
   set_emax (emax);
 }
 
-int main(void)
+int
+main (void)
 {
   mpfr_prec_t p;
 
@@ -103,8 +104,8 @@ int main(void)
     mpfr_set_prec(b,  _p); mpfr_set_prec(c,  _p); \
   }
 
-
-void check_random(mp_prec_t p)
+static void
+check_random (mp_prec_t p)
 {
   mpfr_t a1,b,c,a2;
   int r;
@@ -136,7 +137,8 @@ void check_random(mp_prec_t p)
   mpfr_clears (a1, a2, b, c, (mpfr_ptr) 0);
 }
 
-void check_special(void)
+static void
+check_special (void)
 {
   mpfr_t a1,a2,b,c;
   int r;

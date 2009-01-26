@@ -1,7 +1,7 @@
 /* Test file for
    mpfr_set_sj, mpfr_set_uj, mpfr_set_sj_2exp and mpfr_set_uj_2exp.
 
-Copyright 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2004, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -36,17 +36,22 @@ MA 02110-1301, USA. */
 # define __STDC_CONSTANT_MACROS
 #endif
 
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-# include <inttypes.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h> /* for intmax_t */
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
 #endif
 
 #include "mpfr-test.h"
 
 #ifndef _MPFR_H_HAVE_INTMAX_T
-int main() { return 0; }
+int
+main (void)
+{
+  return 0;
+}
 #else
 
 #define ERROR(str) {printf("Error for "str"\n"); exit(1);}
@@ -149,7 +154,7 @@ check_set_uj_2exp (void)
 }
 
 static void
-check_set_sj ()
+check_set_sj (void)
 {
   mpfr_t x;
   int inex;
@@ -170,7 +175,7 @@ check_set_sj ()
 }
 
 static void
-check_set_sj_2exp ()
+check_set_sj_2exp (void)
 {
   mpfr_t x;
   int inex;

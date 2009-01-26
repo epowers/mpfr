@@ -1,6 +1,6 @@
 /* Test file for mpfr_cmp_d.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -74,6 +74,11 @@ main (void)
   if (c != 0 || !mpfr_erangeflag_p ())
     {
       printf ("ERROR for NAN (1)\n");
+#ifdef MPFR_NANISNAN
+      printf ("The reason is that NAN == NAN. Please look at the configure "
+              "output\nand Section \"In case of problem\" of the INSTALL "
+              "file.\n");
+#endif
       exit (1);
     }
   mpfr_set_nan (x);
@@ -82,6 +87,11 @@ main (void)
   if (c != 0 || !mpfr_erangeflag_p ())
     {
       printf ("ERROR for NAN (2)\n");
+#ifdef MPFR_NANISNAN
+      printf ("The reason is that NAN == NAN. Please look at the configure "
+              "output\nand Section \"In case of problem\" of the INSTALL "
+              "file.\n");
+#endif
       exit (1);
     }
 

@@ -1,6 +1,6 @@
 /* Test file for mpfr_sin.
 
-Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -204,7 +204,7 @@ check_nans (void)
 const char xs[] = "0.111011111110110000111000001100000111110E-1";
 
 static void
-check_regression ()
+check_regression (void)
 {
   mpfr_t x, y;
   mp_prec_t p;

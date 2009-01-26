@@ -1,6 +1,6 @@
 /* Test file for mpfr_set_str.
 
-Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -189,7 +189,8 @@ int randomab (int a, int b)
   return a + rand () % (b-a);
 }
 
-int main()
+int
+main (void)
 {
   int i, base;
   mpfr_t x;
@@ -531,7 +532,7 @@ static struct dymmy_test {
 };
 
 static void
-check_reftable ()
+check_reftable (void)
 {
   int i, base;
   mpfr_t x, y;

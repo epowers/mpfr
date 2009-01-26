@@ -1,6 +1,6 @@
 /* mpfr_tgamma -- test file for gamma function
 
-Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library, and was contributed by Mathieu Dutour.
@@ -424,7 +424,7 @@ gamma_integer (void)
       mpfr_set_z (x, n, GMP_RNDN);
       if (!mpfr_equal_p (x, y))
         {
-          printf ("Error for gamma(%d)\n", i+1);
+          printf ("Error for gamma(%u)\n", i+1);
           printf ("expected "); mpfr_dump (x);
           printf ("got      "); mpfr_dump (y);
           exit (1);

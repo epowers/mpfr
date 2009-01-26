@@ -445,8 +445,8 @@ be extracted using @samp{cc -V} on some machines, or, if you're using gcc,
 version (the GMP version may be useful too).
 
 If your bug report is good, we will do our best to help you to get a corrected
-version of the library; if the bug report is poor, we won't do anything about
-it (aside of chiding you to send better bug reports).
+version of the library; if the bug report is poor, we will not do anything
+about it (aside of chiding you to send better bug reports).
 
 Send your bug report to: @samp{mpfr@@loria.fr}.
 
@@ -500,11 +500,14 @@ gcc myprogram.c -lmpfr -lgmp
 
 @cindex Libtool
 MPFR is built using Libtool and an application can use that to link if
-desired, @MPFRpxreftop{libtool, GNU Libtool}
-@c Note: Do not try the above cross reference without moving mpfr.info
-@c into some "safe" place first. Due to a poor design, "info" will not
-@c find the correct libtool info file because of the "libtool" script
-@c in MPFR's directory!
+desired, @MPFRpxreftop{libtool.info, GNU Libtool}
+@c Note: the .info extension has been added to avoid the following bug:
+@c   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=484740
+@c which occurs when reading the info file from the build directory:
+@c   info ./mpfr    or    info -f ./mpfr.info
+@c Due to a poor design, the "info" utility will not find the correct
+@c libtool info file if the .info extension is not provided, because of
+@c the "libtool" script in MPFR's directory!
 
 If MPFR has been installed to a non-standard location, then it may be
 necessary to set up environment variables such as @samp{C_INCLUDE_PATH}
@@ -604,7 +607,7 @@ For efficiency reasons, avoid to initialize and clear out a variable in loops.
 Instead, initialize it before entering the loop, and clear it out after the
 loop has exited.
 
-You don't need to be concerned about allocating additional space for MPFR
+You do not need to be concerned about allocating additional space for MPFR
 variables, since any variable has a significand of fixed size.
 Hence unless you change its precision, or clear and reinitialize it,
 a floating-point variable will have the same allocated space during all its
@@ -988,7 +991,7 @@ Note that the input 0 is converted to +0 by @code{mpfr_set_ui},
 @code{mpfr_set_si}, @code{mpfr_set_sj}, @code{mpfr_set_uj},
 @code{mpfr_set_z}, @code{mpfr_set_q} and
 @code{mpfr_set_f}, regardless of the rounding mode.
-If the system doesn't support the IEEE-754 standard, @code{mpfr_set_d},
+If the system does not support the IEEE-754 standard, @code{mpfr_set_d},
 @code{mpfr_set_ld} and
 @code{mpfr_set_decimal64} might not preserve the signed zeros.
 The @code{mpfr_set_decimal64} function is built only with the configure
@@ -1019,10 +1022,12 @@ Note that the input 0 is converted to +0.
 @end deftypefun
 
 @deftypefun int mpfr_set_str (mpfr_t @var{rop}, const char *@var{s}, int @var{base}, mp_rnd_t @var{rnd})
-Set @var{rop} to the value of the whole string @var{s} in base @var{base},
+Set @var{rop} to the value of the string @var{s} in base @var{base},
 rounded in the direction @var{rnd}.
 See the documentation of @code{mpfr_strtofr} for a detailed description
 of the valid string formats.
+Contrary to @code{mpfr_strtofr}, @code{mpfr_set_str} requires the
+@emph{whole} string to represent a valid floating-point number.
 @c Additionally, special values
 @c @code{@@NaN@@}, @code{@@Inf@@}, @code{+@@Inf@@} and @code{-@@Inf@@},
 @c all case insensitive, without leading whitespace and possibly followed by
@@ -1257,12 +1262,12 @@ Free a string allocated by @code{mpfr_get_str} using the current unallocation
 function (preliminary interface).
 The block is assumed to be @code{strlen(@var{str})+1} bytes.
 For more information about how it is done:
-@ifnothtml
-@pxref{Custom Allocation,,, gmp,GNU MP}.
-@end ifnothtml
-@ifhtml
-see section ``Custom Allocation'' in @cite{GNU MP}.
-@end ifhtml
+@ifinfo
+@pxref{Custom Allocation,,, gmp.info,GNU MP}.
+@end ifinfo
+@ifnotinfo
+see Section ``Custom Allocation'' in @cite{GNU MP}.
+@end ifnotinfo
 @end deftypefun
 
 @deftypefun int mpfr_fits_ulong_p (mpfr_t @var{op}, mp_rnd_t @var{rnd})
@@ -1738,7 +1743,7 @@ rounded in the direction @var{rnd}.
 @deftypefun int mpfr_j0 (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
 @deftypefunx int mpfr_j1 (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
 @deftypefunx int mpfr_jn (mpfr_t @var{rop}, long @var{n}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
-Set @var{rop} to the value of the first order Bessel function of order 0, 1
+Set @var{rop} to the value of the first kind Bessel function of order 0, 1
 and @var{n} on @var{op}, rounded in the direction @var{rnd}. When @var{op} is
 NaN, @var{rop} is always set to NaN. When @var{op} is plus or minus Infinity,
 @var{rop} is set to +0. When @var{op} is zero, and @var{n} is not zero,
@@ -1749,7 +1754,7 @@ and the sign of @var{op}.
 @deftypefun int mpfr_y0 (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
 @deftypefunx int mpfr_y1 (mpfr_t @var{rop}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
 @deftypefunx int mpfr_yn (mpfr_t @var{rop}, long @var{n}, mpfr_t @var{op}, mp_rnd_t @var{rnd})
-Set @var{rop} to the value of the second order Bessel function of order 0, 1
+Set @var{rop} to the value of the second kind Bessel function of order 0, 1
 and @var{n} on @var{op}, rounded in the direction @var{rnd}. When @var{op} is
 NaN or negative,
 @var{rop} is always set to NaN. When @var{op} is +Inf,
@@ -1913,27 +1918,54 @@ The format specification accepted by @code{mpfr_printf} is an extension of the
 the standard C function @code{printf} (in particular, notice that the
 precision is related to the number of digits displayed in the base chosen by
 @samp{conv} and not related to the internal precision of the @code{mpfr_t}
-variable).  @code{mpfr_printf} is an extension to the @code{gmp_printf}
-function, hence it accepts the same @samp{type} specifiers plus the following
-two:
+variable).  @code{mpfr_printf} accepts the same @samp{type} specifiers as
+@code{gmp} (except the non-standard and deprecated @samp{q}, use @samp{ll}
+instead), plus @samp{R} and @samp{P}:
+
 @quotation
 @multitable {(space)} {MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM}
+@item @samp{h}  @tab @code{short}
+@item @samp{hh} @tab @code{char}
+@item @samp{j}  @tab @code{intmax_t} or @code{uintmax_t}
+@item @samp{l}  @tab @code{long} or @code{wchar_t}
+@item @samp{ll} @tab @code{long long}
+@item @samp{L}  @tab @code{long double}
+@item @samp{t}  @tab @code{ptrdiff_t}
+@item @samp{z}  @tab @code{size_t}
+
+@item @samp{F}  @tab @code{mpf_t}, float conversions
+@item @samp{Q}  @tab @code{mpq_t}, integer conversions
+@item @samp{M}  @tab @code{mp_limb_t}, integer conversions
+@item @samp{N}  @tab @code{mp_limb_t} array, integer conversions
+@item @samp{Z}  @tab @code{mpz_t}, integer conversions
+
 @item @samp{R}  @tab @code{mpfr_t} input, float conversions
 @item @samp{P}  @tab @code{mpfr_prec_t} input, integer conversions
 @end multitable
 @end quotation
-The @samp{type} specifiers have the same restrictions as those mentioned in
-the GMP documentation, for instance, only @samp{h} and @samp{l} are portable;
-moreover, @samp{M}, @samp{j}, @samp{ll}, or @samp{q} are not supported if your
-GMP library does not support them.
-The @samp{rounding} specifier is specific to @code{mpfr_t}
-parameter and shall not be used with other types. @code{mpfr_printf} accepts
-the same conversion specifier character @samp{conv} as @code{gmp_printf} plus
-@samp{b}.
+
+The @samp{type} specifiers have the same restrictions as those
+mentioned in the GMP documentation:
+@ifinfo
+@pxref{Formatted Output Strings,,, gmp.info,GNU MP}.
+@end ifinfo
+@ifnotinfo
+see Section ``Formatted Output Strings''' in @cite{GNU MP}.
+@end ifnotinfo
+More precisely, except for @samp{R} and @samp{P}
+(which are defined by MPFR), the @samp{type} specifiers are supported
+only if they are supported by @code{gmp_printf} in your GMP build;
+this implies that the standard specifiers, such as @samp{t}, must
+@emph{also} be supported by your C library if you want to use them.
+
+The @samp{rounding} specifier is specific to @code{mpfr_t} parameter and shall
+not be used with other types. @code{mpfr_printf} accepts the same conversion
+specifier character @samp{conv} as @code{gmp_printf} plus @samp{b}.
 
 The @samp{P} type outputs the precision of an @code{mpfr_t} variable.
-It is needed because the @code{mpfr_prec_t} type doesn't necessarily
-correspond to an unsigned int or any fixed standard type. For example:
+It is needed because the @code{mpfr_prec_t} type does not necessarily
+correspond to an @code{unsigned int} or any fixed standard type.
+For example:
 @example
 mpfr_t x;
 mpfr_prec_t p;
@@ -1945,6 +1977,7 @@ mpfr_printf ("variable x with %Pu bits", p);
 
 The @samp{R} type is used for a @code{mpfr_t} output and can be followed by
 a rounding specifier denoted by one of the following characters:
+
 @quotation
 @multitable {(space)} {MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM}
 @item @samp{U}  @tab round toward plus infinity
@@ -1955,6 +1988,7 @@ a rounding specifier denoted by one of the following characters:
 argument just before the corresponding @code{mpfr_t} variable.
 @end multitable
 @end quotation
+
 If the precision field is not empty, the @code{mpfr_t} number is rounded to
 the given precision in the direction specified by the rounding mode.
 If the precision field is empty (as in @samp{%.Rf}), the number is displayed
@@ -1975,6 +2009,7 @@ mpfr_printf ("%.128R*f", GMP_RNDN, x);
 displays the @code{mpfr_t} parameter in binary, the behavior is undefined with
 other parameter type.
 The @samp{conv} specifiers allowed with @code{mpfr_t} parameter are:
+
 @quotation
 @multitable {(space)} {MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM}
 @item @samp{a} @samp{A} @tab hex float, C99 style
@@ -1984,6 +2019,7 @@ The @samp{conv} specifiers allowed with @code{mpfr_t} parameter are:
 @item @samp{g} @samp{G} @tab fixed or scientific float
 @end multitable
 @end quotation
+
 In case of non-decimal output, only the significand is written in the
 specified base, the exponent is always displayed in decimal.
 Special values are always displayed as @code{nan}, @code{-inf}, and
@@ -2723,7 +2759,7 @@ with @code{mpfr_custom_init_set} is undefined.
 
 @deftypefun mp_exp_t mpfr_custom_get_exp (mpfr_t @var{x})
 Return the exponent of @var{x}, assuming that @var{x} is a non-zero ordinary
-number. The return value for NaN, Infinity or Zero is unspecified but doesn't
+number. The return value for NaN, Infinity or Zero is unspecified but does not
 produce any trap.
 The behavior of this function for any @code{mpfr_t} not initialized
 with @code{mpfr_custom_init_set} is undefined.

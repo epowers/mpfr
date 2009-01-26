@@ -1,6 +1,6 @@
 /* Test file for mpfr_const_log2.
 
-Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -90,7 +90,7 @@ check_large (void)
 }
 
 static void
-check_cache ()
+check_cache (void)
 {
   mpfr_t x;
   int i;

@@ -1,6 +1,6 @@
 /* Test file for mpfr_pow_z -- power function x^z with z a MPZ
 
-Copyright 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -171,7 +171,7 @@ check_integer (mp_prec_t begin, mp_prec_t end, unsigned long max)
               res2 = mpfr_pow_z  (y2, x, z, rnd);
               if (mpfr_cmp (y1, y2) != 0)
                 {
-                  printf ("Error for p = %lu, z = %ld, rnd = %s and x = ",
+                  printf ("Error for p = %lu, z = %lu, rnd = %s and x = ",
                           p, n, mpfr_print_rnd_mode (rnd));
                   mpfr_dump (x);
                   printf ("Ypowsi = "); mpfr_dump (y1);
@@ -180,7 +180,7 @@ check_integer (mp_prec_t begin, mp_prec_t end, unsigned long max)
                 }
               if (res1 != res2)
                 {
-                  printf ("Wrong inexact flags for p = %lu, z = %ld, rnd = %s"
+                  printf ("Wrong inexact flags for p = %lu, z = %lu, rnd = %s"
                           " and x = ", p, n, mpfr_print_rnd_mode (rnd));
                   mpfr_dump (x);
                   printf ("Ypowsi(inex = %2d) = ", res1); mpfr_dump (y1);

@@ -1,6 +1,6 @@
 /* Test file for mpfr_pow, mpfr_pow_ui and mpfr_pow_si.
 
-Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -347,7 +347,7 @@ check_pow_si (void)
 }
 
 static void
-check_special_pow_si ()
+check_special_pow_si (void)
 {
   mpfr_t a, b;
   mp_exp_t emin;
@@ -475,7 +475,7 @@ check_inexact (mp_prec_t p)
 }
 
 static void
-special ()
+special (void)
 {
   mpfr_t x, y, z, t;
   mp_exp_t emin, emax;
@@ -1288,7 +1288,8 @@ bug20080721 (void)
                   mpfr_print_rnd_mode ((mp_rnd_t) rnd));
           printf ("expected ");
           mpfr_out_str (stdout, 2, 0, t[i], GMP_RNDN);
-          printf (", inex = %d, flags = %u\n", inex0, MPFR_FLAGS_INEXACT);
+          printf (", inex = %d, flags = %u\n", inex0,
+                  (unsigned int) MPFR_FLAGS_INEXACT);
           printf ("got      ");
           mpfr_out_str (stdout, 2, 0, z, GMP_RNDN);
           printf (", inex = %d, flags = %u\n", inex, flags);

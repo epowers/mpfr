@@ -1,6 +1,6 @@
 /* Miscellaneous support for test programs.
 
-Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 Contributed by the Arenaire and Cacao projects, INRIA.
 
 This file is part of the GNU MPFR Library.
@@ -45,7 +45,9 @@ MA 02110-1301, USA. */
 #  include <time.h>
 #endif
 
-#ifdef HAVE_SYS_FPU_H
+/* <sys/fpu.h> is needed to have union fpc_csr defined under IRIX64
+   (see below). Let's include it only if need be. */
+#if defined HAVE_SYS_FPU_H && defined HAVE_FPC_CSR
 # include <sys/fpu.h>
 #endif
 
@@ -275,7 +277,7 @@ tests_rand_end (void)
 /* initialization function for tests using the hardware floats
    Not very useful now. */
 void
-mpfr_test_init ()
+mpfr_test_init (void)
 {
   double d;
 #ifdef HAVE_FPC_CSR
@@ -373,6 +375,7 @@ dbl (double m, int e)
   return m;
 }
 
+/* Warning: NaN values cannot be distinguished if MPFR_NANISNAN is defined. */
 int
 Isnan (double d)
 {
@@ -529,8 +532,9 @@ test4rm (int (*fct) (FLIST), mpfr_srcptr x, mpfr_ptr y, mpfr_ptr z,
       fct (z, x, rnd);
       if (! mpfr_equal_p (y, z))
         {
-          printf ("Error for %s with xprec=%ld, yprec=%ld, rnd=%s\nx = ",
-                  name, MPFR_PREC (x), yprec, mpfr_print_rnd_mode (rnd));
+          printf ("Error for %s with xprec=%lu, yprec=%lu, rnd=%s\nx = ",
+                  name, (unsigned long) MPFR_PREC (x), (unsigned long) yprec,
+                  mpfr_print_rnd_mode (rnd));
           mpfr_out_str (stdout, 16, 0, x, GMP_RNDN);
           printf ("\nexpected ");
           mpfr_out_str (stdout, 16, 0, y, GMP_RNDN);

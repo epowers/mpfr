@@ -1,6 +1,6 @@
 dnl  MPFR specific autoconf macros
 
-dnl  Copyright 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+dnl  Copyright 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 dnl  Contributed by the Arenaire and Cacao projects, INRIA.
 dnl
 dnl  This file is part of the GNU MPFR Library.
@@ -118,8 +118,8 @@ dnl check for long long
 AC_CHECK_TYPE([long long int],
    AC_DEFINE(HAVE_LONG_LONG, 1, [Define if compiler supports long long]),,)
 
-# quad_t is BSD specific
-AC_CHECK_TYPES([quad_t])
+dnl intmax_t is C99
+AC_CHECK_TYPES([intmax_t])
 
 AC_CHECK_TYPE( [union fpc_csr],
    AC_DEFINE(HAVE_FPC_CSR,1,[Define if union fpc_csr is available]), ,
@@ -221,6 +221,16 @@ int main() {
 ])
 if test "$mpfr_cv_nanisnan" = "yes"; then
   AC_DEFINE(MPFR_NANISNAN,1,[Define if NAN == NAN.])
+  AC_MSG_WARN([The test NAN != NAN is false. The probable reason is that])
+  AC_MSG_WARN([your compiler optimizes floating-point expressions in an])
+  AC_MSG_WARN([unsafe way because some option, such as -ffast-math or])
+  AC_MSG_WARN([-fast (depending on the compiler), has been used.  You])
+  AC_MSG_WARN([should NOT use such an option, otherwise MPFR functions])
+  AC_MSG_WARN([such as mpfr_get_d and mpfr_set_d may return incorrect])
+  AC_MSG_WARN([results on special FP numbers (e.g. NaN or signed zeros).])
+  AC_MSG_WARN([If you did not use such an option, please send us a bug])
+  AC_MSG_WARN([report so that we can try to find a workaround for your])
+  AC_MSG_WARN([platform and/or document the behavior.])
 fi
 
 dnl Check if the chars '0' to '9' are consecutive values
@@ -663,4 +673,67 @@ if test $gmp_cv_c_attribute_mode = yes; then
  AC_DEFINE(HAVE_ATTRIBUTE_MODE, 1,
  [Define to 1 if the compiler accepts gcc style __attribute__ ((mode (XX)))])
 fi
+])
+
+
+dnl  MPFR_FUNC_PRINTF_SPEC
+dnl  ------------------------------------
+dnl  MPFR_FUNC_PRINTF_SPEC(spec, type, [includes], [lib-prefix], [if-true], [if-false])
+dnl  Check if printf supports the conversion specification 'spec'
+dnl  with type 'type'.
+dnl  Expand 'if-true' if printf supports 'spec', 'if-false' otherwise.
+
+AC_DEFUN([MPFR_FUNC_PRINTF_SPEC],[
+AC_MSG_CHECKING(if $4printf supports "$1")
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+#include <stdio.h>
+$3
+]], [[
+  char s[256];
+  $2 a = 0;
+  return ($4sprintf (s, "$1", a) != 1) ? 1 : 0;
+]])],
+  [AC_MSG_RESULT(yes)
+  $5],
+  [AC_MSG_RESULT(no)
+  $6])
+])
+
+
+dnl MPFR_CHECK_PRINTF_SPEC
+dnl ----------------------
+dnl Check if libc printf and gmp_printf support some optional length
+dnl modifiers.
+dnl Defined symbols are negative to shorten the gcc command line.
+
+AC_DEFUN([MPFR_CHECK_PRINTF_SPEC], [
+AC_REQUIRE([MPFR_CONFIGS])dnl
+if test "$ac_cv_type_intmax_t" == yes; then
+ MPFR_FUNC_PRINTF_SPEC([%jd], [intmax_t], [
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+
+#include <gmp.h>
+         ], [gmp_],,
+         [AC_DEFINE([NPRINTF_J], 1, [gmp_printf cannot read intmax_t])])
+fi
+
+MPFR_FUNC_PRINTF_SPEC([%.0Lf], [long double], [
+#include <gmp.h>
+         ], [gmp_],,
+         [AC_DEFINE([NPRINTF_L], 1, [gmp_printf cannot read long double])])
+
+MPFR_FUNC_PRINTF_SPEC([%td], [ptrdiff_t], [
+#if defined (__cplusplus)
+#include <cstddef>
+#else
+#include <stddef.h>
+#endif
+#include "gmp.h"
+    ], [gmp_],,
+    [AC_DEFINE([NPRINTF_T], 1, [gmp_printf cannot read ptrdiff_t])])
 ])
