@@ -1,4 +1,72 @@
 ------------------------------------------------------------------------
+r5890 | thevenyp | 2009-01-26 09:04:38 +0000 (Mon, 26 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+VERSION, version.c, mpfr.h, mpfr.texi, configure.in: Updated version to 2.4.0.
+
+------------------------------------------------------------------------
+r5889 | thevenyp | 2009-01-26 08:56:11 +0000 (Mon, 26 Jan 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/README.dev
+   M /branches/2.4/nightly-test
+
+README.dev: --disable-alloca is a GMP configure option.
+nightly-test: removed --disable-alloca (GMP option)
+[merge r5886:5888 from trunk]
+
+------------------------------------------------------------------------
+r5885 | thevenyp | 2009-01-21 14:30:29 +0000 (Wed, 21 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tests/tsprintf.c: remove tests against libc's printf with "%a" (not in ISO C90), and with "%p" (implementation defined).
+
+------------------------------------------------------------------------
+r5884 | thevenyp | 2009-01-21 14:25:33 +0000 (Wed, 21 Jan 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/mpfr-impl.h
+
+mpfr-impl.h: avoid a compiler bug under Mac OS X Tiger + Xcode (&x == &x
+is false) that makes tset_d fail; this problem was introduced in r5880.
+[merged -c 5883 from trunk]
+
+------------------------------------------------------------------------
+r5882 | thevenyp | 2009-01-21 10:06:07 +0000 (Wed, 21 Jan 2009) | 10 lines
+Changed paths:
+   M /branches/2.4/mpfr-impl.h
+   M /branches/2.4/tests/tset_ld.c
+
+Fixed bug reported by Chris Saunders: if _GMP_IEEE_FLOATS is defined,
+the build of tset_ld.c fails because DOUBLE_ISNAN expects a lvalue.
+* mpfr-impl.h: documented that for such macros, the argument must
+  be a lvalue, and always make sure that it is a lvalue (so that
+  a failure doesn't depend on the environment).
+* tests/tset_ld.c: fixed the bug.
+tests/tset_ld.c: added explanation of NaN-related failures in case
+MPFR_NANISNAN is defined.
+[merged -r 5877:5880 from trunk]
+
+------------------------------------------------------------------------
+r5881 | thevenyp | 2009-01-21 10:01:26 +0000 (Wed, 21 Jan 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tversion.c
+
+tests/tversion.c: be more tolerant when checking whether gmp.h version
+and libgmp version are the same (in case patch level is 0).
+[merge -c 5879 from trunk]
+
+------------------------------------------------------------------------
+r5877 | vlefevre | 2009-01-20 00:52:25 +0000 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r5876 | vlefevre | 2009-01-20 00:45:54 +0000 (Tue, 20 Jan 2009) | 1 line
 Changed paths:
    M /branches/2.4/tests/tconst_log2.c
