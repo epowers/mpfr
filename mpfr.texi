@@ -1061,7 +1061,7 @@ with an optional decimal point, and an optional exponent consisting of
 an exponent prefix followed by an optional sign and a non-empty sequence
 of decimal digits. A significand digit is either a decimal digit or a
 Latin letter (62 possible characters), with @code{a} = 10, @code{b} = 11,
-@dots{}, @code{z} = 36; its value must be strictly less than the base.
+@dots{}, @code{z} = 35; its value must be strictly less than the base.
 The decimal point can be either the one defined by the current locale or
 the period (the first one is accepted for consistency with the C standard
 and the practice, the second one is accepted to allow the programmer to
