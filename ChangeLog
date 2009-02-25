@@ -1,4 +1,92 @@
 ------------------------------------------------------------------------
+r6005 | vlefevre | 2009-02-25 14:56:38 +0000 (Wed, 25 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: added changes from version 2.4.0 to version 2.4.1.
+------------------------------------------------------------------------
+r6002 | vlefevre | 2009-02-25 13:06:32 +0000 (Wed, 25 Feb 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: moved mpfr_inits, mpfr_inits2, mpfr_clears and MPFR_DECL_INIT
+to supported functions; removed now empty Section "Advanced Functions".
+[Merged changesets 5921 and 5925 from trunk.]
+------------------------------------------------------------------------
+r6001 | thevenyp | 2009-02-25 13:00:22 +0000 (Wed, 25 Feb 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: Fix typos. [merged -c5994 from trunk]
+
+------------------------------------------------------------------------
+r6000 | vlefevre | 2009-02-25 12:55:59 +0000 (Wed, 25 Feb 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/printf.c
+   M /branches/2.4/tests/tsprintf.c
+
+Fixed behavior of mpfr_snprintf/mpfr_vsnprintf, including
+a buffer overflow; added testcases.
+[svn merge -r5988:5992 -r5994:5996 -c5999 <trunk>]
+------------------------------------------------------------------------
+r5998 | vlefevre | 2009-02-25 12:39:09 +0000 (Wed, 25 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated month.
+------------------------------------------------------------------------
+r5986 | vlefevre | 2009-02-23 12:29:45 +0000 (Mon, 23 Feb 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tests.c
+   M /branches/2.4/tests/tversion.c
+   M /branches/2.4/update-version
+
+Changed how the test of MPFR_VERSION_MAJOR, MPFR_VERSION_MINOR and
+MPFR_VERSION_PATCHLEVEL vs MPFR_VERSION_STRING is performed (merged
+changeset 5985 from the trunk).
+------------------------------------------------------------------------
+r5979 | vlefevre | 2009-02-20 16:05:18 +0000 (Fri, 20 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/FAQ.html
+
+FAQ update.
+------------------------------------------------------------------------
+r5968 | vlefevre | 2009-02-19 01:01:49 +0000 (Thu, 19 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: corrected error in mpfr_strtofr description.
+------------------------------------------------------------------------
+r5956 | thevenyp | 2009-02-16 10:38:33 +0000 (Mon, 16 Feb 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+   M /branches/2.4/vasprintf.c
+
+acinclude.m4: Add new checks for length modifiers 'hh' and 'll' (C99 extensions). 'hh' is absent on alpha-OSF1-V5, bug reported by Kate Minola.
+vasprintf.c: Add conditional support of 'hh' and 'll'.
+tests/tfprintf.c tests/tprintf.c: tests with 'hh' are now optional.
+
+------------------------------------------------------------------------
+r5894 | vlefevre | 2009-01-26 17:05:41 +0000 (Mon, 26 Jan 2009) | 1 line
+Changed paths:
+   M /branches/2.4/INSTALL
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Updated version to 2.4.1-dev.
+------------------------------------------------------------------------
+r5891 | thevenyp | 2009-01-26 09:07:17 +0000 (Mon, 26 Jan 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: ChangeLog update (with LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v).
+
+------------------------------------------------------------------------
 r5890 | thevenyp | 2009-01-26 09:04:38 +0000 (Mon, 26 Jan 2009) | 2 lines
 Changed paths:
    M /branches/2.4/VERSION
