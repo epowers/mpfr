@@ -72,21 +72,37 @@ check_sprintf (const char *expected, const char *fmt, mpfr_srcptr x)
 
   /* test mpfr_snprintf */
   p = (int) (randlimb () % n0);
-  n1 = mpfr_snprintf (buffer, p, fmt, x);
-  if ((p != 0 && n0 != n1) || (p == 0 && n1 != 0))
+  if (p == 0 && (randlimb () & 1) == 0)
+    {
+      n1 = mpfr_snprintf (NULL, 0, fmt, x);
+    }
+  else
+    {
+      buffer[p] = 17;
+      n1 = mpfr_snprintf (buffer, p, fmt, x);
+      if (buffer[p] != 17)
+        {
+          printf ("Buffer overflow in mpfr_snprintf for p = %d!\n", p);
+          exit (1);
+        }
+    }
+  if (n0 != n1)
     {
       printf ("Error in mpfr_snprintf (s, %d, \"%s\", x) return value\n",
               p, fmt);
       printf ("expected: %d\ngot:      %d\n", n0, n1);
       exit (1);
     }
-  if (strncmp (expected, buffer, p) != 0)
+  if ((p > 1 && strncmp (expected, buffer, p-1) != 0)
+      || (p == 1 && buffer[0] != '\0'))
     {
-      printf ("Error in mpfr_snprintf (s, %d, \"%s\", x);\n", p, fmt);
-      printf ("expected: \"%s\"\ngot:      \"%s\"\n", expected, buffer);
+      char part_expected[p];
+      strncpy (part_expected, expected, p);
+      part_expected[p-1] = '\0';
+      printf ("Error in mpfr_vsnprintf (s, %d, \"%s\", ...);\n", p, fmt);
+      printf ("expected: \"%s\"\ngot:      \"%s\"\n", part_expected, buffer);
       exit (1);
     }
-
   return n0;
 }
 
@@ -116,8 +132,21 @@ check_vsprintf (const char *expected, const char *fmt, ...)
 
   /* test mpfr_snprintf */
   p = (int) (randlimb () % n0);
-  n1 = mpfr_vsnprintf (buffer, p, fmt, ap1);
-  if ((p != 0 && n0 != n1) || (p == 0 && n1 != 0))
+  if (p == 0 && (randlimb () & 1) == 0)
+    {
+      n1 = mpfr_vsnprintf (NULL, 0, fmt, ap1);
+    }
+  else
+    {
+      buffer[p] = 17;
+      n1 = mpfr_vsnprintf (buffer, p, fmt, ap1);
+      if (buffer[p] != 17)
+        {
+          printf ("Buffer overflow in mpfr_vsnprintf for p = %d!\n", p);
+          exit (1);
+        }
+    }
+  if (n0 != n1)
     {
       printf ("Error in mpfr_vsnprintf (s, %d, \"%s\", ...) return value\n",
               p, fmt);
@@ -126,10 +155,14 @@ check_vsprintf (const char *expected, const char *fmt, ...)
       va_end (ap1);
       exit (1);
     }
-  if (strncmp (expected, buffer, p) != 0)
+  if ((p > 1 && strncmp (expected, buffer, p-1) != 0)
+      || (p == 1 && buffer[0] != '\0'))
     {
+      char part_expected[p];
+      strncpy (part_expected, expected, p);
+      part_expected[p-1] = '\0';
       printf ("Error in mpfr_vsnprintf (s, %d, \"%s\", ...);\n", p, fmt);
-      printf ("expected: \"%s\"\ngot:      \"%s\"\n", expected, buffer);
+      printf ("expected: \"%s\"\ngot:      \"%s\"\n", part_expected, buffer);
 
       va_end (ap1);
       exit (1);
