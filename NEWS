@@ -20,6 +20,9 @@ MA 02110-1301, USA.
 
 ##############################################################################
 
+Changes from version 2.4.1 to version 2.4.2:
+- Bug fixes.
+
 Changes from version 2.4.0 to version 2.4.1:
 - Security fix in mpfr_snprintf and mpfr_vsnprintf (buffer overflow).
 - Configure: new checks for length modifiers 'hh' and 'll' (new in C99)
