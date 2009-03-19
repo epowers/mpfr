@@ -8,6 +8,9 @@ grep -E 'mpfr_(underflow|overflow|nanflag|inexflag|erangeflag)_p' *.{c,h} | \
   grep -v '^exceptions.c:' | grep -v '^mpfr-impl.h:#define mpfr_.*_p()' | \
   grep -v '^mpfr.h:__MPFR_DECLSPEC '
 
+grep -E 'if +(test|\[).* == ' acinclude.m4 configure.in
+grep -E '="`' acinclude.m4 configure.in
+
 fdlv1="`sed -n '/Version / {s/.*Version //; s/,.*//; p; q}' fdl.texi`"
 fdlv2="`sed -n '/GNU Free Documentation License/ \
   {s/.*Version //; s/ or.*//; p; q}' mpfr.texi`"
