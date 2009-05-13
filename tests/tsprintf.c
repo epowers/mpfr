@@ -22,14 +22,7 @@ MA 02110-1301, USA. */
 #ifdef HAVE_STDARG
 #include <stdarg.h>
 
-#if defined (__cplusplus)
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
-
 #include <stdlib.h>
-#include <string.h>
 #include <float.h>
 
 #ifdef HAVE_LOCALE_H

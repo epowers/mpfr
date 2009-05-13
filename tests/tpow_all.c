@@ -29,9 +29,7 @@ MA 02110-1301, USA. */
 /* Execute with at least an argument to report all the errors found by
    comparisons. */
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
 #include "mpfr-test.h"
 

@@ -26,9 +26,7 @@ MA 02110-1301, USA. */
 # endif
 #endif
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <float.h>
 #include <errno.h>
 

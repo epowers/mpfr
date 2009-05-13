@@ -33,8 +33,10 @@ MA 02110-1301, USA. */
    also force to disable incompatible features). */
 #if defined (__cplusplus)
 #include <cstdio>
+#include <cstring>
 #else
 #include <stdio.h>
+#include <string.h>
 #endif
 #include <limits.h>
 
