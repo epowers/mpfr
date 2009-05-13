@@ -296,9 +296,12 @@ check_special (void)
       exit (1);
     }
   /* Check overflow. Corner case of mpfr_exp_3 */
-  if (MPFR_PREC_MAX > MPFR_EXP_THRESHOLD + 10)
+  if (MPFR_PREC_MAX >= MPFR_EXP_THRESHOLD + 10 && MPFR_PREC_MAX >= 64)
     {
-      mpfr_set_prec (x, MPFR_EXP_THRESHOLD + 10);
+      /* this ensures that for small MPFR_EXP_THRESHOLD, the following
+         mpfr_set_str conversion is exact */
+      mpfr_set_prec (x, (MPFR_EXP_THRESHOLD + 10 > 64)
+                       ? MPFR_EXP_THRESHOLD + 10 : 64);
       mpfr_set_str (x,
        "0.1011000101110010000101111111010100001100000001110001100111001101E30",
                     2, GMP_RNDN);
