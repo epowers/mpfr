@@ -144,6 +144,20 @@ test_small (void)
   mpfr_clear (z);
 }
 
+static void
+test_fixed_bugs (void)
+{
+  mpfr_t x;
+  long double d;
+
+  /* bug found by Steve Kargl (2009-03-14) */
+  mpfr_init2 (x, 64);
+  mpfr_set_ui_2exp (x, 1, -16447, GMP_RNDN);
+  d = mpfr_get_ld (x, GMP_RNDN);  /* an assertion failed in init2.c:50 */
+
+  mpfr_clear (x);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -163,6 +177,7 @@ main (int argc, char *argv[])
 #endif
 
   check_gcc33_bug ();
+  test_fixed_bugs ();
 
   tests_start_mpfr ();
   mpfr_test_init ();
