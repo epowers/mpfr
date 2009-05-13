@@ -188,7 +188,6 @@ check_flags (void)
 static void
 test_set_underflow (void)
 {
-  /* static to allow non-constant initialiers in r */
   mpfr_t x, zero, min;
   mpfr_ptr r[4];
   int t[4] = { 1, -1, 1, -1 };
@@ -231,7 +230,6 @@ test_set_underflow (void)
 static void
 test_set_overflow (void)
 {
-  /* static to allow non-constant initialiers in r */
   mpfr_t x, inf, max;
   mpfr_ptr r[4];
   int t[4] = { 1, -1, 1, -1 };
