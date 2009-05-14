@@ -540,6 +540,7 @@ buffer_widen (struct string_buffer *b, size_t len)
   b->size += n;
   b->curr = b->start + pos;
 
+  MPFR_ASSERTD (pos < b->size);
   MPFR_ASSERTD (*b->curr == '\0');
 }
 
@@ -551,12 +552,13 @@ buffer_cat (struct string_buffer *b, const char *s, size_t len)
   MPFR_ASSERTD (len != 0);
   MPFR_ASSERTD (len <= strlen (s));
 
-  if (MPFR_UNLIKELY ((b->curr + len) > (b->start + b->size)))
+  if (MPFR_UNLIKELY ((b->curr + len) >= (b->start + b->size)))
     buffer_widen (b, len);
 
   strncat (b->curr, s, len);
   b->curr += len;
 
+  MPFR_ASSERTD (b->curr < b->start + b->size);
   MPFR_ASSERTD (*b->curr == '\0');
 }
 
@@ -576,6 +578,8 @@ buffer_pad (struct string_buffer *b, const char c, const size_t n)
     memset (b->curr, c, n);
   b->curr += n;
   *b->curr = '\0';
+
+  MPFR_ASSERTD (b->curr < b->start + b->size);
 }
 
 /* Form a string by concatenating the first LEN characters of STR to TZ
@@ -639,6 +643,8 @@ buffer_sandwich (struct string_buffer *b, char *str, size_t len,
     }
 
   *b->curr = '\0';
+
+  MPFR_ASSERTD (b->curr < b->start + b->size);
 }
 
 /* let gmp_xprintf process the part it can understand */
