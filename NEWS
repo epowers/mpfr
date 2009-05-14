@@ -21,6 +21,12 @@ MA 02110-1301, USA.
 ##############################################################################
 
 Changes from version 2.4.1 to version 2.4.2:
+- Better portability of configure script.
+- Detection of intmax_t and uintmax_t types.
+- Improved documentation: mpfr_get_z_exp, mpfr_strtofr, mpfr_get_str and
+  formatted output functions.
+- Improved message in case of assertion failure.
+- Test coverage: 97.0% lines of code
 - Bug fixes.
 
 Changes from version 2.4.0 to version 2.4.1:
