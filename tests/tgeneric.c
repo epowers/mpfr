@@ -265,7 +265,7 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
 #endif
               /* Let's increase the precision of the inputs in a random way.
                  In most cases, this doesn't make any difference, but this
-                 triggers a bug in mpfr_fmod (fixed in the trunk in r6230). */
+                 triggers the mpfr_fmod bug fixed in r6235. */
               mpfr_prec_round (x, mpfr_get_prec (x) + (randlimb () & 15),
                                GMP_RNDN);
 #if defined(TWO_ARGS)
