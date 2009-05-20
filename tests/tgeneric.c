@@ -263,7 +263,14 @@ test_generic (mp_prec_t p0, mp_prec_t p1, unsigned int N)
 #ifdef DEBUG_TGENERIC
               TGENERIC_INFO (TEST_FUNCTION, MPFR_PREC (z));
 #endif
+              /* Let's increase the precision of the inputs in a random way.
+                 In most cases, this doesn't make any difference, but this
+                 triggers a bug in mpfr_fmod (fixed in the trunk in r6230). */
+              mpfr_prec_round (x, mpfr_get_prec (x) + (randlimb () & 15),
+                               GMP_RNDN);
 #if defined(TWO_ARGS)
+              mpfr_prec_round (u, mpfr_get_prec (u) + (randlimb () & 15),
+                               GMP_RNDN);
               inexact = TEST_FUNCTION (z, x, u, rnd);
 #elif defined(DOUBLE_ARG1)
               inexact = TEST_FUNCTION (z, d, x, rnd);
