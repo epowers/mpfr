@@ -60,6 +60,7 @@ MA 02110-1301, USA. */
 # endif
 #endif
 
+#define MPFR_NEED_LONGLONG_H
 #include "mpfr-impl.h"
 
 /* Define a length modifier corresponding to mp_prec_t.
@@ -765,6 +766,189 @@ struct number_parts
                              string as ip_ptr */
 };
 
+/* For a real non zero number x, what is the base exponent f when rounding x
+   with rounding mode r to r(x) = m*b^f, where m is a digit and 1 <= m < b ?
+   Return non zero value if x is rounded up to b^f, return zero otherwise */
+static int
+next_base_power_p (mpfr_srcptr x, int base, mpfr_rnd_t rnd)
+{
+  mp_prec_t nbits;
+  mp_limb_t pm;
+  mp_limb_t xm;
+
+  MPFR_ASSERTD (MPFR_IS_PURE_FP (x));
+  MPFR_ASSERTD (base == 2 || base == 16);
+
+  /* Warning: the decimal point is AFTER THE FIRST DIGIT in this output
+     representation. */
+  nbits = base == 2 ? 1 : 4;
+
+  if (rnd == GMP_RNDZ
+      || (rnd == GMP_RNDD && MPFR_IS_POS (x))
+      || (rnd == GMP_RNDU && MPFR_IS_NEG (x))
+      || MPFR_PREC (x) <= nbits)
+    /* no rounding when printing x with 1 digit */
+    return 0;
+
+  xm = MPFR_MANT (x) [MPFR_LIMB_SIZE (x) - 1];
+  pm = MPFR_LIMB_MASK (BITS_PER_MP_LIMB - nbits);
+  if ((xm & ~pm) ^ ~pm)
+    /* do no round up if some of the nbits first bits are 0s. */
+    return 0;
+
+  if (rnd == GMP_RNDN)
+    /* mask for rounding bit */
+    pm = (MPFR_LIMB_ONE << (BITS_PER_MP_LIMB - nbits - 1));
+
+  /* round up if some remaining bits are 1 */
+  /* warning: the return value must be an int */
+  return xm & pm ? 1 : 0;
+}
+
+/* For a real non zero number x, what is the exponent f when rounding x with
+   rounding mode r to r(x) = m*10^f, where m has p+1 digits and 1 <= m < 10 ?
+
+   Return non zero value if x is rounded up to 10^f, return zero
+   otherwise.
+   If e is not NULL, *e is set to f. */
+static int
+round_to_10_power (mp_exp_t *e, mpfr_srcptr x, mp_prec_t p, mpfr_rnd_t r)
+{
+  mpfr_t f, u, v, y;
+  mp_prec_t m;
+  mpfr_uexp_t uexp;
+  int inex = -1;
+
+  MPFR_ZIV_DECL (loop);
+
+  /* y = abs(x) */
+  MPFR_ALIAS (y, x, 1, MPFR_EXP(x));
+
+  /* we want f = floor(log(|x|)/log(10)) exactly.
+     we have |f| >= |Exp(x)|/3,
+     then m = ceil(log(uexp/3)/log(2)) > log(f)/log(2)
+     is a sufficient precision for f. */
+  uexp = SAFE_ABS (mpfr_uexp_t, mpfr_get_exp (x)) / 3;
+  m = 1;
+  while (uexp)
+    {
+      uexp >>= 1;
+      m++;
+    }
+  if (m < 2)
+    m = 2;
+  mpfr_init2 (f, m);
+  mpfr_log10 (f, y, GMP_RNDD);
+  mpfr_floor (f, f);
+
+  /* In most cases, the output exponent is f. */
+  if (e != NULL)
+    *e = (mp_exp_t)mpfr_get_si (f, GMP_RNDD);
+
+  if (r == GMP_RNDZ
+      || (MPFR_IS_POS (x) && r == GMP_RNDD)
+      || (MPFR_IS_NEG (x) && r == GMP_RNDU))
+    /* If rounding toward zero, the exponent is f */
+    {
+      mpfr_clear (f);
+      return 0;
+    }
+
+  /* Is |x| less than 10^(f+1) - 10^(f-p)? */
+  {
+    int cmp;
+    int inex_u, inex_v, inex_w;
+    mp_exp_t exp_u, exp_v, exp_w;
+
+    m = MPFR_PREC (x);
+    m += MPFR_INT_CEIL_LOG2 (m);
+    mpfr_init2 (u, m);
+    mpfr_init2 (v, m);
+
+    MPFR_ZIV_INIT (loop, m);
+    for (;;)
+      {
+        mpfr_set_prec (u, m);
+        mpfr_set_prec (v, m);
+
+        /* u = o(10^(f+1)) rounding toward -infinity
+           error (u) < 1 ulp(u)
+           error(u) = 0 if inex_u = 0 */
+        mpfr_add_ui (u, f, 1, GMP_RNDN);
+        inex_u = mpfr_ui_pow (u, 10, u, GMP_RNDD);
+        exp_u = MPFR_EXP (u);
+
+        /* if r = rounding to nearest
+           v = o(0.5 * 10^(f-p)) rounding toward +infinity
+           else
+           v = o(10^(f-p)) rounding toward +infinity
+
+           error(v) < 1 ulp(v)
+           error(v) = 0 if inex_v = 0 */
+        mpfr_sub_ui (v, f, p, GMP_RNDN);
+        inex_v = mpfr_ui_pow (v, 10, v, GMP_RNDU);
+        if (r == GMP_RNDN)
+          mpfr_div_2ui (v, v, 1, GMP_RNDN);
+        exp_v = MPFR_EXP (v);
+
+        /* w = o(u-v) rounding toward -infinity
+           w is an approximation of 10^(f+1) - v with
+           error(w) < 1 ulp(w) + error(u) + error(v)
+           error(w) = 0 iff inex_u = inex_v = inex_diff = 0 */
+        inex_w = mpfr_sub (u, u, v, GMP_RNDD);
+        exp_w = MPFR_EXP (u);
+
+        cmp = mpfr_cmp (y, u);
+
+        if (cmp < 0)
+          /* |x| < u <= 10^(f+1) - v, the exponent is f,
+             does |x| equal 10^f? */
+          {
+            inex = 0;
+            break;
+          }
+        else if (cmp == 0 && inex_u == 0 && inex_v == 0 && inex_w == 0)
+          /* |x| = u = 10^(f+1) - v, the exponent is f+1 */
+          {
+            if (e != NULL)
+              (*e)++;
+
+            inex = +1;
+            break;
+          }
+
+          /* compare |x| with w + error(w) */
+        if (inex_u)
+          mpfr_set_ui_2exp (v, 1, exp_u - m, GMP_RNDU);
+        else
+          mpfr_set_ui (v, 0, GMP_RNDN);
+        if (inex_v)
+          mpfr_set_ui_2exp (v, 1, exp_v - m, GMP_RNDU);
+        if (inex_w)
+          mpfr_set_ui_2exp (v, 1, exp_w - m, GMP_RNDU);
+
+        mpfr_add (u, u, v, GMP_RNDU);
+        if (mpfr_cmp (y, u) >= 0)
+          {
+            if (e != NULL)
+              *e = (mp_exp_t)mpfr_get_si (f, GMP_RNDD) + 1;
+
+            inex = +1;
+            break;
+          }
+
+        MPFR_ZIV_NEXT (loop, m);
+      }
+    MPFR_ZIV_FREE (loop);
+    mpfr_clear (u);
+    mpfr_clear (v);
+  }
+
+  MPFR_ASSERTD (inex != -1);
+  mpfr_clear (f);
+  return inex;
+}
+
 /* Determine the different parts of the string representation of the regular
    number P when SPEC.SPEC is 'a', 'A', or 'b'.
 
@@ -801,20 +985,15 @@ regular_ab (struct number_parts *np, mpfr_srcptr p,
   np->ip_size = 1;
   base = (spec.spec == 'b') ? 2 : 16;
 
-  if (spec.spec == 'b' || spec.prec != 0)
-    /* In order to avoid ambiguity in rounding to even case, we will always
-       output at least one fractional digit in binary mode */
+  if (spec.prec != 0)
     {
       size_t nsd;
 
       /* Number of significant digits:
          - if no given precision, let mpfr_get_str determine it;
-         - if a zero precision is specified and if we are in binary mode, then
-         ask for two binary digits, one before decimal point, and one after;
          - if a non-zero precision is specified, then one digit before decimal
          point plus SPEC.PREC after it. */
-      nsd = spec.prec < 0 ? 0
-        : (spec.prec == 0 && spec.spec == 'b') ? 2 : spec.prec + np->ip_size;
+      nsd = spec.prec < 0 ? 0 : spec.prec + np->ip_size;
       str = mpfr_get_str (0, &exp, base, nsd, p, spec.rnd_mode);
       register_string (np->sl, str);
       np->ip_ptr = MPFR_IS_NEG (p) ? ++str : str;  /* skip sign if any */
@@ -835,88 +1014,45 @@ regular_ab (struct number_parts *np, mpfr_srcptr p,
           --exp;
         }
     }
-  else
-    /* One hexadecimal digit is sufficient but mpfr_get_str returns at least
-       two digits when the base is a power of two.
-       So, in order to avoid double rounding, we will build our own string. */
+  else if (next_base_power_p (p, base, spec.rnd_mode))
     {
-      mp_limb_t *pm = MPFR_MANT (p);
-      mp_size_t ps;
+      str = (char *)(*__gmp_allocate_func) (2);
+      str[0] = '1';
+      str[1] = '\0';
+      np->ip_ptr = register_string (np->sl, str);
+
+      exp = MPFR_GET_EXP (p);
+    }
+  else if (base == 2)
+    {
+      str = (char *)(*__gmp_allocate_func) (2);
+      str[0] = '1';
+      str[1] = '\0';
+      np->ip_ptr = register_string (np->sl, str);
+
+      exp = MPFR_GET_EXP (p) - 1;
+    }
+  else
+    {
       int digit;
-      unsigned int shift;
-      int rnd_away;
+      mp_limb_t msl = MPFR_MANT (p)[MPFR_LIMB_SIZE (p) - 1];
+      int rnd_bit = BITS_PER_MP_LIMB - 5;
 
-      /* rnd_away:
-         1 if round away from zero,
-         0 if round to zero,
-         -1 if not decided yet. */
-      rnd_away =
-        spec.rnd_mode == GMP_RNDD ? MPFR_IS_NEG (p) :
-        spec.rnd_mode == GMP_RNDU ? MPFR_IS_POS (p) :
-        spec.rnd_mode == GMP_RNDZ ? 0 : -1;
-
-      /* exponent for radix-2 with the decimal point after the first
-         hexadecimal digit */
-      MPFR_ASSERTN (MPFR_GET_EXP (p) > MPFR_EMIN_MIN + 3); /* possible
-                                                              overflow */
-      exp = MPFR_GET_EXP (p) - 4;
-
-      /* Determine the radix-16 digit by grouping the 4 first digits. Even
-         if MPFR_PREC (p) < 4, we can read 4 bits in its first limb */
-      shift = BITS_PER_MP_LIMB - 4;
-      ps = (MPFR_PREC (p) - 1) / BITS_PER_MP_LIMB;
-      digit = pm[ps] >> shift;
-
-      if (MPFR_PREC (p) > 4)
-        /* round taking into account bits outside the first 4 ones */
-        {
-          if (rnd_away == -1)
-            /* Round to nearest mode: we have to decide in that particular
-               case if we have to round away from zero or not */
-            {
-              mp_limb_t limb, rb, mask;
-
-              /* compute rounding bit */
-              mask = MPFR_LIMB_ONE << (shift - 1);
-              rb = pm[ps] & mask;
-              if (rb == 0)
-                rnd_away = 0;
-              else
-                {
-                  mask = MPFR_LIMB_MASK (shift - 1);
-                  limb = pm[ps] & mask;
-                  while ((ps > 0) && (limb == 0))
-                    limb = pm[--ps];
-                  if (limb == 0)
-                    /* tie case, round to even */
-                    rnd_away = (digit & 1) ? 1 : 0;
-                  else
-                    rnd_away = 1;
-                }
-            }
-
-          MPFR_ASSERTD (rnd_away >= 0);  /* rounding direction is defined */
-          if (rnd_away)
-            {
-              digit++;
-              if (digit > 15)
-                /* As we want only the first significant digit, we have
-                   to shift one position to the left */
-                {
-                  digit >>= 1;
-                  ++exp;  /* no possible overflow because
-                             exp == EXP(p)-3 */
-                }
-            }
-        }
-
+      /* pick up the 4 first bits */
+      digit = msl >> (rnd_bit+1);
+      if ((spec.rnd_mode == GMP_RNDU && MPFR_IS_POS (p))
+          || (spec.rnd_mode == GMP_RNDD && MPFR_IS_NEG (p))
+          || (spec.rnd_mode == GMP_RNDN
+              && (msl & (MPFR_LIMB_ONE << rnd_bit))))
+        digit++;
       MPFR_ASSERTD ((0 <= digit) && (digit <= 15));
-      np->ip_size = 1;
+
       str = (char *)(*__gmp_allocate_func) (1 + np->ip_size);
       str[0] = num_to_text [digit];
       str[1] = '\0';
-
       np->ip_ptr = register_string (np->sl, str);
+
+      exp = MPFR_GET_EXP (p) - 4;
     }
 
   if (uppercase)
@@ -1052,7 +1188,7 @@ regular_eg (struct number_parts *np, mpfr_srcptr p,
        - if no given precision, then let mpfr_get_str determine it,
        - if a precision is specified, then one digit before decimal point
        plus SPEC.PREC after it.
-       We use the fact here that mpfr_get_exp allows us to ask for only one
+       We use the fact here that mpfr_get_str allows us to ask for only one
        significant digit when the base is not a power of 2. */
     nsd = (spec.prec < 0) ? 0 : spec.prec + np->ip_size;
     str = mpfr_get_str (0, &exp, 10, nsd, p, spec.rnd_mode);
@@ -1149,10 +1285,17 @@ static int
 regular_fg (struct number_parts *np, mpfr_srcptr p,
             const struct printf_spec spec)
 {
-  mpfr_t x;
+  mp_exp_t exp;
   char * str;
   const int spec_g = (spec.spec == 'g' || spec.spec == 'G');
   const int keep_trailing_zeros = spec_g && spec.alt;
+
+  /* WARNING: an empty precision field:
+     - with 'f' or 'F' asks for enough digits so that the number can be reread
+     exactly
+     - is forbidden with 'g' or 'G' (it means precision = 6 and it should have
+     been changed to 6 before the function call) */
+  MPFR_ASSERTD (!spec_g || spec.prec >= 0);
 
   /* sign */
   if (MPFR_IS_NEG (p))
@@ -1161,76 +1304,36 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
     np->sign = spec.showsign ? '+' : ' ';
 
   /* Determine the position of the most significant decimal digit. */
-  {
-    /* Let p = m*10^e with 1 <= m < 10 and p = n*2^d with 0.5 <= d < 1.
-       We need at most 1+log2(floor(d/3)+1) bits of precision in order to
-       represent the exact value of e+1 if p >= 1, or |e| if p < 1. */
-    mp_prec_t m;
-    mp_prec_t n;
-
-    m = (mp_prec_t) SAFE_ABS (mp_exp_unsigned_t, MPFR_GET_EXP (p));
-    m /= 3;
-    m++;
-    n = 1;
-    while (m != 0)
-      {
-        m >>= 1;
-        n++;
-      }
-
-    if (n <= MPFR_PREC (p))
-      mpfr_init2 (x, MPFR_PREC (p) + 1);
-    else
-      mpfr_init2 (x, n);
-  }
+  round_to_10_power (&exp, p, 0, GMP_RNDZ);
 
   if (MPFR_GET_EXP (p) <= 0)
     /* 0 < p < 1 */
     {
-      int rnd_to_one;
-
-      /* Is p round to +/-1 with rounding mode spec.rnd_mode and precision
-         spec.prec ? rnd_to_one:
-         1 if |p| output as "1.00_0"
-         0 if |p| output as "0.dd_d"
-         -1 if not decided yet */
-
-      if (spec_g || spec.prec >= 0)
+      if (spec.prec >= 0)
+        /* the number of output digits is known */
         {
-          mpfr_t y;
-          mpfr_t u;
-
-          mpfr_init2 (u, MPFR_PREC (p));
-
-          /* compare y = |p| and 1 - 10^(-spec.prec) */
-          MPFR_ALIAS (y, p, 1, MPFR_EXP (p));
-          mpfr_set_si (u, -spec.prec, GMP_RNDN); /* FIXME: analyze error */
-          mpfr_exp10 (u, u, GMP_RNDN);
-          mpfr_ui_sub (x, 1, u, GMP_RNDN);
-
-          rnd_to_one =
-            mpfr_cmp (y, x) < 0 ? 0 :
-            spec.rnd_mode == GMP_RNDD ? MPFR_IS_NEG (p) :
-            spec.rnd_mode == GMP_RNDU ? MPFR_IS_POS (p) :
-            spec.rnd_mode == GMP_RNDZ ? 0 : -1;
-
-          if (rnd_to_one == -1)
-            /* round to nearest mode */
+          if (spec.prec == 0 && spec.rnd_mode == GMP_RNDN && exp == -1)
             {
-              /* round to 1 iff y = |p| > 1 - 0.5 * 10^(-spec.prec) */
-              mpfr_div_2ui (x, u, 1, GMP_RNDN);
-              mpfr_ui_sub (x, 1, x, GMP_RNDN);
+              mpfr_t y;
+              /* y = abs(p) */
+              MPFR_ALIAS (y, p, 1, MPFR_EXP (p));
 
-              rnd_to_one = mpfr_cmp (y, x) > 0 ? 1 : 0;
+              if (mpfr_cmp_d (y, 0.5) >= 0)
+                /* |p| > 0.5, round up to 1 */
+                exp++;
             }
-          mpfr_clear (u);
+          else
+            round_to_10_power (&exp, p,
+                               spec.prec > -exp ? spec.prec + exp : 0,
+                               spec.rnd_mode);
         }
-      else
-        rnd_to_one = 0;
 
-      MPFR_ASSERTD (rnd_to_one >= 0); /* rnd_to_one is defined */
-      if (rnd_to_one)
-        /* one digit '1' in integral part */
+      if (exp == 0
+          || (spec.prec == 0
+              && ((spec.rnd_mode == GMP_RNDD && MPFR_IS_NEG (p))
+                  || (spec.rnd_mode == GMP_RNDU && MPFR_IS_POS (p)))))
+        /* rounded up to 1: one digit '1' in integral part, zeros (if any) in
+           fractional part */
         {
           /* integral part */
           np->ip_size = 1;
@@ -1239,19 +1342,9 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
           str[1] = '\0';
           np->ip_ptr = register_string (np->sl, str);
 
-          if (spec.prec > 0)
+          if (spec.prec >= 0)
             /* fractional part */
-            {
-              if (spec_g)
-                /* with specifier 'g', spec.prec is the number of
-                   significant digits to display, take into account the digit
-                   '1' in the integral part*/
-                np->fp_trailing_zeros = spec.alt ? spec.prec - 1 : 0;
-              else
-                /* with specifier 'f', spec.prec is the number of digits
-                   after the decimal point */
-                np->fp_trailing_zeros = spec.prec;
-            }
+            np->fp_trailing_zeros = (!spec_g || spec.alt) ? spec.prec : 0;
         }
       else
         /* one digit '0' in integral part */
@@ -1266,52 +1359,15 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
           if (spec.prec != 0)
             /* fractional part */
             {
-              mpfr_t y;
-
-              MPFR_ALIAS (y, p, 1, MPFR_EXP (p)); /* y = |p| */
-              mpfr_log10 (x, y, GMP_RNDD); /* FIXME: analyze error */
-              mpfr_floor (x, x);
-              mpfr_abs (x, x, GMP_RNDD);
-              /* We have rounded away from zero so that x == |e| (with
-                 p = m*10^e, see above). */
-
-              if ((spec.prec > 0 && mpfr_cmp_si (x, spec.prec) > 0)
-                  || (spec_g && mpfr_cmp_ui (x, 5) == 0))
+              if (spec.prec > 0 && exp < -spec.prec)
                 /* p is too small for the given precision,
-                   output "0.0_00" or "0.0_01" depending on rnd_mode */
+                   output "0.0_00", or "0.0_01" */
                 {
-                  int rnd_away;
-
-                  /* rnd_away:
-                     1 if round away from zero,
-                     0 if round to zero,
-                     -1 if not decided yet. */
-                  rnd_away =
-                    spec.rnd_mode == GMP_RNDD ? MPFR_IS_NEG (p) :
-                    spec.rnd_mode == GMP_RNDU ? MPFR_IS_POS (p) :
-                    spec.rnd_mode == GMP_RNDZ ? 0 : -1;
-
-                  if (rnd_away == -1)
-                    /* round to nearest mode */
+                  if ((spec.rnd_mode == GMP_RNDD && MPFR_IS_NEG (p))
+                      || (spec.rnd_mode == GMP_RNDU && MPFR_IS_POS (p)))
+                    /* round away from zero: the last output digit is '1' */
                     {
-                      /* round away iff |p| with x = 0.5 * 10^(-spec.prec) */
-                      mpfr_set_si (x, -spec.prec, GMP_RNDN);
-                      mpfr_exp10 (x, x, GMP_RNDN);
-                      mpfr_div_2ui (x, x, 1, GMP_RNDN);
-
-                      rnd_away = mpfr_cmp (y, x) > 0 ? 1 : 0;
-                    }
-
-                  MPFR_ASSERTD (rnd_away >= 0);  /* rounding direction is
-                                                    defined */
-                  if (rnd_away)
-                    /* the last output digit is '1' */
-                    {
-                      if (spec_g)
-                        /* |p| is output as 0.0001 */
-                        np->fp_leading_zeros = 3;
-                      else
-                        np->fp_leading_zeros = spec.prec - 1;
+                      np->fp_leading_zeros = spec.prec - 1;
 
                       np->fp_size = 1;
                       str = (char *) (*__gmp_allocate_func) (1 + np->fp_size);
@@ -1327,11 +1383,9 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
                 /* some significant digits can be output in the fractional
                    part */
                 {
-                  mp_exp_t exp;
                   char *ptr;
                   size_t str_len;
-                  const size_t nsd = spec.prec < 0 ? 0
-                    : spec.prec - mpfr_get_ui (x, GMP_RNDZ) + 1;
+                  const size_t nsd = spec.prec < 0 ? 0 : (spec.prec + exp + 1);
                   /* WARNING: nsd may equal 1, we use here the fact that
                      mpfr_get_str can return one digit with base ten
                      (undocumented feature, see comments in get_str.c) */
@@ -1356,14 +1410,12 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
 
                   if (str_len > INT_MAX)
                     /* too much digits in fractional part */
-                    {
-                      mpfr_clear (x);
-                      return -1;
-                    }
+                    return -1;
+
                   MPFR_ASSERTD (str_len > 0);
                   np->fp_size = str_len;
 
-                  if (!spec_g && (spec.prec > 0)
+                  if (!spec_g && spec.prec > 0
                       && (np->fp_leading_zeros + np->fp_size < spec.prec))
                     /* add missing trailing zeros */
                     np->fp_trailing_zeros = spec.prec - np->fp_leading_zeros
@@ -1378,26 +1430,14 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
   else
     /* 1 <= p */
     {
-      mp_exp_t exp;
       size_t nsd;  /* Number of significant digits */
 
-      mpfr_abs (x, p, GMP_RNDD); /* With our choice of precision,
-                                    x == |p| exactly. */
-      mpfr_log10 (x, x, GMP_RNDZ);
-      mpfr_floor (x, x);
-      mpfr_add_ui (x, x, 1, GMP_RNDZ);
-      /* We have rounded towards zero so that x == e + 1 (with p = m*10^e,
-         see above). x is now the number of digits in the integral part. */
-
-      MPFR_ASSERTD (mpfr_cmp_si (x, 0) >= 0);
-      if (mpfr_cmp_ui (x, INT_MAX) > 0)
+      MPFR_ASSERTD (exp >= 0);
+      if (exp > INT_MAX)
         /* P is too large to print all its integral part digits */
-        {
-          mpfr_clear (x);
-          return -1;
-        }
+        return -1;
 
-      np->ip_size = mpfr_get_ui (x, GMP_RNDN);
+      np->ip_size = exp + 1;
 
       nsd = spec.prec < 0 ? 0 : spec.prec + np->ip_size;
       str = mpfr_get_str (NULL, &exp, 10, nsd, p, spec.rnd_mode);
@@ -1415,11 +1455,11 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
           size_t str_len;
           str_len = strlen (str); /* note: the sign has been skipped */
 
-          if (np->ip_size > str_len)
+          if (exp > str_len)
             /* mpfr_get_str doesn't give the trailing zeros when p is a
                multiple of 10 (p integer, so no fractional part) */
             {
-              np->ip_trailing_zeros = np->ip_size - str_len;
+              np->ip_trailing_zeros = exp - str_len;
               np->ip_size = str_len;
               if (spec.alt)
                 np->point = MPFR_DECIMAL_POINT;
@@ -1445,10 +1485,7 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
 
               if (str_len > INT_MAX)
                 /* too much digits in fractional part */
-                {
-                  mpfr_clear (x);
-                  return -1;
-                }
+                return -1;
 
               if (str_len != 0)
                 /* some digits in fractional part */
@@ -1457,17 +1494,20 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
                   np->fp_ptr = str + np->ip_size;
                   np->fp_size = str_len;
                 }
-              else
-                MPFR_ASSERTN (spec.alt == 0);
             }
         }
       else
         /* spec.prec digits in fractional part */
         {
-          MPFR_ASSERTD (np->ip_size == exp);
+          if (np->ip_size < exp)
+            /* the absolute value of the number has been rounded up to a power
+               of ten */
+            np->ip_trailing_zeros = exp - np->ip_size;
 
           if (spec.prec != 0)
             {
+              MPFR_ASSERTD (np->ip_size == exp);
+
               np->point = MPFR_DECIMAL_POINT;
               np->fp_ptr = str + np->ip_size;
               np->fp_size = spec.prec;
@@ -1477,7 +1517,6 @@ regular_fg (struct number_parts *np, mpfr_srcptr p,
         }
     }
 
-  mpfr_clear (x);
   return 0;
 }
 
@@ -1651,87 +1690,20 @@ partition_number (struct number_parts *np, mpfr_srcptr p,
              otherwise, the conversion is with style 'e'/'E' and
              precision T-1.
              where T is the threshold computed below and X is the exponent
-             that would be displayed with style 'e'. */
+             that would be displayed with style 'e' and precision T-1. */
           int threshold;
-          long x;
-          mpfr_t y;
-
-          MPFR_ALIAS (y, p, 1, MPFR_EXP (p)); /* y = |p| */
+          mp_exp_t x;
 
           threshold = (spec.prec < 0) ? 6 : (spec.prec == 0) ? 1 : spec.prec;
-          {
-            mpfr_t z;
+          round_to_10_power (&x, p, threshold - 1, spec.rnd_mode);
 
-            mpfr_init2 (z, 53);
-            mpfr_log10 (z, y, GMP_RNDD);
-            x = mpfr_get_si (z, GMP_RNDD);
-            mpfr_clear (z);
-          }
-
-          if (x < threshold && x >= -5)
+          if (threshold > x && x >= -4)
             {
-              if (x == -5)
-                /* |p| might be rounded to 1e-4 */
-                {
-                  int round_to_1em4;
+              /* the conversion is with style 'f' */
+              spec.prec = threshold - x - 1;
 
-                  /* round_to_1em4:
-                     1 if |p| rounded to 1e-4,
-                     0 if not,
-                     -1 if not decided yet. */
-                  round_to_1em4 =
-                    spec.rnd_mode == GMP_RNDD ? MPFR_IS_NEG (p) :
-                    spec.rnd_mode == GMP_RNDU ? MPFR_IS_POS (p) :
-                    spec.rnd_mode == GMP_RNDZ ? 0 : -1;
-
-                  if (round_to_1em4 == -1)
-                    /* round to nearest mode: |p| is output as "1e-04" iff
-                       0 < 10^(-4) - |p| <= 5 * 10^(-threshold-5) */
-                    {
-                      mpfr_t z;
-
-                      mpfr_init2 (z, MPFR_PREC (p)); /* FIXME: analyse error*/
-                      mpfr_set_si (z, -threshold, GMP_RNDN);
-                      mpfr_exp10 (z, z, GMP_RNDN);
-                      mpfr_div_2ui (z, z, 1, GMP_RNDN);
-                      mpfr_ui_sub (z, 1, z, GMP_RNDN);
-                      /* here, z = 1 - 10^(-threshold)/2 */
-
-                      mpfr_div_ui (z, z, 625, GMP_RNDN);
-                      mpfr_div_2ui (z, z, 4, GMP_RNDN);
-
-                      round_to_1em4 = mpfr_cmp (y, z) < 0 ? 0 : 1;
-                      mpfr_clear (z);
-                    }
-
-                  MPFR_ASSERTD (round_to_1em4 >= 0); /* rounding is defined */
-                  if (round_to_1em4)
-                    /* |p| = 0.0000abc_d is output as "1.00_0e-04" with
-                       style 'e', so the conversion is with style 'f' */
-                    {
-                      spec.prec = threshold + 3;
-
-                      if (regular_fg (np, p, spec) == -1)
-                        goto error;
-                    }
-                  else
-                    /* |p| = 0.0000abc_d is output as "a.bc_de-05" with
-                       style 'e', so the conversion is with style 'e' */
-                    {
-                      spec.prec = threshold - 1;
-
-                      if (regular_eg (np, p, spec) == -1)
-                        goto error;
-                    }
-                }
-              else
-                /* x >= -4, the conversion is with style 'f' */
-                {
-                  spec.prec = threshold - 1 - x;
-
-                  if (regular_fg (np, p, spec) == -1)
-                    goto error;
-                }
+              if (regular_fg (np, p, spec) == -1)
+                goto error;
             }
           else
             {
@@ -1906,6 +1878,7 @@ mpfr_vasprintf (char **ptr, const char *fmt, va_list ap)
            character */
         {
           ++fmt;
+          xgmp_fmt_flag = 1;
           continue;
         }
 
