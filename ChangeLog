@@ -1,4 +1,657 @@
 ------------------------------------------------------------------------
+r6309 | thevenyp | 2009-07-06 11:45:46 +0000 (Mon, 06 Jul 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+
+tests/tfprintf.c tests/tprintf.c: Do not test very small values with %f.
+[merge r6279 from trunk]
+
+------------------------------------------------------------------------
+r6308 | vlefevre | 2009-07-06 11:17:15 +0000 (Mon, 06 Jul 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated the month.
+------------------------------------------------------------------------
+r6306 | vlefevre | 2009-07-06 11:16:26 +0000 (Mon, 06 Jul 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi consistency: @var{stdout} -> @code{stdout}.
+------------------------------------------------------------------------
+r6304 | vlefevre | 2009-07-06 11:09:34 +0000 (Mon, 06 Jul 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: do not use a potential function call in SAFE_ABS macro.
+[merged changeset 6303 from trunk]
+------------------------------------------------------------------------
+r6302 | thevenyp | 2009-07-06 08:37:51 +0000 (Mon, 06 Jul 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c tests/tsprintf.c: deleted trailing spaces.
+
+------------------------------------------------------------------------
+r6299 | thevenyp | 2009-06-29 13:24:48 +0000 (Mon, 29 Jun 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: Fix bug with %.0Rg and %.0Rf when the value to display is rounded up to the next power of ten.
+tests/tsprintf.c: Tests for %Rf and %Rg when the value to display is rounded up to the next power of ten.
+[merge r6298 from trunk]
+
+------------------------------------------------------------------------
+r6291 | vlefevre | 2009-06-23 02:17:11 +0000 (Tue, 23 Jun 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated the month.
+------------------------------------------------------------------------
+r6289 | vlefevre | 2009-06-23 02:14:06 +0000 (Tue, 23 Jun 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: fixed description of mpfr_get_str in the case n = 0
+(merged changesets 6269, 6270 and 6287 from the trunk).
+------------------------------------------------------------------------
+r6288 | vlefevre | 2009-06-23 02:11:50 +0000 (Tue, 23 Jun 2009) | 1 line
+Changed paths:
+   M /branches/2.4/get_str.c
+
+get_str.c: added a space.
+------------------------------------------------------------------------
+r6284 | vlefevre | 2009-06-21 20:55:24 +0000 (Sun, 21 Jun 2009) | 1 line
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: corrected comments.
+------------------------------------------------------------------------
+r6281 | thevenyp | 2009-06-19 16:46:41 +0000 (Fri, 19 Jun 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: Fix bug with %%, %.0Ra, %.0Rg and %.0Rf when the value to display is rounded up to the next power of the base.
+tests/tfprintf.c tests/tsprintf.c tests/tprintf.c: Tests for %%, and fixed behavior of %Ra, %Rf and %Rg.
+[merge r6258 r6265 r6278 r6280 from trunk]
+
+------------------------------------------------------------------------
+r6273 | vlefevre | 2009-06-14 11:55:47 +0000 (Sun, 14 Jun 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/acinclude.m4
+
+acinclude.m4: Make sure results of calculations on constants used with
+the fesetround() test are not precomputed by GCC (occurs on MIPS).
+Patch from Maciej W. Rozycki.
+  http://websympa.loria.fr/wwsympa/arc/mpfr/2009-06/msg00036.html
+  http://article.gmane.org/gmane.comp.lib.mpfr.general/174
+------------------------------------------------------------------------
+r6262 | vlefevre | 2009-05-29 13:52:51 +0000 (Fri, 29 May 2009) | 1 line
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: do not use GMP's namespace for identifiers defined in MPFR.
+------------------------------------------------------------------------
+r6260 | vlefevre | 2009-05-29 12:28:55 +0000 (Fri, 29 May 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.h
+
+mpfr.h: rewrote a comment.
+------------------------------------------------------------------------
+r6253 | thevenyp | 2009-05-27 15:02:46 +0000 (Wed, 27 May 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: remind buffer overflow fixed with r6223.
+
+------------------------------------------------------------------------
+r6250 | thevenyp | 2009-05-27 13:38:36 +0000 (Wed, 27 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/get_d64.c
+   M /branches/2.4/set_d64.c
+
+get_d64.c set_d64.c: Fix types.
+[merge r6190 r6248 from trunk]
+
+------------------------------------------------------------------------
+r6249 | thevenyp | 2009-05-27 13:33:17 +0000 (Wed, 27 May 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/get_d64.c
+   M /branches/2.4/set_d64.c
+
+get_d64.c set_d64.c: revert r6215.
+
+------------------------------------------------------------------------
+r6244 | vlefevre | 2009-05-27 02:25:42 +0000 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated the month.
+------------------------------------------------------------------------
+r6243 | vlefevre | 2009-05-27 02:22:18 +0000 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.h
+
+mpfr.h untabified.
+------------------------------------------------------------------------
+r6242 | vlefevre | 2009-05-27 02:21:30 +0000 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tfmod.c
+
+tests/tfmod.c: deleted trailing whitespace.
+------------------------------------------------------------------------
+r6239 | vlefevre | 2009-05-20 22:43:16 +0000 (Wed, 20 May 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tgeneric.c
+
+tests/tgeneric.c: corrected comment from r6238 (the mpfr_fmod bug was
+actually fixed in r6235 for the 2.4 branch).
+------------------------------------------------------------------------
+r6238 | vlefevre | 2009-05-20 22:34:09 +0000 (Wed, 20 May 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tgeneric.c
+
+tests/tgeneric.c: for the second computation, increase the precision
+of the inputs in order to trigger the mpfr_fmod bug fixed in the trunk
+in r6230 (and potentially other bugs). Thanks to Eric Veach for the
+idea. [This change is almost r6237 from the trunk.]
+------------------------------------------------------------------------
+r6235 | thevenyp | 2009-05-20 16:08:03 +0000 (Wed, 20 May 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/rem1.c
+   M /branches/2.4/tests/mpfr-test.h
+   M /branches/2.4/tests/tfmod.c
+
+rem1.c tests/tfmod.c: Fix bug found by Eric Veach.
+tests/mpfr-test.h: added mpfr_cmp_ui0 macro (check that x is not a NaN).
+[merge -r 6229:6234 from trunk]
+
+------------------------------------------------------------------------
+r6228 | thevenyp | 2009-05-14 12:19:07 +0000 (Thu, 14 May 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: Update.
+
+------------------------------------------------------------------------
+r6227 | thevenyp | 2009-05-14 11:56:16 +0000 (Thu, 14 May 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tests.c
+
+tests/tests.c (data_check): try to open the data file first from the
+build directory, then from the source directory.
+[merge r6177 from trunk]
+
+------------------------------------------------------------------------
+r6226 | thevenyp | 2009-05-14 11:49:45 +0000 (Thu, 14 May 2009) | 6 lines
+Changed paths:
+   M /branches/2.4/init2.c
+
+init2.c: check that mp_bits_per_limb == BITS_PER_MP_LIMB (useful in case GMP
+         is upgraded with a different ABI, e.g. 32 vs mode32 on PowerPC
+         64). Without such a check, MPFR can give incorrect results if the
+         ABI's don't match.
+[merge r6176 from trunk]
+
+------------------------------------------------------------------------
+r6225 | thevenyp | 2009-05-14 11:45:00 +0000 (Thu, 14 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/INSTALL
+
+INSTALL: updated Notes on AIX/PowerPC
+[merge r6159 r6182 from trunk]
+
+------------------------------------------------------------------------
+r6224 | thevenyp | 2009-05-14 09:55:00 +0000 (Thu, 14 May 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/printf.c
+   M /branches/2.4/vasprintf.c
+
+acinclude.m4: Change MPFR_FUNC_PRINTF_SPEC (renamed MPFR_FUNC_GMP_PRINTF_SPEC) so that it actually checks output.
+acinclude.m4: remove definition of va_copy, just detect its presence.
+printf.c vasprintf.c: #define a replacement of va_copy if needed (in the same way as gmp).
+[merge r6142 r6143 from trunk]
+
+------------------------------------------------------------------------
+r6223 | thevenyp | 2009-05-14 09:41:25 +0000 (Thu, 14 May 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: Fix bug_20090316 (in buffer_cat, the buffer was 1 character too small in some cases).
+tests/tfprintf.c: Add test for bug_20090316.
+[merge r6112 r6113 r6118 from trunk]
+
+------------------------------------------------------------------------
+r6222 | thevenyp | 2009-05-14 09:32:10 +0000 (Thu, 14 May 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tprintf.c
+   M /branches/2.4/vasprintf.c
+
+tests/tprintf.c: Add an expensive test where the output number has more than INT_MAX characters.
+vasprintf.c: Fix the bug triggered by the new test in tsprintf.c.
+[merge r6096 r6110 from trunk]
+
+------------------------------------------------------------------------
+r6221 | thevenyp | 2009-05-14 08:48:57 +0000 (Thu, 14 May 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/tests/tprintf.c
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: Fix behavior in case of error as in the documentation (return -1 when the format string is invalid).
+tests/tsprintf.c: Improve code coverage.
+tests/tprintf.c: Additional checks with invalid format strings.
+[merge r6081 r6095 r6108 from trunk]
+
+------------------------------------------------------------------------
+r6219 | thevenyp | 2009-05-13 17:41:45 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: Code cleaning.
+[merge r6098 r6099 r6100 from trunk]
+
+------------------------------------------------------------------------
+r6218 | thevenyp | 2009-05-13 17:31:34 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: Fix bug.
+[merge -c 6097 from trunk]
+
+------------------------------------------------------------------------
+r6217 | thevenyp | 2009-05-13 17:19:59 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: Improve documentation in Formatted Output Functions/Format String subsection.
+[merge r6080 r6095 r6135 r6138 from trunk]
+
+------------------------------------------------------------------------
+r6216 | thevenyp | 2009-05-13 17:10:03 +0000 (Wed, 13 May 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/dump.c
+   M /branches/2.4/get_d64.c
+   M /branches/2.4/get_str.c
+   M /branches/2.4/mpfr-impl.h
+   M /branches/2.4/out_str.c
+   M /branches/2.4/set_d.c
+   M /branches/2.4/strtofr.c
+   M /branches/2.4/swap.c
+   M /branches/2.4/tests/tests.c
+   M /branches/2.4/tests/tget_str.c
+   M /branches/2.4/tests/tout_str.c
+   M /branches/2.4/tests/toutimpl.c
+   M /branches/2.4/tests/tpow_all.c
+   M /branches/2.4/tests/trint.c
+   M /branches/2.4/tests/tset_str.c
+   M /branches/2.4/tests/tsin.c
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/tests/tstckintc.c
+   M /branches/2.4/tests/tstrtofr.c
+   M /branches/2.4/tests/tversion.c
+   M /branches/2.4/vasprintf.c
+
+<string.h> is not automatically included when compiling with --with-gmp-build option, so put '#include <string.h>' in mpfr-impl.h, remove it elsewhere.
+Other cleanup of header inclusion.
+[partial merge of r6189 and r6192 from trunk]
+
+------------------------------------------------------------------------
+r6215 | thevenyp | 2009-05-13 16:58:30 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/get_d64.c
+   M /branches/2.4/set_d64.c
+
+get_d64.c set_d64.c: Fix types.
+[merge -c 6190 from trunk]
+
+------------------------------------------------------------------------
+r6214 | thevenyp | 2009-05-13 16:54:35 +0000 (Wed, 13 May 2009) | 7 lines
+Changed paths:
+   M /branches/2.4/atan.c
+   M /branches/2.4/tests/tatan.c
+
+tests/tatan.c: added testcase for bug found by Christopher Creutzig
+               (atan2_different_prec). Check underflow of arctan(Inf) and
+               arctan(1) with reduced exponent range.
+atan.c: fixed bug when x is very near but differs from 1 atan.c: expand
+        exponent range when computing arctan(Inf) and arctan(+-1).
+[merge r6180 r6181 r6186 r6187 from trunk]
+
+------------------------------------------------------------------------
+r6213 | thevenyp | 2009-05-13 16:37:50 +0000 (Wed, 13 May 2009) | 7 lines
+Changed paths:
+   M /branches/2.4/tests/Makefile.am
+   M /branches/2.4/tests/tmul.c
+
+tests/Makefile.am tests/tmul.c:Fixed problem when the srcdir value contains a
+                  word that is #define'd by the C implementation (test
+                  failure) or a comma (worse, the build of the tests
+                  terminates with an error). This can happen only when objdir
+                  and srcdir are different directories.
+[merge -r 6173:6175 from trunk]
+
+------------------------------------------------------------------------
+r6212 | thevenyp | 2009-05-13 16:15:00 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/mpf2mpfr.h
+
+mpf2mpfr.h: fix typo
+[merge r6153 r6154 from trunk]
+
+------------------------------------------------------------------------
+r6209 | thevenyp | 2009-05-13 15:34:22 +0000 (Wed, 13 May 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.h
+
+mpfr.h: Add a warning comment (removed in r6199).
+
+------------------------------------------------------------------------
+r6208 | thevenyp | 2009-05-13 15:31:35 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/get_z_exp.c
+
+get_z_exp.c: updated comments.
+[merge -c 6148 from trunk]
+
+------------------------------------------------------------------------
+r6207 | thevenyp | 2009-05-13 15:27:51 +0000 (Wed, 13 May 2009) | 9 lines
+Changed paths:
+   M /branches/2.4/get_z.c
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/tests/tget_z.c
+
+mpfr.texi: completed documentation of mpfr_get_z_exp (was incomplete for 0).
+get_z.c: simplified the code, removed the FIXME, detect out-of-range precision
+         (such a detection could be missed if mpfr_exp_t > mpfr_prec_t), and
+         fixed title in comment.
+tget_z.c: added test case for 0 with emin > 0 (should give 100% coverage for
+          get_z.c) + added new test.
+
+[merge r6146 r6147 r6149 r6150 r6151 r6152 from trunk]
+
+------------------------------------------------------------------------
+r6206 | thevenyp | 2009-05-13 15:08:28 +0000 (Wed, 13 May 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/get_str.c
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/tests/tget_str.c
+
+mpfr.texi: fixed documentation of mpfr_get_str which was wrong
+tget_str.c: added test cases for odd base and tie breaking case
+get_str.c: fixed typos in comments
+[merge -c 6140 from trunk]
+
+------------------------------------------------------------------------
+r6205 | thevenyp | 2009-05-13 14:59:12 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/cos.c
+   M /branches/2.4/sin.c
+
+cos.c, sin.c: added MPFR_ASSERTN for huge expx.
+[merge -c 6134 from trunk]
+
+------------------------------------------------------------------------
+r6204 | thevenyp | 2009-05-13 14:52:15 +0000 (Wed, 13 May 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/get_ld.c
+   M /branches/2.4/tests/tset_ld.c
+
+get_ld.c: fixed bugs in the case HAVE_LDOUBLE_IEEE_EXT_LITTLE (one found
+by Steve Kargl, and another one concerning the mpfr_set_emax value).
+tests/tset_ld.c: Add test case for the bug.
+[merge r6101 r6124 6125 from trunk]
+
+------------------------------------------------------------------------
+r6203 | thevenyp | 2009-05-13 14:14:08 +0000 (Wed, 13 May 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/cmp2.c
+   M /branches/2.4/const_catalan.c
+   M /branches/2.4/tests/tcmp2.c
+
+cmp2.c: added comments
+tcmp2.c: added test to improve coverage to 100%
+const_catalan.c: decreased initial Ziv precision to get 100% coverage
+[merge r6068 r6069 from trunk]
+
+------------------------------------------------------------------------
+r6202 | thevenyp | 2009-05-13 14:07:25 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/atan.c
+
+atan.c: untabify
+[partial merge r6074 from trunk]
+
+------------------------------------------------------------------------
+r6201 | thevenyp | 2009-05-13 14:01:25 +0000 (Wed, 13 May 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/atan.c
+   M /branches/2.4/atan2.c
+   M /branches/2.4/tests/tatan.c
+
+atan.c: coverage should now be 100%
+atan2.c,tatan.c: reduced Ziv's initial precision and added test to have
+		 100% coverage of atan2.c
+[merge r6066 r6067 from trunk with changes (MPFR_RNDX -> GMP_RNDX)]
+
+------------------------------------------------------------------------
+r6200 | thevenyp | 2009-05-13 13:10:46 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/texceptions.c
+
+tests/texceptions.c: removed obsolete comments from r2427.
+[merge -c 6034 from trunk]
+
+------------------------------------------------------------------------
+r6199 | thevenyp | 2009-05-13 12:53:21 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/mpfr.h
+
+mpfr.h: added comments for rounding modes.
+[merge -c 6026 from trunk]
+
+------------------------------------------------------------------------
+r6198 | thevenyp | 2009-05-13 12:38:07 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/texp.c
+
+tests/texp.c: fixed corner case test.
+[merge r5960 r5961 r5962 and part of r5970 from trunk]
+
+------------------------------------------------------------------------
+r6197 | thevenyp | 2009-05-13 12:26:23 +0000 (Wed, 13 May 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tuneup.c
+
+tuneup.c: Fix typo, print gcc patchlevel, untabify.
+[merge r5943, part of r5975, r5993 from trunk]
+
+------------------------------------------------------------------------
+r6167 | vlefevre | 2009-04-10 08:29:00 +0000 (Fri, 10 Apr 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: update concerning intmax_t after the change in r6165.
+------------------------------------------------------------------------
+r6165 | vlefevre | 2009-04-10 08:22:15 +0000 (Fri, 10 Apr 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.h
+
+mpfr.h: for intmax_t, also test _STDINT_H and _STDINT_H_.
+------------------------------------------------------------------------
+r6163 | vlefevre | 2009-04-10 08:10:19 +0000 (Fri, 10 Apr 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated the month.
+------------------------------------------------------------------------
+r6161 | vlefevre | 2009-04-10 08:07:15 +0000 (Fri, 10 Apr 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: improvement concerning the use of intmax_t and uintmax_t.
+------------------------------------------------------------------------
+r6160 | vlefevre | 2009-04-10 07:49:08 +0000 (Fri, 10 Apr 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/mpfr.h
+
+mpfr.h: for the intmax_t detection, also test INTMAX_MAX / UINTMAX_MAX
+(this may be useful for users of C++ compilers, if they have defined
+__STDC_LIMIT_MACROS but not __STDC_CONSTANT_MACROS).
+------------------------------------------------------------------------
+r6133 | vlefevre | 2009-03-21 00:53:16 +0000 (Sat, 21 Mar 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated the month.
+------------------------------------------------------------------------
+r6131 | vlefevre | 2009-03-21 00:49:25 +0000 (Sat, 21 Mar 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/tests/tstrtofr.c
+
+mpfr.texi: corrected mpfr_strtofr documentation ("NAN()" is accepted).
+tests/tstrtofr.c: added a test for "NAN()".
+Note: the code follows the ISO C99 standard for strtod, as explained
+in the mpfr_strtofr documentation, so that the code was correct.
+------------------------------------------------------------------------
+r6129 | vlefevre | 2009-03-19 02:10:05 +0000 (Thu, 19 Mar 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfrlint
+
+mpfrlint: added some tests for acinclude.m4 and configure.in (sh).
+------------------------------------------------------------------------
+r6127 | vlefevre | 2009-03-19 02:02:19 +0000 (Thu, 19 Mar 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/configure.in
+
+Applied patch from Ralf Wildenhues.
+  * configure.in: Avoid unportable (and unneeded) shell quoting.
+  * acinclude.m4: Avoid non-POSIX shell construct.
+------------------------------------------------------------------------
+r6093 | vlefevre | 2009-03-12 17:47:40 +0000 (Thu, 12 Mar 2009) | 6 lines
+Changed paths:
+   M /branches/2.4/zeta_ui.c
+
+zeta_ui.c: a shift count (to detect whether n*n is representable in
+an unsigned long) was incorrect. Fixed, assuming no padding bits in
+unsigned long. This problem was detected by a warning on gcc40 with
+CFLAGS="-mpowerpc64 -mcpu=970 -O2". [merge -r6089:6091 from trunk]
+Note: in practice, the consequence of this bug can be a performance
+loss; incorrect result or whatever is rather unlikely.
+------------------------------------------------------------------------
+r6087 | vlefevre | 2009-03-10 01:10:18 +0000 (Tue, 10 Mar 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tprintf.c
+
+tests/tprintf.c: added missing cast to void * for %p.
+------------------------------------------------------------------------
+r6085 | vlefevre | 2009-03-09 15:50:43 +0000 (Mon, 09 Mar 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tfprintf.c
+
+tests/tfprintf.c: added missing cast to void * for %p.
+------------------------------------------------------------------------
+r6083 | vlefevre | 2009-03-09 15:38:04 +0000 (Mon, 09 Mar 2009) | 1 line
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: fixed bug in CONSUME_VA_ARG for case MP_LIMB_ARG (%Mu).
+------------------------------------------------------------------------
+r6072 | vlefevre | 2009-03-05 23:55:01 +0000 (Thu, 05 Mar 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tadd.c
+
+tests/tadd.c: completed the code coverage (case bk == 0 in add1.c).
+[merged changeset 6071 from the trunk - note concerning the license:
+I'm the author of the patch, which was in LGPL v2+]
+------------------------------------------------------------------------
+r6063 | vlefevre | 2009-03-04 13:25:52 +0000 (Wed, 04 Mar 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+Updated NEWS file (bug fixes).
+------------------------------------------------------------------------
+r6060 | vlefevre | 2009-03-04 13:01:19 +0000 (Wed, 04 Mar 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr-gmp.c
+
+mpfr-gmp.c (mpfr_assert_fail): output "MPFR" too in assertion failure
+messages.
+------------------------------------------------------------------------
+r6044 | vlefevre | 2009-02-27 16:44:03 +0000 (Fri, 27 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/rem1.c
+
+rem1.c: untabified.
+------------------------------------------------------------------------
+r6042 | thevenyp | 2009-02-27 15:16:41 +0000 (Fri, 27 Feb 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/rem1.c
+   M /branches/2.4/tests/tremquo.c
+
+rem1.c: fixed bug found in adding tests for round away
+[merge -c6036 from trunk]
+
+------------------------------------------------------------------------
+r6023 | vlefevre | 2009-02-26 01:41:37 +0000 (Thu, 26 Feb 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/m4
+
+Added svn:ignore property on the m4 directory (these .m4 files are
+generated automatically).
+------------------------------------------------------------------------
+r6020 | vlefevre | 2009-02-26 01:32:18 +0000 (Thu, 26 Feb 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/Makefile.am
+
+Makefile.am: In a "make dist", if the VERSION file does not contain
+"-dev", check that libtool -version-info value is up-to-date (this
+is a heuristic only). [Merged -r6017:6019 from trunk]
+------------------------------------------------------------------------
+r6017 | vlefevre | 2009-02-26 00:37:48 +0000 (Thu, 26 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/README.dev
+
+README.dev: update from the trunk.
+------------------------------------------------------------------------
+r6013 | vlefevre | 2009-02-25 22:31:24 +0000 (Wed, 25 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/INSTALL
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Updated version to 2.4.2-dev.
+------------------------------------------------------------------------
+r6011 | vlefevre | 2009-02-25 22:20:47 +0000 (Wed, 25 Feb 2009) | 1 line
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Updated version to 2.4.1.
+------------------------------------------------------------------------
+r6009 | thevenyp | 2009-02-25 17:35:56 +0000 (Wed, 25 Feb 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog: ChangeLog update (with LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v).
+
+------------------------------------------------------------------------
 r6008 | thevenyp | 2009-02-25 17:30:14 +0000 (Wed, 25 Feb 2009) | 2 lines
 Changed paths:
    M /branches/2.4/tests/tsprintf.c
