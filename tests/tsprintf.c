@@ -450,6 +450,10 @@ decimal (void)
   check_sprintf ("0.10",  "%#.2Rg", x);
   check_sprintf ("0.099", "%#.2RZg", x);
 
+  /* assertion failure in r6320 */
+  mpfr_set_str (x, "-9.996", 10, GMP_RNDN);
+  check_sprintf ("-10.0", "%.1Rf", x);
+
   mpfr_clears (x, z, (mpfr_ptr) 0);
   return 0;
 }
