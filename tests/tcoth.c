@@ -60,19 +60,19 @@ check_specials (void)
       exit (1);
     }
 
-  /* cot(+/-0) = +/-0 */
+  /* coth(+/-0) = +/-Inf */
   mpfr_set_ui (x, 0, GMP_RNDN);
   mpfr_coth (y, x, GMP_RNDN);
-  if (! (mpfr_zero_p (y) && MPFR_SIGN (y) > 0))
+  if (! (mpfr_inf_p (y) && MPFR_SIGN (y) > 0))
     {
-      printf ("Error: coth(+0) != +0\n");
+      printf ("Error: coth(+0) != +Inf\n");
       exit (1);
     }
   mpfr_neg (x, x, GMP_RNDN);
   mpfr_coth (y, x, GMP_RNDN);
-  if (! (mpfr_zero_p (y) && MPFR_SIGN (y) < 0))
+  if (! (mpfr_inf_p (y) && MPFR_SIGN (y) < 0))
     {
-      printf ("Error: coth(-0) != -0\n");
+      printf ("Error: coth(-0) != -Inf\n");
       exit (1);
     }
 
