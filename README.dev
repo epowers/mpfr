@@ -173,6 +173,10 @@ To make a release (for the MPFR team):
      Try different compilers, e.g., icc, opencc (x86_64 machines),
      tcc <http://bellard.org/tcc/>.
 
+     On 64-bit PowerPC, test against GMP built with the different ABI's:
+     32, mode32 and mode64 (in particular mode32, where long's have
+     32 bits and limbs have 64 bits [long long]).
+
      Test with both "make check" and the worst cases.
 
      Check that there are no abnormal regressions in the timings (both
@@ -296,6 +300,11 @@ flash memory. Don't use "new", which is reserved in C++.
 
 Avoid variable names "l", "I" and "O", which look like "1" and "0" with
 some fonts.
+
+   =====================================================================
+
+For identifiers defined in MPFR, do not use the GMP namespaces
+(gmp_..., GMP_...).
 
    =====================================================================
 
@@ -445,7 +454,7 @@ after the format string.
 +++ MPFR_LOG_BEGIN(x)
  Add this macro at the beginning of a function.
 Example:
- int dodo (mpfr_t x, mpfr_t op, int cnt, mp_rnd_t rnd) {
+ int dodo (mpfr_t x, mpfr_t op, int cnt, mpfr_rnd_t rnd) {
   [decl]
   MPFR_LOG_BEGIN (("op[%#R]=%R rnd=%s", op, op, RND2STR(rnd)));
 
@@ -497,7 +506,7 @@ could use theses macros:
 If you plan to add a new function, you could follow this schema:
 
 int
-mpfr_toto (mpfr_ptr rop, mpfr_srcptr op, mp_rnd_t rnd)
+mpfr_toto (mpfr_ptr rop, mpfr_srcptr op, mpfr_rnd_t rnd)
 {
   [Declare all used variables]
   int inexact;
@@ -556,6 +565,9 @@ Make sure that Ziv loops cannot increase the precision forever because of
 internal exception. Otherwise one gets either a segmentation fault (with
 limited stack size) or an assertion failure (with unlimited stack size,
 e.g. with "make check").
+
+Do not use code with side effects inside MPFR_ASSERTD or MPFR_ASSERTN,
+as assertion checking can be disabled.
 
 Exception handling (overflow/underflow in particular):
   * Warning: To detect exceptions and/or possible error loss due to
