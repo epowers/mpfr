@@ -2,7 +2,11 @@ AUTOMAKE_OPTIONS = gnu ansi2knr
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = tests
-EXTRA_DIST = BUGS FAQ.html PATCHES VERSION get_patches.sh round_raw_generic.c gen_inverse.h jyn_asympt.c
+
+nobase_dist_doc_DATA = AUTHORS BUGS COPYING COPYING.LIB FAQ.html NEWS TODO \
+  examples/ReadMe examples/divworst.c examples/rndo-add.c examples/sample.c
+
+EXTRA_DIST = PATCHES VERSION get_patches.sh round_raw_generic.c gen_inverse.h jyn_asympt.c
 
 include_HEADERS = mpfr.h mpf2mpfr.h
 
