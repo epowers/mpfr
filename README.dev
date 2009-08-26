@@ -90,9 +90,8 @@ To make a release (for the MPFR team):
 
   *** Please read this section entirely before making any release. ***
 
-  0) Make sure that the mpfr-longlong.h file (from GMP's longlong.h) and
-     the libtool-related files (config.guess, etc.) are up-to-date. An
-     "autoreconf -f -i" may be necessary.
+  0) Make sure that the libtool-related files (config.guess, etc.) are
+     up-to-date. An "autoreconf -f -i" may be necessary.
 
   1) Generate the tuning parameters on different architectures
      and put them in mparam_h.in. For each architecture:
