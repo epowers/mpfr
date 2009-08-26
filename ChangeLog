@@ -1,4 +1,197 @@
 ------------------------------------------------------------------------
+r6387 | vlefevre | 2009-08-26 09:49:08 +0000 (Wed, 26 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/Makefile.am
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Updated version to 2.4.2-rc1. Updated libmpfr_la_LDFLAGS in Makefile.am.
+------------------------------------------------------------------------
+r6386 | vlefevre | 2009-08-26 09:43:45 +0000 (Wed, 26 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: update.
+------------------------------------------------------------------------
+r6385 | vlefevre | 2009-08-26 09:41:47 +0000 (Wed, 26 Aug 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/README.dev
+
+README.dev: removed the part about mpfr-longlong.h, which can no longer
+be updated from GMP in the 2.4 branch due to the licence change in GMP.
+------------------------------------------------------------------------
+r6384 | vlefevre | 2009-08-26 09:39:05 +0000 (Wed, 26 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/README.dev
+
+README.dev: update from the trunk.
+------------------------------------------------------------------------
+r6383 | vlefevre | 2009-08-26 09:36:50 +0000 (Wed, 26 Aug 2009) | 8 lines
+Changed paths:
+   M /branches/2.4/Makefile.am
+   M /branches/2.4/README
+   A /branches/2.4/examples (from /trunk/examples:6368)
+   M /branches/2.4/examples/ReadMe
+   M /branches/2.4/examples/divworst.c
+   M /branches/2.4/examples/rndo-add.c
+   M /branches/2.4/examples/sample.c
+   M /branches/2.4/mpfr.texi
+
+Install some documentation files and examples (merged changesets
+6362 and 6368 from the trunk, with the necessary updates for the
+2.4 branch). Details:
+  * Added "examples" directory with a ReadMe file and 3 examples
+    (keeping the same licence as the library).
+  * Makefile.am: added nobase_dist_doc_DATA.
+  * README: added "examples/".
+  * mpfr.texi: update concerning install directories.
+------------------------------------------------------------------------
+r6382 | vlefevre | 2009-08-26 08:51:41 +0000 (Wed, 26 Aug 2009) | 6 lines
+Changed paths:
+   M /branches/2.4/set_ld.c
+
+set_ld.c: replaced a struct by a union. The struct was triggering the
+following warning with GCC 4.4:
+  dereferencing type-punned pointer will break strict-aliasing rules
+(possibly due to possible memory alignment problems). The old code
+looked strange anyway and unions are exactly for such kind of things.
+[merged changeset 6381 from the trunk]
+------------------------------------------------------------------------
+r6379 | vlefevre | 2009-08-25 12:32:27 +0000 (Tue, 25 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: update.
+------------------------------------------------------------------------
+r6377 | vlefevre | 2009-08-25 12:19:58 +0000 (Tue, 25 Aug 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tcmp_ld.c
+
+tcmp_ld.c: use "long double" constants.
+Note: this might solve the tcmp_ld failure reported on
+http://www.linuxquestions.org/questions/linux-from-scratch-13/mpfr-2.4.1-check-failures-in-lfs-6.5-rc2-746538/
+(not tested).
+------------------------------------------------------------------------
+r6371 | vlefevre | 2009-08-21 21:56:04 +0000 (Fri, 21 Aug 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: various changes about the IEEE 754-2008 standard, as done
+in r6030.
+------------------------------------------------------------------------
+r6370 | vlefevre | 2009-08-21 21:43:48 +0000 (Fri, 21 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: the sign bit of a NaN is unspecified.
+------------------------------------------------------------------------
+r6361 | vlefevre | 2009-08-05 11:40:22 +0000 (Wed, 05 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated section "Installing MPFR".
+------------------------------------------------------------------------
+r6359 | vlefevre | 2009-08-05 10:39:23 +0000 (Wed, 05 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: corrected a spelling mistake.
+------------------------------------------------------------------------
+r6357 | vlefevre | 2009-08-05 10:25:24 +0000 (Wed, 05 Aug 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/Makefile.am
+   M /branches/2.4/configure.in
+
+Since GNU Automake 1.11 is available on too few platforms, removed its
+requirement (reverted to 1.10 requirement: 1.10.1 was needed only for
+dist-lzma, which has been removed). Instead, added hardcoded dist-xz
+support (tested with both Automake 1.10.2 and Automake 1.11).
+------------------------------------------------------------------------
+r6355 | vlefevre | 2009-08-04 00:55:34 +0000 (Tue, 04 Aug 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/configure.in
+
+configure.in: replaced dist-lzma by dist-xz (the xz format is the
+successor of the lzma format); as a consequence, automake 1.11 is
+needed.
+------------------------------------------------------------------------
+r6343 | vlefevre | 2009-07-20 20:58:15 +0000 (Mon, 20 Jul 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: update.
+------------------------------------------------------------------------
+r6342 | thevenyp | 2009-07-20 15:32:22 +0000 (Mon, 20 Jul 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: Add the new mpfr_printf behavior for empty precision field with "%Rf".
+
+------------------------------------------------------------------------
+r6341 | thevenyp | 2009-07-20 15:21:02 +0000 (Mon, 20 Jul 2009) | 5 lines
+Changed paths:
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+   M /branches/2.4/tests/tsprintf.c
+   M /branches/2.4/vasprintf.c
+
+mpfr.texi: Restate subsection Formatted Output Functions/Format String.
+vasprintf.c: Change behavior with %Rf and an empty precision field. The default precision is now 6 with %Rf and %Rg.
+tests/tprintf.c tests/tfprintf.c tests/tsprintf.c: Change tests with empty precision field and %Rf.
+[merge r6256 r6257 r6340 from trunk]
+
+------------------------------------------------------------------------
+r6338 | vlefevre | 2009-07-17 20:53:06 +0000 (Fri, 17 Jul 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/coth.c
+   M /branches/2.4/tests/tcoth.c
+
+[coth.c, tcoth.c] fixed coth(+/0) which was wrong (reported by
+Christopher Creutzig) [merged changeset 6334 from trunk]
+------------------------------------------------------------------------
+r6331 | thevenyp | 2009-07-08 13:58:53 +0000 (Wed, 08 Jul 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: Fix bug in precision 0 with format %.0Rf (0.5 rounds to 0). Fix bug with %Rf, non-zero precision and a value rounded up to the next power of ten.
+[merge r6325 r6328 r6329 r6330 from trunk]
+
+------------------------------------------------------------------------
+r6327 | vlefevre | 2009-07-08 10:43:38 +0000 (Wed, 08 Jul 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tsprintf.c: added tests of some halfway cases.
+------------------------------------------------------------------------
+r6321 | vlefevre | 2009-07-08 07:37:27 +0000 (Wed, 08 Jul 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tsprintf.c: added a test that triggers an assertion failure.
+------------------------------------------------------------------------
+r6318 | vlefevre | 2009-07-08 07:15:04 +0000 (Wed, 08 Jul 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tsprintf.c: fixed a test and added more tests for %.0Rf with the even
+rounding rule (shows a bug added in the latest corrections).
+------------------------------------------------------------------------
+r6317 | vlefevre | 2009-07-07 08:21:19 +0000 (Tue, 07 Jul 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tsprintf.c: added test on emax (for %Ra and %Rb).
+------------------------------------------------------------------------
+r6312 | vlefevre | 2009-07-06 12:45:55 +0000 (Mon, 06 Jul 2009) | 1 line
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6309 | thevenyp | 2009-07-06 11:45:46 +0000 (Mon, 06 Jul 2009) | 3 lines
 Changed paths:
    M /branches/2.4/tests/tfprintf.c
@@ -77,8 +270,8 @@ Changed paths:
    M /branches/2.4/tests/tsprintf.c
    M /branches/2.4/vasprintf.c
 
-vasprintf.c: Fix bug with %%, %.0Ra, %.0Rg and %.0Rf when the value to display is rounded up to the next power of the base.
-tests/tfprintf.c tests/tsprintf.c tests/tprintf.c: Tests for %%, and fixed behavior of %Ra, %Rf and %Rg.
+vasprintf.c: Fix bug with %%, %.0Ra, %.0Rb (now accepted as precision 0), %.0Rg and %.0Rf when the value to display is rounded up to the next power of the base.
+tests/tfprintf.c tests/tsprintf.c tests/tprintf.c: Tests for %%, and fixed behavior of %Ra, %Rb, %Rf and %Rg.
 [merge r6258 r6265 r6278 r6280 from trunk]
 
 ------------------------------------------------------------------------
