@@ -603,7 +603,7 @@ test4rm (int (*fct) (FLIST), mpfr_srcptr x, mpfr_ptr y, mpfr_ptr z,
    x is the input (hexadecimal format)
    y is the expected output (hexadecimal format) for foo(x) with rounding rnd
 
-   If rnd is Z, y is the expected output in round-towards-zero, and the
+   If rnd is Z, y is the expected output in round-toward-zero, and the
    three directed rounding modes are tested, then the round-to-nearest
    mode is tested in precision yprec-1. This is useful for worst cases,
    where yprec is the minimum value such that one has a worst case in a
