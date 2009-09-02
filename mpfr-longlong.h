@@ -70,7 +70,7 @@ MA 02110-1301, USA. */
 
    4) sdiv_qrnnd(quotient, remainder, high_numerator, low_numerator,
    denominator).  Like udiv_qrnnd but the numbers are signed.  The quotient
-   is rounded towards 0.
+   is rounded toward 0.
 
    5) count_leading_zeros(count, x) counts the number of zero-bits from the
    msb to the first non-zero bit in the UWtype X.  This is the number of

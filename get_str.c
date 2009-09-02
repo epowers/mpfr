@@ -188,7 +188,7 @@ mpfr_get_str_aux (char *const str, mp_exp_t *const exp, mp_limb_t *const r,
             }
 
           /* now rnd1 is either GMP_RNDD or GMP_RNDZ -> truncate
-                             or GMP_RDNU -> round towards infinity */
+                             or GMP_RDNU -> round toward infinity */
 
           /* round away from zero */
           if (rnd1 == GMP_RNDU)

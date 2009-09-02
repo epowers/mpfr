@@ -864,7 +864,7 @@ bad_cases (int (*fct)(FLIST), int (*inv)(FLIST), char *name,
           mpfr_out_str (stdout, 16, 0, y, GMP_RNDN);
           printf ("\n");
         }
-      /* Note: y is now the expected result rounded towards zero. */
+      /* Note: y is now the expected result rounded toward zero. */
       test4rm (fct, x, y, z, GMP_RNDZ, 0, name);
     next_i:
       /* In case the exponent range has been changed by
