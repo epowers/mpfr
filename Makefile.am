@@ -57,7 +57,7 @@ $(srcdir)/get_patches.c: PATCHES get_patches.sh
 EXTRA_PROGRAMS = tuneup
 
 tuneup_SOURCES = tuneup.c
-tuneup_LDADD = -lspeed $(top_builddir)/libmpfr.la
+tuneup_LDADD = -lspeed libmpfr.la
 tuneup_LDFLAGS = -static
 
 tune:
