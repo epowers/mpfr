@@ -293,6 +293,50 @@ test20071214 (void)
   mpfr_clear (b);
 }
 
+/* Ported testcase from the trunk (r6507) without checking the inexact
+   value because of its new meaning in the trunk, but it doesn't seem
+   to show any bug in the 2.4 branch. */
+static void
+bug20091008 (void)
+{
+  mpfr_t x, y, z, yref, zref;
+  mp_prec_t p = 1000;
+  mp_rnd_t r = GMP_RNDN;
+
+  mpfr_init2 (x, p);
+  mpfr_init2 (y, p);
+  mpfr_init2 (z, p);
+  mpfr_init2 (yref, p);
+  mpfr_init2 (zref, p);
+
+  mpfr_set_str (x, "c.91813724e28ef6a711d33e6505984699daef7fe93636c1ed5d0168bc96989cc6802f7f9e405c902ec62fb90cd39c9d21084c8ad8b5af4c4aa87bf402e2e4a78e6fe1ffeb6dbbbdbbc2983c196c518966ccc1e094ed39ee77984ef2428069d65de37928e75247edbe7007245e682616b5ebbf05f2fdefc74ad192024f10", 16, GMP_RNDN);
+  mpfr_sin_cos (yref, zref, x, r);
+
+  mpfr_sin (y, x, r);
+  mpfr_cos (z, x, r);
+
+  if (mpfr_cmp (y, yref))
+    {
+      printf ("mpfr_sin_cos and mpfr_sin disagree (bug20091008)\n");
+      printf ("yref="); mpfr_dump (yref);
+      printf ("y="); mpfr_dump (y);
+      exit (1);
+    }
+  if (mpfr_cmp (z, zref))
+    {
+      printf ("mpfr_sin_cos and mpfr_cos disagree (bug20091008)\n");
+      printf ("zref="); mpfr_dump (zref);
+      printf ("z="); mpfr_dump (z);
+      exit (1);
+    }
+
+  mpfr_clear (x);
+  mpfr_clear (y);
+  mpfr_clear (z);
+  mpfr_clear (yref);
+  mpfr_clear (zref);
+}
+
 /* tsin_cos prec [N] performs N tests with prec bits */
 int
 main(int argc, char *argv[])
@@ -303,6 +347,8 @@ main(int argc, char *argv[])
     {
       large_test (atoi (argv[1]), (argc > 2) ? atoi (argv[2]) : 1);
     }
+
+  bug20091008 ();
 
   check_nans ();
 
