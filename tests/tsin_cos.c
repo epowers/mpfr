@@ -346,8 +346,8 @@ consistency (void)
 
   for (i = 0; i <= 10000; i++)
     {
-      mpfr_init2 (x, MPFR_PREC_MIN + (randlimb () % 80));
-      mpfr_inits2 (MPFR_PREC_MIN + (randlimb () % 80), s1, s2, c1, c2,
+      mpfr_init2 (x, MPFR_PREC_MIN + (randlimb () % 40));
+      mpfr_inits2 (MPFR_PREC_MIN + (randlimb () % 40), s1, s2, c1, c2,
                    (mpfr_ptr) 0);
       tests_default_random (x, 256, -5, 50);
       rnd = RND_RAND ();
