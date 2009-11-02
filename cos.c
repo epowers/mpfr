@@ -186,6 +186,8 @@ mpfr_cos (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
           mpfr_const_pi (c, GMP_RNDN);
           mpfr_mul_2ui (c, c, 1, GMP_RNDN); /* 2Pi */
           mpfr_remainder (xr, x, c, GMP_RNDN);
+          if (MPFR_IS_ZERO(xr))
+            goto ziv_next;
           /* now |xr| <= 4, thus r <= 16 below */
           mpfr_mul (r, xr, xr, GMP_RNDU); /* err <= 1 ulp */
         }
