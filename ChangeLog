@@ -1,4 +1,308 @@
 ------------------------------------------------------------------------
+r6547 | vlefevre | 2009-11-20 13:57:05 +0000 (Fri, 20 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Updated version to 2.4.2-rc2.
+------------------------------------------------------------------------
+r6546 | vlefevre | 2009-11-20 13:55:15 +0000 (Fri, 20 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: update.
+------------------------------------------------------------------------
+r6544 | vlefevre | 2009-11-20 12:46:43 +0000 (Fri, 20 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+
+Changeset r6160 broke Solaris builds. Fixed that by no longer checking
+INTMAX_MAX and UINTMAX_MAX to detect use of <stdint.h> / <inttypes.h>.
+------------------------------------------------------------------------
+r6542 | vlefevre | 2009-11-10 14:54:26 +0000 (Tue, 10 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tcos.c
+
+tests/tcos.c: added testcase associated with the bug fixed in r6536.
+[Ported testcase r6534 from the trunk.]
+------------------------------------------------------------------------
+r6541 | vlefevre | 2009-11-09 01:44:27 +0000 (Mon, 09 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/cache.c
+   M /branches/2.4/tests/tconst_pi.c
+
+Fixed bug in cache.c with directed rounding, and added corresponding
+testcase in tests/tconst_pi.c [Ported changeset r6527 from the trunk]
+------------------------------------------------------------------------
+r6540 | vlefevre | 2009-11-09 01:31:08 +0000 (Mon, 09 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/cache.c
+   M /branches/2.4/mpfr-impl.h
+
+[cache.c, mpfr-impl.h] Removed mpfr_init_cache (unused and undocumented
+function). [Patches r6070, r6074 and r6077 merged from the trunk.]
+------------------------------------------------------------------------
+r6539 | vlefevre | 2009-11-09 01:17:50 +0000 (Mon, 09 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/lngamma.c
+
+[lngamma.c] Fixed typo, added comments about argument reduction, and
+replaced code using doubles. [Patch r6520 ported from the trunk.]
+------------------------------------------------------------------------
+r6538 | vlefevre | 2009-11-09 01:01:32 +0000 (Mon, 09 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/li2.c
+   M /branches/2.4/tests/tli2.c
+
+Fixed bug in mpfr_li2 when x is near 0 and added testcase.
+[Patch r6512 ported from the trunk.]
+------------------------------------------------------------------------
+r6536 | vlefevre | 2009-11-02 01:33:07 +0000 (Mon, 02 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/cos.c
+
+cos.c: fixed case where reduced argument is zero.
+[merged r6535 from trunk]
+------------------------------------------------------------------------
+r6532 | vlefevre | 2009-10-30 15:01:40 +0000 (Fri, 30 Oct 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/tests/tsin_cos.c
+
+tests/tsin_cos.c: because I'm not confident in the current sin_cos.c
+code, I've reduced the precision again in the consistency test (so that
+it is more likely to find a bad case). This yields an assertion failure
+in get_exp.c (Linux/x86_64). Hardcoded testcase will come later.
+------------------------------------------------------------------------
+r6531 | vlefevre | 2009-10-30 14:54:44 +0000 (Fri, 30 Oct 2009) | 1 line
+Changed paths:
+   M /branches/2.4/sin_cos.c
+
+sin_cos.c: ported the patch r6507 from the trunk.
+------------------------------------------------------------------------
+r6530 | vlefevre | 2009-10-30 14:50:45 +0000 (Fri, 30 Oct 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tsin_cos.c
+
+tests/tsin_cos.c: modified bug20091008 so that the failure occurs
+(in the 2.4 branch).
+------------------------------------------------------------------------
+r6529 | vlefevre | 2009-10-30 14:44:38 +0000 (Fri, 30 Oct 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tsin_cos.c
+
+tests/tsin_cos.c: in the consistency test, use smaller precisions
+to make the bug r6507 more likely to appear, and indeed it appears
+under Linux/x86_64 with the default seed.
+------------------------------------------------------------------------
+r6528 | vlefevre | 2009-10-30 14:09:20 +0000 (Fri, 30 Oct 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsin_cos.c
+
+tests/tsin_cos.c: added consistency check.
+------------------------------------------------------------------------
+r6508 | vlefevre | 2009-10-09 07:16:43 +0000 (Fri, 09 Oct 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/tests/tsin_cos.c
+
+tests/tsin_cos.c: ported testcase bug20091008 from the trunk (r6507)
+without checking the inexact value because of its new meaning in the
+trunk, but it doesn't seem to show any bug in the 2.4 branch.
+------------------------------------------------------------------------
+r6500 | vlefevre | 2009-09-29 14:55:23 +0000 (Tue, 29 Sep 2009) | 4 lines
+Changed paths:
+   M /branches/2.4/atan.c
+
+atan.c: replaced the test oldn0 < 3*n0+1 by oldn0 < 3 * (n0 + 1) like
+in the trunk (r6483). Since the expression 3 * (n0 + 1) is used later,
+this makes the code more readable; but as oldn0 is a multiple of 3,
+both tests are equivalent (and equivalent to oldn0 <= 3*n0).
+------------------------------------------------------------------------
+r6499 | vlefevre | 2009-09-29 14:44:29 +0000 (Tue, 29 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/FAQ.html
+
+FAQ update.
+------------------------------------------------------------------------
+r6491 | vlefevre | 2009-09-25 11:06:38 +0000 (Fri, 25 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/Makefile.am
+
+tests/Makefile.am: added information about LOADLIBES.
+------------------------------------------------------------------------
+r6481 | vlefevre | 2009-09-20 23:32:06 +0000 (Sun, 20 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfrlint
+
+mpfrlint: check that lines aren't too long.
+------------------------------------------------------------------------
+r6479 | vlefevre | 2009-09-20 19:07:20 +0000 (Sun, 20 Sep 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/Makefile.am
+
+Makefile.am: line-wrap libmpfr_la_SOURCES (M-q with Emacs) for
+compatibility with some vendor grep.
+------------------------------------------------------------------------
+r6477 | vlefevre | 2009-09-20 19:02:29 +0000 (Sun, 20 Sep 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/Makefile.am
+   M /branches/2.4/tests/Makefile.am
+
+Makefile.am, tests/Makefile.am: patch from Ralf Wildenhues (backported).
+http://lists.gnu.org/archive/html/bug-automake/2009-09/msg00033.html
+------------------------------------------------------------------------
+r6472 | vlefevre | 2009-09-18 14:52:05 +0000 (Fri, 18 Sep 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/frac.c
+   M /branches/2.4/tests/tfrac.c
+
+frac.c, tests/tfrac.c: fixed underflow case in mpfr_frac and added
+testcase. [Bug fixed in r6471 in the trunk.]
+------------------------------------------------------------------------
+r6468 | vlefevre | 2009-09-18 13:54:38 +0000 (Fri, 18 Sep 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/frac.c
+   M /branches/2.4/tests/tfrac.c
+
+[frac.c] Patch r6457 was incorrect: the problem with the non-significant
+bits had to be dealt with only in the case t = r. This is now fixed
+(corresponding changesets in trunk: 6458, 6460, 6464, 6467).
+------------------------------------------------------------------------
+r6457 | vlefevre | 2009-09-18 11:36:15 +0000 (Fri, 18 Sep 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/frac.c
+   M /branches/2.4/tests/tfrac.c
+
+frac.c, tests/tfrac.c: fixed bug in mpfr_frac (the non-significant bits
+in low limb were not cleared) and added testcase (this corresponds to
+changesets 6453 to 6456 in trunk).
+------------------------------------------------------------------------
+r6452 | vlefevre | 2009-09-18 10:39:02 +0000 (Fri, 18 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tmodf.c
+
+tests/tmodf.c: typo in error message.
+------------------------------------------------------------------------
+r6438 | vlefevre | 2009-09-15 13:15:48 +0000 (Tue, 15 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfrlint
+
+mpfrlint: bug fix.
+------------------------------------------------------------------------
+r6436 | vlefevre | 2009-09-15 13:13:34 +0000 (Tue, 15 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated the month.
+------------------------------------------------------------------------
+r6434 | vlefevre | 2009-09-15 13:12:45 +0000 (Tue, 15 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfrlint
+
+mpfrlint: execute svn in C locale.
+------------------------------------------------------------------------
+r6432 | vlefevre | 2009-09-15 13:11:08 +0000 (Tue, 15 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfrlint
+
+mpfrlint: check mpfr.texi's UPDATED-MONTH.
+------------------------------------------------------------------------
+r6430 | vlefevre | 2009-09-15 12:41:52 +0000 (Tue, 15 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Switched version back to 2.4.2-dev.
+------------------------------------------------------------------------
+r6429 | vlefevre | 2009-09-15 12:27:04 +0000 (Tue, 15 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/mpfr.texi
+
+mpfr.texi: updated mpfr_sum description from the trunk.
+------------------------------------------------------------------------
+r6422 | vlefevre | 2009-09-14 21:32:40 +0000 (Mon, 14 Sep 2009) | 6 lines
+Changed paths:
+   M /branches/2.4/get_ld.c
+   M /branches/2.4/tests/tget_ld_2exp.c
+
+get_ld.c, tests/tget_ld_2exp.c: backported patch r6418 fixing bug
+reported by Nelson Beebe:
+  http://websympa.loria.fr/wwsympa/arc/mpfr/2009-05/msg00061.html
+  http://article.gmane.org/gmane.comp.lib.mpfr.general/119
+Note: the test also works on platforms where 1e-16383 is not
+representable as a long double (one should have d = e = 0).
+------------------------------------------------------------------------
+r6420 | vlefevre | 2009-09-14 16:20:45 +0000 (Mon, 14 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/iszero.c
+
+iszero.c: corrected a comment.
+------------------------------------------------------------------------
+r6416 | vlefevre | 2009-09-11 23:28:46 +0000 (Fri, 11 Sep 2009) | 6 lines
+Changed paths:
+   M /branches/2.4/vasprintf.c
+
+vasprintf.c: fixed problem reported on
+  http://websympa.loria.fr/wwsympa/arc/mpfr/2009-09/msg00012.html
+  http://article.gmane.org/gmane.comp.lib.mpfr.general/409
+for mingw32, which defines wint_t as an unsigned short (though
+this is here forbidden by the ISO C99 standard).
+[changeset 6415 from the trunk]
+------------------------------------------------------------------------
+r6406 | vlefevre | 2009-09-02 23:00:55 +0000 (Wed, 02 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/atan2.c
+   M /branches/2.4/div.c
+   M /branches/2.4/exp2.c
+   M /branches/2.4/gen_inverse.h
+   M /branches/2.4/get_str.c
+   M /branches/2.4/mpfr-impl.h
+   M /branches/2.4/mpfr-longlong.h
+   M /branches/2.4/mpn_exp.c
+   M /branches/2.4/pow.c
+   M /branches/2.4/pow_z.c
+   M /branches/2.4/rec_sqrt.c
+   M /branches/2.4/rint.c
+   M /branches/2.4/round_near_x.c
+   M /branches/2.4/strtofr.c
+   M /branches/2.4/sub.c
+   M /branches/2.4/sub1.c
+   M /branches/2.4/tests/tests.c
+   M /branches/2.4/tests/texp.c
+   M /branches/2.4/tests/tli2.c
+
+towards -> toward (consistency).
+------------------------------------------------------------------------
+r6405 | vlefevre | 2009-09-02 22:49:53 +0000 (Wed, 02 Sep 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tests.c
+
+tests/tests.c: typo in comment.
+------------------------------------------------------------------------
+r6395 | vlefevre | 2009-08-26 23:29:08 +0000 (Wed, 26 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tsprintf.c: fixed locale_da_DK test.
+------------------------------------------------------------------------
+r6392 | vlefevre | 2009-08-26 16:58:50 +0000 (Wed, 26 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsprintf.c
+
+tests/tsprintf.c: bug fix (uncommented an "exit(1);").
+------------------------------------------------------------------------
+r6388 | vlefevre | 2009-08-26 09:53:25 +0000 (Wed, 26 Aug 2009) | 1 line
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6387 | vlefevre | 2009-08-26 09:49:08 +0000 (Wed, 26 Aug 2009) | 1 line
 Changed paths:
    M /branches/2.4/Makefile.am
