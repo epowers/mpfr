@@ -1,4 +1,16 @@
 ------------------------------------------------------------------------
+r6549 | vlefevre | 2009-11-20 21:34:36 +0000 (Fri, 20 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tconst_pi.c
+
+tests/tconst_pi.c: fixed types for C++.
+------------------------------------------------------------------------
+r6548 | vlefevre | 2009-11-20 13:58:23 +0000 (Fri, 20 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6547 | vlefevre | 2009-11-20 13:57:05 +0000 (Fri, 20 Nov 2009) | 1 line
 Changed paths:
    M /branches/2.4/VERSION
