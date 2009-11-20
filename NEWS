@@ -32,6 +32,7 @@ Changes from version 2.4.1 to version 2.4.2:
 - Test coverage: 97.0% lines of code.
 - Updated tcmp_ld test to really test the long double.
 - Some documentation files are installed in $docdir.
+- Removed mpfr_init_cache (unused and undocumented function).
 - Bug fixes.
 
 Changes from version 2.4.0 to version 2.4.1:
