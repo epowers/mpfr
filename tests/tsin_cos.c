@@ -356,14 +356,14 @@ bug20091122 (void)
   mpfr_sin (y, x, r);
   mpfr_cos (z, x, r);
 
-  if (mpfr_cmp (y, yref))
+  if (! mpfr_equal_p (y, yref))
     {
       printf ("mpfr_sin_cos and mpfr_sin disagree (bug20091122)\n");
       printf ("yref = "); mpfr_dump (yref);
       printf ("y    = "); mpfr_dump (y);
       exit (1);
     }
-  if (mpfr_cmp (z, zref))
+  if (! mpfr_equal_p (z, zref))
     {
       printf ("mpfr_sin_cos and mpfr_cos disagree (bug20091122)\n");
       printf ("zref = "); mpfr_dump (zref);
