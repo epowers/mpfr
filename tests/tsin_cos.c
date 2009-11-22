@@ -335,6 +335,49 @@ bug20091008 (void)
   mpfr_clear (zref);
 }
 
+/* Bug reported by Laurent Fousse.
+   http://websympa.loria.fr/wwsympa/arc/mpfr/2009-11/msg00044.html */
+static void
+bug20091122 (void)
+{
+  mpfr_t x, y, z, yref, zref;
+  mp_prec_t p = 3;
+  mp_rnd_t r = GMP_RNDN;
+
+  mpfr_init2 (x, 5);
+  mpfr_init2 (y, p);
+  mpfr_init2 (z, p);
+  mpfr_init2 (yref, p);
+  mpfr_init2 (zref, p);
+
+  mpfr_set_str (x, "0.11111E49", 2, GMP_RNDN);
+  mpfr_sin_cos (yref, zref, x, r);
+
+  mpfr_sin (y, x, r);
+  mpfr_cos (z, x, r);
+
+  if (mpfr_cmp (y, yref))
+    {
+      printf ("mpfr_sin_cos and mpfr_sin disagree (bug20091122)\n");
+      printf ("yref = "); mpfr_dump (yref);
+      printf ("y    = "); mpfr_dump (y);
+      exit (1);
+    }
+  if (mpfr_cmp (z, zref))
+    {
+      printf ("mpfr_sin_cos and mpfr_cos disagree (bug20091122)\n");
+      printf ("zref = "); mpfr_dump (zref);
+      printf ("z    = "); mpfr_dump (z);
+      exit (1);
+    }
+
+  mpfr_clear (x);
+  mpfr_clear (y);
+  mpfr_clear (z);
+  mpfr_clear (yref);
+  mpfr_clear (zref);
+}
+
 static void
 consistency (void)
 {
@@ -383,6 +426,7 @@ main(int argc, char *argv[])
     }
 
   bug20091008 ();
+  bug20091122 ();
   consistency ();
 
   check_nans ();
