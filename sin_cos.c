@@ -160,7 +160,7 @@ mpfr_sin_cos (mpfr_ptr y, mpfr_ptr z, mpfr_srcptr x, mp_rnd_t rnd_mode)
         err = m;
       else
         err = MPFR_GET_EXP (c) + (mp_exp_t) (m - 3);
-      if (!mpfr_can_round (c, err, GMP_RNDN, rnd_mode,
+      if (!mpfr_can_round (c, err, GMP_RNDN, GMP_RNDZ,
                            MPFR_PREC (z) + (rnd_mode == GMP_RNDN)))
         goto next_step;
 
@@ -183,7 +183,7 @@ mpfr_sin_cos (mpfr_ptr y, mpfr_ptr z, mpfr_srcptr x, mp_rnd_t rnd_mode)
       /* the absolute error on c is at most 2^(err-m), which we must put
          in the form 2^(EXP(c)-err). */
       err = MPFR_GET_EXP (c) + (mp_exp_t) m - err;
-      if (mpfr_can_round (c, err, GMP_RNDN, rnd_mode,
+      if (mpfr_can_round (c, err, GMP_RNDN, GMP_RNDZ,
                           MPFR_PREC (y) + (rnd_mode == GMP_RNDN)))
         break;
       /* check for huge cancellation */
