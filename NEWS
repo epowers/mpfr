@@ -34,6 +34,9 @@ Changes from version 2.4.1 to version 2.4.2:
 - Some documentation files are installed in $docdir.
 - Removed mpfr_init_cache (unused and undocumented function).
 - Bug fixes.
+- Also note that GCC 4.4.0 (only this obsolete version) does not build
+  MPFR 2.4.2 correctly; this is detected by "make check" (failures in
+  tget_z and tpow_all).
 
 Changes from version 2.4.0 to version 2.4.1:
 - Security fix in mpfr_snprintf and mpfr_vsnprintf (buffer overflow).
