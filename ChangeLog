@@ -1,4 +1,116 @@
 ------------------------------------------------------------------------
+r6590 | vlefevre | 2009-11-25 12:51:59 +0000 (Wed, 25 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Updated version to 2.4.2-rc3.
+------------------------------------------------------------------------
+r6589 | vlefevre | 2009-11-25 12:51:33 +0000 (Wed, 25 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Updated version to 2.4.2-rc2.
+------------------------------------------------------------------------
+r6588 | vlefevre | 2009-11-25 12:25:08 +0000 (Wed, 25 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+
+Reverted changeset r6584 and applied modified patch by Philippe Théveny.
+------------------------------------------------------------------------
+r6584 | vlefevre | 2009-11-25 10:42:05 +0000 (Wed, 25 Nov 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/acinclude.m4
+   M /branches/2.4/tests/tfprintf.c
+   M /branches/2.4/tests/tprintf.c
+
+[acinclude.m4] added test for %zu
+[tfprintf.c,tprintf.c] added #ifdef's for NPRINTF_ZU
+[merged changeset r6582 from the trunk]
+------------------------------------------------------------------------
+r6583 | vlefevre | 2009-11-25 10:22:59 +0000 (Wed, 25 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: update.
+------------------------------------------------------------------------
+r6581 | vlefevre | 2009-11-25 10:17:56 +0000 (Wed, 25 Nov 2009) | 3 lines
+Changed paths:
+   M /branches/2.4/configure.in
+
+configure.in: fixed the GMP CC/CFLAGS detection and replaced
+"test ... -o ..." (obsolete in POSIX) by "test ... || test ..."
+and "test ... -a ..." (obsolete in POSIX) by "test ... && test ...".
+------------------------------------------------------------------------
+r6579 | vlefevre | 2009-11-25 09:52:55 +0000 (Wed, 25 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/tests/tstckintc.c
+
+tests/tstckintc.c: fixed types for the printf %p format specifier
+(trunk r6577).
+------------------------------------------------------------------------
+r6578 | vlefevre | 2009-11-25 09:52:29 +0000 (Wed, 25 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tget_ld_2exp.c
+
+tests/tget_ld_2exp.c: %La -> %Le for C89 compatibility (trunk r6575).
+------------------------------------------------------------------------
+r6572 | vlefevre | 2009-11-24 23:40:14 +0000 (Tue, 24 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/NEWS
+
+NEWS: mentions that GCC 4.4.0 does not build MPFR 2.4.2 correctly.
+------------------------------------------------------------------------
+r6565 | vlefevre | 2009-11-24 15:23:36 +0000 (Tue, 24 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/INSTALL
+
+INSTALL: made instructions more clear.
+------------------------------------------------------------------------
+r6558 | vlefevre | 2009-11-22 23:33:49 +0000 (Sun, 22 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/2.4/sin_cos.c
+
+sin_cos.c: fixed bug in mpfr_can_round call (introduced in r4574).
+bug20091122 no longer fails!
+------------------------------------------------------------------------
+r6555 | vlefevre | 2009-11-22 22:33:24 +0000 (Sun, 22 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsin_cos.c
+
+tests/tsin_cos.c: use !mpfr_equal_p instead of mpfr_cmp.
+------------------------------------------------------------------------
+r6554 | vlefevre | 2009-11-22 22:20:21 +0000 (Sun, 22 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/tests/tsin_cos.c
+
+tests/tsin_cos.c: added bug20091122 (reported by Laurent Fousse).
+------------------------------------------------------------------------
+r6553 | vlefevre | 2009-11-22 22:10:35 +0000 (Sun, 22 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/VERSION
+   M /branches/2.4/configure.in
+   M /branches/2.4/mpfr.h
+   M /branches/2.4/mpfr.texi
+   M /branches/2.4/version.c
+
+Switched version back to 2.4.2-dev.
+------------------------------------------------------------------------
+r6551 | vlefevre | 2009-11-20 21:43:14 +0000 (Fri, 20 Nov 2009) | 1 line
+Changed paths:
+   M /branches/2.4/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6549 | vlefevre | 2009-11-20 21:34:36 +0000 (Fri, 20 Nov 2009) | 1 line
 Changed paths:
    M /branches/2.4/tests/tconst_pi.c
