@@ -33,6 +33,7 @@ Changes from version 2.4.1 to version 2.4.2:
 - Updated tcmp_ld test to really test the long double.
 - Some documentation files are installed in $docdir.
 - Removed mpfr_init_cache (unused and undocumented function).
+- Fixed the way $CC / $CFLAGS are got from gmp.h (__GMP_CC / __GMP_CFLAGS).
 - Bug fixes.
 - Also note that GCC 4.4.0 (only this obsolete version) does not build
   MPFR 2.4.2 correctly; this is detected by "make check" (failures in
