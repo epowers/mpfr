@@ -382,23 +382,56 @@ static void
 consistency (void)
 {
   mpfr_t x, s1, s2, c1, c2;
+  mp_exp_t emin, emax;
   mp_rnd_t rnd;
+  unsigned int flags_sin, flags_cos, flags, flags_before, flags_ref;
+  int inex_sin, inex_cos, inex, inex_ref;
   int i;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
 
   for (i = 0; i <= 10000; i++)
     {
       mpfr_init2 (x, MPFR_PREC_MIN + (randlimb () % 8));
       mpfr_inits2 (MPFR_PREC_MIN + (randlimb () % 8), s1, s2, c1, c2,
                    (mpfr_ptr) 0);
-      tests_default_random (x, 256, -5, 50);
-      rnd = RND_RAND ();
-      mpfr_sin (s1, x, rnd);
-      mpfr_cos (c1, x, rnd);
-      mpfr_sin_cos (s2, c2, x, rnd);
-      if (!(mpfr_equal_p (s1, s2) && mpfr_equal_p (c1, c2)))
+      if (i < 8 * GMP_RND_MAX)
         {
-          printf ("mpfr_sin_cos and mpfr_sin/mpfr_cos disagree on %s,\nx = ",
-                  mpfr_print_rnd_mode (rnd));
+          int j = i / GMP_RND_MAX;
+          if (j & 1)
+            mpfr_set_emin (MPFR_EMIN_MIN);
+          mpfr_set_si (x, (j & 2) ? 1 : -1, GMP_RNDN);
+          mpfr_set_exp (x, mpfr_get_emin ());
+          rnd = (mpfr_rnd_t) (i % GMP_RND_MAX);
+          flags_before = 0;
+          if (j & 4)
+            mpfr_set_emax (-17);
+        }
+      else
+        {
+          tests_default_random (x, 256, -5, 50);
+          rnd = RND_RAND ();
+          flags_before = (randlimb () & 1) ?
+            (unsigned int) (MPFR_FLAGS_ALL ^ MPFR_FLAGS_ERANGE) :
+            (unsigned int) 0;
+        }
+      __gmpfr_flags = flags_before;
+      inex_sin = mpfr_sin (s1, x, rnd);
+      flags_sin = __gmpfr_flags;
+      __gmpfr_flags = flags_before;
+      inex_cos = mpfr_cos (c1, x, rnd);
+      flags_cos = __gmpfr_flags;
+      __gmpfr_flags = flags_before;
+      inex = !!mpfr_sin_cos (s2, c2, x, rnd);
+      flags = __gmpfr_flags;
+      inex_ref = inex_sin || inex_cos;
+      flags_ref = flags_sin | flags_cos;
+      if (!(mpfr_equal_p (s1, s2) && mpfr_equal_p (c1, c2)) ||
+          inex != inex_ref || flags != flags_ref)
+        {
+          printf ("mpfr_sin_cos and mpfr_sin/mpfr_cos disagree on %s,"
+                  " i = %d\nx = ", mpfr_print_rnd_mode (rnd), i);
           mpfr_dump (x);
           printf ("s1 = ");
           mpfr_dump (s1);
@@ -408,9 +441,16 @@ consistency (void)
           mpfr_dump (c1);
           printf ("c2 = ");
           mpfr_dump (c2);
+          printf ("inex_sin = %d, inex_cos = %d, inex = %d (expected %d)\n",
+                  inex_sin, inex_cos, inex, inex_ref);
+          printf ("flags_sin = 0x%x, flags_cos = 0x%x, "
+                  "flags = 0x%x (expected 0x%x)\n",
+                  flags_sin, flags_cos, flags, flags_ref);
           exit (1);
         }
       mpfr_clears (x, s1, s2, c1, c2, (mpfr_ptr) 0);
+      mpfr_set_emin (emin);
+      mpfr_set_emax (emax);
     }
 }
 
