@@ -65,6 +65,12 @@ MA 02110-1301, USA. */
 # ifndef __GMP_IMPL_H__
 #  include "gmp-impl.h"
 # endif
+# ifndef BITS_PER_MP_LIMB
+#  define BITS_PER_MP_LIMB GMP_LIMB_BITS
+# endif
+#ifndef mpn_sqr_n
+# define mpn_sqr_n mpn_sqr
+#endif
 # ifdef MPFR_NEED_LONGLONG_H
 #  include "longlong.h"
 # endif
