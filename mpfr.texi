@@ -2369,8 +2369,8 @@ be the case when @var{b} is near from a value exactly representable on
 @end deftypefun
 
 @deftypefun {const char *} mpfr_print_rnd_mode (mp_rnd_t @var{rnd})
-Return the input string (GMP_RNDD, GMP_RNDU, GMP_RNDN, GMP_RNDZ)
-corresponding to the rounding mode @var{rnd} or a null pointer if
+Return a string ("GMP_RNDD", "GMP_RNDU", "GMP_RNDN", "GMP_RNDZ")
+corresponding to the rounding mode @var{rnd}, or a null pointer if
 @var{rnd} is an invalid rounding mode.
 @end deftypefun
 
