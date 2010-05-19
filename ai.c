@@ -266,7 +266,6 @@ mpfr_ai (mpfr_ptr y, mpfr_srcptr x, mpfr_rnd_t rnd)
     } /* End of ZIV loop */
 
   MPFR_ZIV_FREE (loop);
-  MPFR_SAVE_EXPO_FREE (expo);
 
   r = mpfr_set (y, s, rnd);
 
@@ -277,5 +276,7 @@ mpfr_ai (mpfr_ptr y, mpfr_srcptr x, mpfr_rnd_t rnd)
   mpfr_clear (s);
   mpfr_clear (tmp_sp);
   mpfr_clear (tmp2_sp);
-  return r;
+
+  MPFR_SAVE_EXPO_FREE (expo);
+  return mpfr_check_range (y, r, rnd);
 }
