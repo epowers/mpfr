@@ -1,4 +1,149 @@
 ------------------------------------------------------------------------
+r6856 | vlefevre | 2010-05-24 00:02:50 +0000 (Mon, 24 May 2010) | 6 lines
+Changed paths:
+   M /branches/3.0/sub1sp.c
+
+[sub1sp.c] Fixed a problem that appeared after mpfr_prec_t has been
+made signed. It was visible on PowerPC (tested on Linux 32 bits and
+on Mac OS X 32 & 64 bits), but could potentially affect any platform
+as a negative shift count was generated. As the faulty expressions
+were in a MPFR_ASSERTD, the failure could occur only when assertion
+checking had been enabled. [merged changeset r6855 from the trunk]
+------------------------------------------------------------------------
+r6854 | vlefevre | 2010-05-23 21:39:42 +0000 (Sun, 23 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/VERSION
+   M /branches/3.0/configure.in
+   M /branches/3.0/mpfr.h
+   M /branches/3.0/mpfr.texi
+   M /branches/3.0/version.c
+
+Updated version to 3.0.0-rc1 (let's hope this one will be OK).
+Note: mpfr.texi will need to be updated before the final release.
+------------------------------------------------------------------------
+r6853 | vlefevre | 2010-05-22 23:08:57 +0000 (Sat, 22 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/README.dev
+
+[README.dev] Update from the trunk.
+------------------------------------------------------------------------
+r6850 | vlefevre | 2010-05-22 22:51:46 +0000 (Sat, 22 May 2010) | 7 lines
+Changed paths:
+   M /branches/3.0/acinclude.m4
+   M /branches/3.0/fits_intmax.c
+   M /branches/3.0/fits_uintmax.c
+   M /branches/3.0/get_sj.c
+   M /branches/3.0/get_uj.c
+   M /branches/3.0/mpfr-impl.h
+   M /branches/3.0/tests/tfits.c
+   M /branches/3.0/tests/tget_sj.c
+   M /branches/3.0/tests/tset_sj.c
+
+Detect when the intmax_t type is available but INTMAX_MAX doesn't work
+(e.g. with gcc -ansi -pedantic-errors in 32-bit mode under GNU/Linux).
+New macros MPFR_UINTMAX_MAX, MPFR_INTMAX_MAX and MPFR_INTMAX_MIN are
+defined and used internally instead of UINTMAX_MAX, INTMAX_MAX and
+INTMAX_MIN. If these C99 macros work, then the MPFR_* macros use them,
+otherwise MPFR uses its own definitions.
+[merged changeset r6849 from the trunk]
+------------------------------------------------------------------------
+r6848 | vlefevre | 2010-05-22 19:50:44 +0000 (Sat, 22 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/ai.c
+   M /branches/3.0/bernoulli.c
+   M /branches/3.0/buildopt.c
+   M /branches/3.0/digamma.c
+   M /branches/3.0/get_flt.c
+   M /branches/3.0/ieee_floats.h
+   M /branches/3.0/isregular.c
+   M /branches/3.0/mbench/mfv5.h
+   M /branches/3.0/mbench/timp.h
+   M /branches/3.0/min_prec.c
+   M /branches/3.0/scale2.c
+   M /branches/3.0/set_flt.c
+   M /branches/3.0/set_z_exp.c
+   M /branches/3.0/set_zero.c
+   M /branches/3.0/speed.c
+   M /branches/3.0/tests/tai.c
+   M /branches/3.0/tests/taway.c
+   M /branches/3.0/tests/tbuildopt.c
+   M /branches/3.0/tests/tdigamma.c
+   M /branches/3.0/tests/tfprintf.c
+   M /branches/3.0/tests/tget_flt.c
+   M /branches/3.0/tests/tmin_prec.c
+   M /branches/3.0/tests/tprintf.c
+   M /branches/3.0/tests/tset_z_exp.c
+   M /branches/3.0/tests/tstdint.c
+
+Updated Subversion properties.
+------------------------------------------------------------------------
+r6847 | vlefevre | 2010-05-22 19:49:23 +0000 (Sat, 22 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/Makefile.am
+   M /branches/3.0/ai.c
+   A /branches/3.0/gammaonethird.c
+   M /branches/3.0/mpfr-impl.h
+
+Merged latest changes concerning mpfr_ai from trunk.
+------------------------------------------------------------------------
+r6830 | vlefevre | 2010-05-19 23:08:42 +0000 (Wed, 19 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/NEWS
+   M /branches/3.0/mpfr.texi
+
+[mpfr.texi, NEWS] Noted that the mpfr_ai implementation is incomplete
+and experimental. [merged changeset r6829 from the trunk]
+------------------------------------------------------------------------
+r6828 | vlefevre | 2010-05-19 23:05:34 +0000 (Wed, 19 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/ai.c
+
+[ai.c] Use MPFR_IS_SINGULAR. Added a FIXME comment for Ai(0).
+[merged changeset r6827 from the trunk]
+------------------------------------------------------------------------
+r6826 | vlefevre | 2010-05-19 22:43:26 +0000 (Wed, 19 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/mpfr-impl.h
+   M /branches/3.0/tests/texceptions.c
+   M /branches/3.0/tests/tget_f.c
+   M /branches/3.0/tests/tmodf.c
+   M /branches/3.0/tests/tpow_all.c
+   M /branches/3.0/tests/turandom.c
+
+Type corrections for C++ compilers (in particular, mpfr_rnd_t vs int).
+[merged changeset r6825 from the trunk]
+------------------------------------------------------------------------
+r6824 | vlefevre | 2010-05-19 14:33:00 +0000 (Wed, 19 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/ai.c
+
+[ai.c] Fixed possible problem in reduced exponent range.
+[merged changeset r6822 from the trunk]
+------------------------------------------------------------------------
+r6823 | vlefevre | 2010-05-19 14:32:08 +0000 (Wed, 19 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/VERSION
+   M /branches/3.0/configure.in
+   M /branches/3.0/mpfr.h
+   M /branches/3.0/mpfr.texi
+   M /branches/3.0/version.c
+
+Updated version to 3.0.0-dev (various problems that need to be fixed).
+------------------------------------------------------------------------
+r6819 | vlefevre | 2010-05-19 13:12:47 +0000 (Wed, 19 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/README.dev
+   D /branches/3.0/patch-aclocal-icc
+
+Removed obsolete patch-aclocal-icc and updated README.dev (about
+"To make a release"). [merged changeset r6818 from trunk]
+------------------------------------------------------------------------
+r6817 | vlefevre | 2010-05-19 12:51:16 +0000 (Wed, 19 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6816 | vlefevre | 2010-05-19 12:49:32 +0000 (Wed, 19 May 2010) | 1 line
 Changed paths:
    M /branches/3.0/VERSION
