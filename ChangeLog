@@ -1,4 +1,130 @@
 ------------------------------------------------------------------------
+r6913 | vlefevre | 2010-06-03 08:25:20 +0000 (Thu, 03 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/mpfr.texi
+
+[mpfr.texi] Arenaire -> Arénaire.
+------------------------------------------------------------------------
+r6911 | vlefevre | 2010-06-03 08:09:16 +0000 (Thu, 03 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/VERSION
+   M /branches/3.0/configure.in
+   M /branches/3.0/mpfr.h
+   M /branches/3.0/mpfr.texi
+   M /branches/3.0/version.c
+
+Updated version to 3.0.0-rc2.
+------------------------------------------------------------------------
+r6910 | vlefevre | 2010-06-02 11:02:54 +0000 (Wed, 02 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/NEWS
+
+[NEWS] 3.0 -> 3.0.0.
+------------------------------------------------------------------------
+r6908 | vlefevre | 2010-06-02 11:01:39 +0000 (Wed, 02 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/NEWS
+
+[NEWS] Added test coverage for MPFR 3.0.0.
+------------------------------------------------------------------------
+r6906 | vlefevre | 2010-05-31 22:47:29 +0000 (Mon, 31 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/TODO
+
+[TODO] Update from the trunk.
+------------------------------------------------------------------------
+r6905 | vlefevre | 2010-05-31 22:44:19 +0000 (Mon, 31 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/INSTALL
+
+[INSTALL] added instructions for "make tune"
+(merged changesets r6900 and r6904 from the trunk)
+------------------------------------------------------------------------
+r6903 | vlefevre | 2010-05-31 22:41:39 +0000 (Mon, 31 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/README.dev
+
+[README.dev] completed missing instructions for "make tune"
+(merged changeset r6899 from the trunk)
+------------------------------------------------------------------------
+r6902 | vlefevre | 2010-05-31 22:35:51 +0000 (Mon, 31 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/tests/tset_z_exp.c
+
+[tests/tset_z_exp.c] Correction from the trunk (possible overflow
+problem).
+------------------------------------------------------------------------
+r6894 | vlefevre | 2010-05-31 13:50:16 +0000 (Mon, 31 May 2010) | 8 lines
+Changed paths:
+   M /branches/3.0/NEWS
+   M /branches/3.0/TODO
+   M /branches/3.0/fdl.texi
+   M /branches/3.0/gammaonethird.c
+   M /branches/3.0/get_si.c
+   M /branches/3.0/get_sj.c
+   M /branches/3.0/get_ui.c
+   M /branches/3.0/get_uj.c
+   M /branches/3.0/get_z.c
+   M /branches/3.0/get_z_exp.c
+   M /branches/3.0/mpfr.h
+   M /branches/3.0/mpfr.texi
+   M /branches/3.0/stack_interface.c
+   M /branches/3.0/tests/tget_sj.c
+   M /branches/3.0/tests/tget_z.c
+   M /branches/3.0/tests/tset_si.c
+   M /branches/3.0/tests/tstckintc.c
+
+Merged latest changes from the trunk, more precisely:
+  * mpfr_custom_get_mantissa was renamed to mpfr_custom_get_significand.
+  * Functions mpfr_get_si, mpfr_get_ui, mpfr_get_sj, mpfr_get_uj,
+    mpfr_get_z and mpfr_get_z_2exp no longer have cases with undefined
+    behavior.
+  * mpfr.texi: many changes, and the encoding is now UTF-8.
+  * gammaonethird.c: do ... while(0) style for macros.
+  * TODO: update.
+------------------------------------------------------------------------
+r6887 | vlefevre | 2010-05-28 09:54:43 +0000 (Fri, 28 May 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/Makefile.am
+   A /branches/3.0/examples/version.c (from /trunk/examples/version.c:6886)
+
+Added examples/version.c (and updated Makefile.am).
+[merged changeset r6886 from the trunk]
+------------------------------------------------------------------------
+r6884 | vlefevre | 2010-05-28 08:17:02 +0000 (Fri, 28 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/Makefile.am
+
+[Makefile.am] Improved dist-hook rule.
+------------------------------------------------------------------------
+r6876 | vlefevre | 2010-05-25 13:20:58 +0000 (Tue, 25 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/NEWS
+
+[NEWS] Correction.
+------------------------------------------------------------------------
+r6864 | vlefevre | 2010-05-25 07:28:55 +0000 (Tue, 25 May 2010) | 4 lines
+Changed paths:
+   M /branches/3.0/buildopt.c
+   M /branches/3.0/mpfrlint
+
+[buildopt.c] Missing #include "mpfr-impl.h" for cygwin builds.
+[mpfrlint] Detect such errors (mpfr-impl.h may be needed because it
+  includes config.h when there is one).
+[merged changeset r6863 from the trunk]
+------------------------------------------------------------------------
+r6861 | vlefevre | 2010-05-24 10:54:17 +0000 (Mon, 24 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/NEWS
+
+[NEWS] Reformat / fixed typography.
+------------------------------------------------------------------------
+r6857 | vlefevre | 2010-05-24 08:57:04 +0000 (Mon, 24 May 2010) | 1 line
+Changed paths:
+   M /branches/3.0/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6856 | vlefevre | 2010-05-24 00:02:50 +0000 (Mon, 24 May 2010) | 6 lines
 Changed paths:
    M /branches/3.0/sub1sp.c
