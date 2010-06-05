@@ -1,4 +1,27 @@
 ------------------------------------------------------------------------
+r6923 | vlefevre | 2010-06-05 02:47:22 +0000 (Sat, 05 Jun 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/exp_2.c
+
+[exp_2.c] speed improvement using MPFR_GROUP_* (from Patrick Pelissier)
+(merged changeset r6922 from the trunk)
+------------------------------------------------------------------------
+r6921 | vlefevre | 2010-06-04 10:18:38 +0000 (Fri, 04 Jun 2010) | 5 lines
+Changed paths:
+   M /branches/3.0/exp_2.c
+
+exp_2.c: replaced MY_INIT_MPZ (allocation on the stack) by mpz_init
+as GMP can reallocate mpz data even though the additional space isn't
+necessary (this could occur with low values of MPFR_EXP_2_THRESHOLD,
+such as 36), yielding buffer overflow.
+[merged 6917:6920 from the trunk]
+------------------------------------------------------------------------
+r6917 | vlefevre | 2010-06-03 15:11:57 +0000 (Thu, 03 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6916 | vlefevre | 2010-06-03 15:08:55 +0000 (Thu, 03 Jun 2010) | 4 lines
 Changed paths:
    M /branches/3.0/acinclude.m4
