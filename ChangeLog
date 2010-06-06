@@ -1,4 +1,43 @@
 ------------------------------------------------------------------------
+r6935 | vlefevre | 2010-06-06 11:24:22 +0000 (Sun, 06 Jun 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/exp_2.c
+
+[exp_2.c] Reverted incorrect optimization patch r6923 (added a comment).
+(merged changeset r6933 from the trunk)
+------------------------------------------------------------------------
+r6934 | vlefevre | 2010-06-06 11:23:18 +0000 (Sun, 06 Jun 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/mpfr-impl.h
+
+[mpfr-impl.h] Added log messages for the MPFR_GROUP_* macros.
+(merged changeset r6932 from the trunk)
+------------------------------------------------------------------------
+r6931 | vlefevre | 2010-06-06 10:17:16 +0000 (Sun, 06 Jun 2010) | 2 lines
+Changed paths:
+   M /branches/3.0/mpfrlint
+
+[mpfrlint] Detect incorrect use of MPFR_LOG_MSG.
+(merged changeset r6930 from the trunk)
+------------------------------------------------------------------------
+r6928 | vlefevre | 2010-06-06 10:01:13 +0000 (Sun, 06 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/README.dev
+
+README.dev: updated "To make a release".
+------------------------------------------------------------------------
+r6926 | vlefevre | 2010-06-06 09:51:11 +0000 (Sun, 06 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/ai.c
+
+[ai.c] Merge from the trunk (mostly source formatting).
+------------------------------------------------------------------------
+r6924 | vlefevre | 2010-06-05 02:55:48 +0000 (Sat, 05 Jun 2010) | 1 line
+Changed paths:
+   M /branches/3.0/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r6923 | vlefevre | 2010-06-05 02:47:22 +0000 (Sat, 05 Jun 2010) | 2 lines
 Changed paths:
    M /branches/3.0/exp_2.c
@@ -1218,7 +1257,7 @@ Changed paths:
 [mpfr.texi] added Sylvain as contributor
 
 ------------------------------------------------------------------------
-r6723 | schevill | 2010-03-17 17:35:59 +0000 (Wed, 17 Mar 2010) | 15 lines
+r6723 | schevill | 2010-03-17 17:35:59 +0000 (Wed, 17 Mar 2010) | 18 lines
 Changed paths:
    M /trunk/Makefile.am
    M /trunk/README.dev
@@ -1230,20 +1269,23 @@ Changed paths:
    M /trunk/tests/Makefile.am
    A /trunk/tests/tai.c
 
-* Added function mpfr_ai. The implementation is	the most naive:	it evaluates the series
-step by	step until it can stop.
-A special strategy is used to detect possible problems when Ai(x) is very close	to 0.   
+* Added function mpfr_ai. The implementation is the most naive: it evaluates
+  the series step by step until it can stop.
+  A special strategy is used to detect possible problems when Ai(x) is very
+  close to 0.
 
-* Updated algorithms.tex with the technical description	of the implementation of mpfr_ai.
+* Updated algorithms.tex with the technical description of the implementation
+  of mpfr_ai.
 
-* Added	algorithm2e.sty	and algorithm2e-compatibility.sty (necessary to	compile	algorithms.tex now)
+* Added algorithm2e.sty and algorithm2e-compatibility.sty (necessary to
+  compile algorithms.tex now).
 
 * Updated mpfr.texi to let it know this new function.
 
-* Added	a basic	test file for mpfr_ai. I will add other	test cases later.
+* Added a basic test file for mpfr_ai. I will add other test cases later.
 
-* Added	a small	HOWTO to README.dev about how to add a new test	file for new functions.
-
+* Added a small HOWTO to README.dev about how to add a new test file for new
+  functions.
 
 ------------------------------------------------------------------------
 r6720 | vlefevre | 2010-03-11 09:43:53 +0000 (Thu, 11 Mar 2010) | 1 line
