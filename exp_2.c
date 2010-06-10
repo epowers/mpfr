@@ -34,11 +34,6 @@ mpz_normalize  (mpz_t, mpz_t, mp_exp_t);
 static mp_exp_t
 mpz_normalize2 (mpz_t, mpz_t, mp_exp_t, mp_exp_t);
 
-#define MY_INIT_MPZ(x, s) { \
-   (x)->_mp_alloc = (s); \
-   PTR(x) = (mp_ptr) MPFR_TMP_ALLOC((s)*BYTES_PER_MP_LIMB); \
-   (x)->_mp_size = 0; }
-
 /* if k = the number of bits of z > q, divides z by 2^(k-q) and returns k-q.
    Otherwise do nothing and return 0.
  */
@@ -91,7 +86,6 @@ mpfr_exp_2 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
   mpfr_t r, s;
   mpz_t ss;
   MPFR_ZIV_DECL (loop);
-  MPFR_TMP_DECL(marker);
 
   MPFR_LOG_FUNC (("x[%#R]=%R rnd=%d", x, x, rnd_mode),
                  ("y[%#R]=%R inexact=%d", y, y, inexact));
@@ -187,8 +181,7 @@ mpfr_exp_2 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
           MPFR_ASSERTD (MPFR_IS_POS (r));
           mpfr_div_2ui (r, r, K, GMP_RNDU); /* r = (x-n*log(2))/2^K, exact */
 
-          MPFR_TMP_MARK(marker);
-          MY_INIT_MPZ(ss, 3 + 2*((q-1)/BITS_PER_MP_LIMB));
+          mpz_init (ss);
           exps = mpfr_get_z_exp (ss, s);
           /* s <- 1 + r/1! + r^2/2! + ... + r^l/l! */
           MPFR_ASSERTD (MPFR_IS_PURE_FP (r) && MPFR_EXP (r) < 0);
@@ -208,7 +201,7 @@ mpfr_exp_2 (mpfr_ptr y, mpfr_srcptr x, mp_rnd_t rnd_mode)
           mpfr_set_z (s, ss, GMP_RNDN);
 
           MPFR_SET_EXP(s, MPFR_GET_EXP (s) + exps);
-          MPFR_TMP_FREE(marker); /* don't need ss anymore */
+          mpz_clear (ss);
 
           /* error is at most 2^K*l, plus cancel+2 to take into account of
              the error of 3*2^(EXP(old_r)-EXP(new_r)) on r */
@@ -255,16 +248,14 @@ mpfr_exp2_aux (mpz_t s, mpfr_srcptr r, mp_prec_t q, mp_exp_t *exps)
   mp_size_t qn;
   mpz_t t, rr;
   mp_size_t sbit, tbit;
-  MPFR_TMP_DECL(marker);
 
   MPFR_ASSERTN (MPFR_IS_PURE_FP (r));
 
-  MPFR_TMP_MARK(marker);
   qn = 1 + (q-1)/BITS_PER_MP_LIMB;
   expt = 0;
   *exps = 1 - (mp_exp_t) q;                   /* s = 2^(q-1) */
-  MY_INIT_MPZ(t, 2*qn+1);
-  MY_INIT_MPZ(rr, qn+1);
+  mpz_init (t);
+  mpz_init (rr);
   mpz_set_ui(t, 1);
   mpz_set_ui(s, 1);
   mpz_mul_2exp(s, s, q-1);
@@ -292,7 +283,9 @@ mpfr_exp2_aux (mpz_t s, mpfr_srcptr r, mp_prec_t q, mp_exp_t *exps)
     expr += mpz_normalize(rr, rr, tbit);
   }
 
-  MPFR_TMP_FREE(marker);
+  mpz_clear (t);
+  mpz_clear (rr);
+
   return 3*l*(l+1);
 }
 
@@ -329,12 +322,12 @@ mpfr_exp2_aux2 (mpz_t s, mpfr_srcptr r, mp_prec_t q, mp_exp_t *exps)
   expR = (mp_exp_t*) MPFR_TMP_ALLOC((m+1)*sizeof(mp_exp_t)); /* exponent for R[i] */
   sizer = 1 + (MPFR_PREC(r)-1)/BITS_PER_MP_LIMB;
   mpz_init(tmp);
-  MY_INIT_MPZ(rr, sizer+2);
-  MY_INIT_MPZ(t, 2*sizer);            /* double size for products */
+  mpz_init (rr);
+  mpz_init (t);
   mpz_set_ui(s, 0);
   *exps = 1-q;                        /* 1 ulp = 2^(1-q) */
   for (i = 0 ; i <= m ; i++)
-    MY_INIT_MPZ(R[i], sizer+2);
+    mpz_init (R[i]);
   expR[1] = mpfr_get_z_exp(R[1], r); /* exact operation: no error */
   expR[1] = mpz_normalize2(R[1], R[1], expR[1], 1-q); /* error <= 1 ulp */
   mpz_mul(t, R[1], R[1]); /* err(t) <= 2 ulps */
@@ -404,7 +397,12 @@ mpfr_exp2_aux2 (mpz_t s, mpfr_srcptr r, mp_prec_t q, mp_exp_t *exps)
     }
   while ((size_t) expr+rrbit > (size_t) (int) -q);
 
+  for (i = 0 ; i <= m ; i++)
+    mpz_clear (R[i]);
   MPFR_TMP_FREE(marker);
+  mpz_clear (rr);
+  mpz_clear (t);
   mpz_clear(tmp);
+
   return l*(l+4);
 }
