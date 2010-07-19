@@ -57,7 +57,9 @@ main (void)
   mpfr_set_flt (x, f, MPFR_RNDN);
   if (mpfr_inf_p (x) == 0 || mpfr_sgn (x) < 0)
     {
-      printf ("Error for mpfr_set_flt(mpfr_get_flt(+Inf))n");
+      printf ("Error for mpfr_set_flt(mpfr_get_flt(+Inf)):\n");
+      printf ("f=%f, expected -Inf\n", f);
+      printf ("got "); mpfr_dump (x);
       exit (1);
     }
 
@@ -66,7 +68,9 @@ main (void)
   mpfr_set_flt (x, f, MPFR_RNDN);
   if (mpfr_inf_p (x) == 0 || mpfr_sgn (x) > 0)
     {
-      printf ("Error for mpfr_set_flt(mpfr_get_flt(-Inf))n");
+      printf ("Error for mpfr_set_flt(mpfr_get_flt(-Inf)):\n");
+      printf ("f=%f, expected -Inf\n", f);
+      printf ("got "); mpfr_dump (x);
       exit (1);
     }
 
@@ -75,7 +79,7 @@ main (void)
   mpfr_set_flt (x, f, MPFR_RNDN);
   if (mpfr_zero_p (x) == 0 || MPFR_SIGN (x) < 0)
     {
-      printf ("Error for mpfr_set_flt(mpfr_get_flt(+0))n");
+      printf ("Error for mpfr_set_flt(mpfr_get_flt(+0))\n");
       exit (1);
     }
 
@@ -85,7 +89,7 @@ main (void)
   mpfr_set_flt (x, f, MPFR_RNDN);
   if (mpfr_zero_p (x) == 0 || MPFR_SIGN (x) > 0)
     {
-      printf ("Error for mpfr_set_flt(mpfr_get_flt(-0))n");
+      printf ("Error for mpfr_set_flt(mpfr_get_flt(-0))\n");
       exit (1);
     }
 
@@ -94,7 +98,7 @@ main (void)
   mpfr_set_flt (x, f, MPFR_RNDN);
   if (mpfr_cmp_ui (x, 17) != 0)
     {
-      printf ("Error for mpfr_set_flt(mpfr_get_flt(17))n");
+      printf ("Error for mpfr_set_flt(mpfr_get_flt(17))\n");
       printf ("expected 17\n");
       printf ("got      ");
       mpfr_dump (x);
@@ -106,7 +110,7 @@ main (void)
   mpfr_set_flt (x, f, MPFR_RNDN);
   if (mpfr_cmp_si (x, -42) != 0)
     {
-      printf ("Error for mpfr_set_flt(mpfr_get_flt(-42))n");
+      printf ("Error for mpfr_set_flt(mpfr_get_flt(-42))\n");
       printf ("expected -42\n");
       printf ("got      ");
       mpfr_dump (x);
