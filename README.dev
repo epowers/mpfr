@@ -55,7 +55,7 @@ instance, for their own patches, MPFR developers do:
 For patches from MPFR developers, e.g. for MPFR 2.4.0:
 1. Unarchive the tarball: a directory mpfr-2.4.0 is created.
 2. Go into this directory (cd mpfr-2.4.0).
-3. Apply the current patches with "patch -N -Z -p1 < /path/to/patches".
+3. Apply the current patches with "patch -N -Z -p1 < /path/to/allpatches".
 4. Reset the PATCHES file with "true >| PATCHES".
 5. Rename mpfr-2.4.0 as mpfr-2.4.0-a and duplicate it as mpfr-2.4.0-b
    without changing the timestamps (e.g. with cp -a).
@@ -108,7 +108,7 @@ To make a release (for the MPFR team):
      b) build GMP with --disable-shared in say /tmp/gmp-x.y.z
         There is no need in tuning GMP, since most users will build MPFR
         with a vanilla GMP installation, i.e., with the default GMP tuning;
-	however you need to go into /tmp/gmp-x.y.z/tune and type "make speed"
+        however you need to go into /tmp/gmp-x.y.z/tune and type "make speed"
         (the MPFR tuning is using the resulting speed library)
      c) configure MPFR with --disable-shared --with-gmp-build=/tmp/gmp-x.y.z
      d) run "make" and "make tune"
@@ -214,9 +214,9 @@ To make a release (for the MPFR team):
      Upload the tarballs and the signatures to the MPFR web server
      (via svn), to INRIAGforge and to the GNU FTP site. Update the
      mpfr-current symbolic link and the history page. Announce the
-     release in the mpfr, gmp-discuss and gcc mailing-lists, and on
-     INRIAGforge. In case of a new patchlevel release, add a link from
-     the web page of the previous release.
+     release in the mpfr-announce, gmp-discuss and gcc mailing-lists,
+     and on INRIAGforge. In case of a new patchlevel release, add a
+     link from the web page of the previous release.
 
 For major or minor releases (but not patchlevels), a branch may be
 created first to allow new features to be committed to the trunk.
@@ -720,6 +720,13 @@ You can use the features related to intmax_t only if _MPFR_H_HAVE_INTMAX_T
 is defined. In such a case, do not use the macros UINTMAX_MAX, INTMAX_MAX
 and INTMAX_MIN directly (because they may make the compilation fail), but
 the MPFR versions: MPFR_UINTMAX_MAX, MPFR_INTMAX_MAX and MPFR_INTMAX_MIN.
+
+===========================================================================
+
+Use mpfr_prec_t and mpfr_rnd_t instead of the old types mp_prec_t and
+mp_rnd_t. Similarly, use mpfr_exp_t instead of GMP's mp_exp_t type
+(unless you really want mp_exp_t, e.g. for conversions with mpf; but
+you should not assume that mpfr_exp_t and mp_exp_t are identical).
 
 ===========================================================================
 
