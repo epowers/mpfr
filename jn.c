@@ -78,9 +78,11 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
   int inex;
   unsigned long absn;
   mpfr_prec_t prec, pbound, err;
-  mpfr_exp_t exps, expT;
+  mpfr_exp_t exps, expT, diffexp;
   mpfr_t y, s, t, absz;
   unsigned long k, zz, k0;
+  MPFR_GROUP_DECL(g);
+  MPFR_SAVE_EXPO_DECL (expo);
   MPFR_ZIV_DECL (loop);
 
   MPFR_LOG_FUNC (("x[%#R]=%R n=%d rnd=%d", z, z, n, r),
@@ -117,7 +119,7 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
      |j0(z) - 1| <= z^2/4 for -1 <= z <= 1. */
   if (n == 0)
     MPFR_FAST_COMPUTE_IF_SMALL_INPUT (res, __gmpfr_one, -2 * MPFR_GET_EXP (z),
-                                      2, 0, r, return _inexact);
+                                      2, 0, r, (void) 0 );
 
   /* idem for j1: j1(z) = z/2 - z^3/16 + ..., more precisely
      |j1(z) - z/2| <= |z^3|/16 for -1 <= z <= 1, with the sign of j1(z) - z/2
@@ -140,7 +142,7 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
         return inex;
     }
 
-  mpfr_init2 (y, 32);
+  MPFR_GROUP_INIT_3 (g, 32, y, s, t);
 
   /* check underflow case: |j(n,z)| <= 1/sqrt(2 Pi n) (ze/2n)^n
      (see algorithms.tex) */
@@ -160,19 +162,18 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
          thus |j(n,z)| < 1/2*y^n < 2^(n*EXP(y)-1).
          If n*EXP(y) < __gmpfr_emin then we have an underflow.
          Warning: absn is an unsigned long. */
-      if ((MPFR_EXP(y) < 0 && absn > (unsigned long) (-__gmpfr_emin))
-          || (absn <= (unsigned long) (-MPFR_EMIN_MIN) &&
-              MPFR_EXP(y) < __gmpfr_emin / (mpfr_exp_t) absn))
+      if ((MPFR_GET_EXP (y) < 0 && absn > (-__gmpfr_emin))
+          || (absn <= (-MPFR_EMIN_MIN) &&
+              MPFR_GET_EXP (y) < __gmpfr_emin / (mpfr_exp_t) absn))
         {
-          mpfr_clear (y);
+          MPFR_GROUP_CLEAR (g);
           return mpfr_underflow (res, (r == MPFR_RNDN) ? MPFR_RNDZ : r,
                          (n % 2) ? ((n > 0) ? MPFR_SIGN(z) : -MPFR_SIGN(z))
                                  : MPFR_SIGN_POS);
         }
     }
 
-  mpfr_init (s);
-  mpfr_init (t);
+  MPFR_SAVE_EXPO_MARK (expo);
 
   /* the logarithm of the ratio between the largest term in the series
      and the first one is roughly bounded by k0, which we add to the
@@ -183,9 +184,7 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
   MPFR_ZIV_INIT (loop, prec);
   for (;;)
     {
-      mpfr_set_prec (y, prec);
-      mpfr_set_prec (s, prec);
-      mpfr_set_prec (t, prec);
+      MPFR_GROUP_REPREC_3 (g, prec, y, s, t);
       mpfr_pow_ui (t, z, absn, MPFR_RNDN); /* z^|n| */
       mpfr_mul (y, z, z, MPFR_RNDN);       /* z^2 */
       zz = mpfr_get_ui (y, MPFR_RNDU);
@@ -196,12 +195,15 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
       if (absn > 0)
         mpfr_div_2ui (t, t, absn, MPFR_RNDN);
       mpfr_set (s, t, MPFR_RNDN);
-      exps = MPFR_EXP (s);
+      /* note: we assume here that the maximal error bound is proportional to
+         2^exps, which is true also in the case where s=0 */
+      exps = MPFR_IS_ZERO (s) ? MPFR_EMIN_MIN : MPFR_GET_EXP (s);
       expT = exps;
       for (k = 1; ; k++)
         {
           mpfr_mul (t, t, y, MPFR_RNDN);
           mpfr_neg (t, t, MPFR_RNDN);
+          MPFR_ASSERTN (absn <= ULONG_MAX - k);
           if (k + absn <= ULONG_MAX / k)
             mpfr_div_ui (t, t, k * (k + absn), MPFR_RNDN);
           else
@@ -209,22 +211,28 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
               mpfr_div_ui (t, t, k, MPFR_RNDN);
               mpfr_div_ui (t, t, k + absn, MPFR_RNDN);
             }
-          exps = MPFR_EXP (t);
+          /* see above note */
+          exps = MPFR_IS_ZERO (s) ? MPFR_EMIN_MIN : MPFR_GET_EXP (t);
           if (exps > expT)
             expT = exps;
           mpfr_add (s, s, t, MPFR_RNDN);
-          exps = MPFR_EXP (s);
+          exps = MPFR_IS_ZERO (s) ? MPFR_EMIN_MIN : MPFR_GET_EXP (s);
           if (exps > expT)
             expT = exps;
-          if (MPFR_EXP (t) + (mpfr_exp_t) prec <= MPFR_EXP (s) &&
+          if (MPFR_GET_EXP (t) + (mpfr_exp_t) prec <= exps &&
               zz / (2 * k) < k + n)
             break;
         }
       /* the error is bounded by (4k^2+21/2k+7) ulp(s)*2^(expT-exps)
          <= (k+2)^2 ulp(s)*2^(2+expT-exps) */
-      err = 2 * MPFR_INT_CEIL_LOG2(k + 2) + 2 + expT - MPFR_EXP (s);
+      diffexp = expT - exps;
+      err = 2 * MPFR_INT_CEIL_LOG2(k + 2) + 2;
+      /* FIXME: Can an overflow occur in the following sum? */
+      MPFR_ASSERTN (diffexp >= 0 && err >= 0 &&
+                    diffexp <= MPFR_PREC_MAX - err);
+      err += diffexp;
       if (MPFR_LIKELY (MPFR_CAN_ROUND (s, prec - err, MPFR_PREC(res), r)))
-          break;
+        break;
       MPFR_ZIV_NEXT (loop, prec);
     }
   MPFR_ZIV_FREE (loop);
@@ -232,11 +240,10 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
   inex = ((n >= 0) || ((n & 1) == 0)) ? mpfr_set (res, s, r)
                                       : mpfr_neg (res, s, r);
 
-  mpfr_clear (y);
-  mpfr_clear (s);
-  mpfr_clear (t);
+  MPFR_SAVE_EXPO_FREE (expo);
+  MPFR_GROUP_CLEAR (g);
 
-  return inex;
+  return mpfr_check_range (res, inex, r);
 }
 
 #define MPFR_JN
