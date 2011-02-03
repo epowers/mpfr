@@ -128,14 +128,3 @@ dist-hook:
 	  vinfo=`sed -n "s/^# *$$mv\.x *\([0-9][0-9]*\):x:\([0-9][0-9]*\)/\1:$$pl:\2/p" $(srcdir)/Makefile.am` && \
 	  printf "vinfo=%s\n" "$$vinfo" && \
 	  grep -q -e "-version-info $$vinfo$$" $(srcdir)/Makefile.am; }
-
-# The following needs to be removed once GNU Automake 1.11 support is added.
-DIST_ARCHIVES = $(distdir).tar.gz $(distdir).tar.bz2 $(distdir).tar.xz \
-	$(distdir).zip
-dist dist-all: distdir
-	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
-	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
-	tardir=$(distdir) && $(am__tar) | xz -c >$(distdir).tar.xz
-	-rm -f $(distdir).zip
-	zip -rq $(distdir).zip $(distdir)
-	$(am__remove_distdir)
