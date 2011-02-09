@@ -155,6 +155,15 @@ http://www.gnu.org/licenses/ or write to the Free Software Foundation, Inc.,
 
 
 /******************************************************
+ ************* GMP Basic Pointer Types ****************
+ ******************************************************/
+
+typedef mp_limb_t *mpfr_limb_ptr;
+typedef __gmp_const mp_limb_t *mpfr_limb_srcptr;
+
+
+
+/******************************************************
  ****************** (U)INTMAX_MAX *********************
  ******************************************************/
 
@@ -896,8 +905,8 @@ extern unsigned char *mpfr_stack;
    MPFR_SET_POS(x),                                                  \
    MPFR_SET_INVALID_EXP(x))
 
-#define MPFR_TMP_INIT(xp, x, p, s)                                   \
-  (xp = (mp_ptr) MPFR_TMP_ALLOC(BYTES_PER_MP_LIMB * ((size_t) s)),        \
+#define MPFR_TMP_INIT(xp, x, p, s)                                        \
+  (xp = (mpfr_limb_ptr) MPFR_TMP_ALLOC(BYTES_PER_MP_LIMB * ((size_t) s)), \
    MPFR_TMP_INIT1(xp, x, p))
 
 #define MPFR_TMP_INIT_ABS(d, s)                                      \
@@ -1717,9 +1726,10 @@ __MPFR_DECLSPEC void mpfr_clear_cache _MPFR_PROTO ((mpfr_cache_t));
 __MPFR_DECLSPEC int  mpfr_cache _MPFR_PROTO ((mpfr_ptr, mpfr_cache_t,
                                               mpfr_rnd_t));
 
-__MPFR_DECLSPEC void mpfr_mulhigh_n _MPFR_PROTO ((mp_ptr, mp_srcptr,
-                                                  mp_srcptr, mp_size_t));
-__MPFR_DECLSPEC void mpfr_sqrhigh_n _MPFR_PROTO ((mp_ptr, mp_srcptr, mp_size_t));
+__MPFR_DECLSPEC void mpfr_mulhigh_n _MPFR_PROTO ((mpfr_limb_ptr,
+                        mpfr_limb_srcptr, mpfr_limb_srcptr, mp_size_t));
+__MPFR_DECLSPEC void mpfr_sqrhigh_n _MPFR_PROTO ((mpfr_limb_ptr,
+                        mpfr_limb_srcptr, mp_size_t));
 
 __MPFR_DECLSPEC int mpfr_round_p _MPFR_PROTO ((mp_limb_t *, mp_size_t,
                                                mpfr_exp_t, mpfr_prec_t));
@@ -1734,7 +1744,7 @@ __MPFR_DECLSPEC int mpfr_round_near_x _MPFR_PROTO ((mpfr_ptr, mpfr_srcptr,
 __MPFR_DECLSPEC void mpfr_abort_prec_max _MPFR_PROTO ((void))
        MPFR_NORETURN_ATTR;
 
-__MPFR_DECLSPEC void mpfr_rand_raw _MPFR_PROTO((mp_ptr, gmp_randstate_t,
+__MPFR_DECLSPEC void mpfr_rand_raw _MPFR_PROTO((mpfr_limb_ptr, gmp_randstate_t,
                                                 unsigned long));
 
 __MPFR_DECLSPEC mpz_t* mpfr_bernoulli_internal _MPFR_PROTO((mpz_t*,

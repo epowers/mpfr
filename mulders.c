@@ -40,7 +40,8 @@ static short mulhigh_ktab[] = {MPFR_MULHIGH_TAB};
    of {mp, n} * {np, n}.
    The error is at worst of ln(n) for rp[n] and rp[n-1] is totally wrong */
 static void
-mpfr_mulhigh_n_basecase (mp_ptr rp, mp_srcptr up, mp_srcptr vp, mp_size_t n)
+mpfr_mulhigh_n_basecase (mpfr_limb_ptr rp, mpfr_limb_srcptr up,
+                         mpfr_limb_srcptr vp, mp_size_t n)
 {
   mp_size_t i;
 
@@ -51,7 +52,8 @@ mpfr_mulhigh_n_basecase (mp_ptr rp, mp_srcptr up, mp_srcptr vp, mp_size_t n)
 }
 
 void
-mpfr_mulhigh_n (mp_ptr rp, mp_srcptr np, mp_srcptr mp, mp_size_t n)
+mpfr_mulhigh_n (mpfr_limb_ptr rp, mpfr_limb_srcptr np, mpfr_limb_srcptr mp,
+                mp_size_t n)
 {
   mp_size_t k;
 
@@ -86,7 +88,7 @@ static short sqrhigh_ktab[] = {MPFR_SQRHIGH_TAB};
 #endif
 
 void
-mpfr_sqrhigh_n (mp_ptr rp, mp_srcptr np, mp_size_t n)
+mpfr_sqrhigh_n (mpfr_limb_ptr rp, mpfr_limb_srcptr np, mp_size_t n)
 {
   mp_size_t k;
 

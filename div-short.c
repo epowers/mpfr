@@ -12,11 +12,11 @@
            : mpn_dc_divrem_n_new (qp, np, dp, nn)
 
 static mp_limb_t
-mpn_dc_divrem_n_new (mp_ptr qp, mp_ptr np, mp_srcptr dp, mp_size_t n)
+mpn_dc_divrem_n_new (mpfr_limb_ptr qp, mpfr_limb_ptr np, mpfr_limb_srcptr dp, mp_size_t n)
 {
   mp_size_t l, m;
   mp_limb_t qh, cc, ql;
-  mp_ptr tmp;
+  mpfr_limb_ptr tmp;
   MPFR_TMP_DECL (marker);
 
   l = n / 2;
@@ -63,11 +63,11 @@ mpn_dc_divrem_n_new (mp_ptr qp, mp_ptr np, mp_srcptr dp, mp_size_t n)
            : mpn_dc_divrem_n_high (qp, np, dp, nn)
 
 static mp_limb_t
-mpn_dc_divrem_n_high (mp_ptr qp, mp_ptr np, mp_srcptr dp, mp_size_t n)
+mpn_dc_divrem_n_high (mpfr_limb_ptr qp, mpfr_limb_ptr np, mpfr_limb_srcptr dp, mp_size_t n)
 {
   mp_size_t l, m;
   mp_limb_t qh, cc, ql;
-  mp_ptr tmp;
+  mpfr_limb_ptr tmp;
   MPFR_TMP_DECL (marker);
 
   l = (n-1) / 2 ;
