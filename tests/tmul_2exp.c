@@ -103,10 +103,11 @@ underflow (mpfr_exp_t e)
                     printf ("default emin");
                   else
                     printf ("%ld", e);
-                  printf (")\nwith %s, x = %d/16, prec = %d, k = %d, mpfr_%s",
-                          div == 0 ? "mul_2si" : div == 1 ? "div_2si" :
-                          "div_2ui", i, prec, k, mpfr_print_rnd_mode ((mpfr_rnd_t) rnd));
-                  printf ("\nExpected ");
+                  printf (") with mpfr_%s,\nx = %d/16, prec = %d, k = %d, "
+                          "%s\n", div == 0 ? "mul_2si" : div == 1 ?
+                          "div_2si" : "div_2ui", i, prec, k,
+                          mpfr_print_rnd_mode ((mpfr_rnd_t) rnd));
+                  printf ("Expected ");
                   mpfr_out_str (stdout, 16, 0, z1, MPFR_RNDN);
                   printf (", inex = %d, flags = %u\n", SIGN (inex1), flags1);
                   printf ("Got      ");
@@ -129,6 +130,114 @@ underflow0 (void)
   if (mpfr_get_emin () != MPFR_EMIN_MIN)
     underflow (mpfr_get_emin ());
   underflow (MPFR_EMIN_MIN);
+}
+
+static void
+large (mpfr_exp_t e)
+{
+  mpfr_t x, y, z;
+  mpfr_exp_t emax;
+  int inex;
+  unsigned int flags;
+
+  emax = mpfr_get_emax ();
+  set_emax (e);
+  mpfr_init2 (x, 8);
+  mpfr_init2 (y, 8);
+  mpfr_init2 (z, 4);
+
+  mpfr_set_inf (x, 1);
+  mpfr_nextbelow (x);
+
+  mpfr_mul_2si (y, x, -1, MPFR_RNDU);
+  mpfr_prec_round (y, 4, MPFR_RNDU);
+
+  mpfr_clear_flags ();
+  inex = mpfr_mul_2si (z, x, -1, MPFR_RNDU);
+  flags = __gmpfr_flags;
+
+  if (inex <= 0 || flags != MPFR_FLAGS_INEXACT || ! mpfr_equal_p (y, z))
+    {
+      printf ("Error in large(");
+      if (e == MPFR_EMAX_MAX)
+        printf ("MPFR_EMAX_MAX");
+      else if (e == emax)
+        printf ("default emax");
+      else if (e <= LONG_MAX)
+        printf ("%ld", (long) e);
+      else
+        printf (">LONG_MAX");
+      printf (") for mpfr_mul_2si\n");
+      printf ("Expected inex > 0, flags = %u,\n         y = ",
+              (unsigned int) MPFR_FLAGS_INEXACT);
+      mpfr_dump (y);
+      printf ("Got      inex = %d, flags = %u,\n         y = ",
+              inex, flags);
+      mpfr_dump (z);
+      exit (1);
+    }
+
+  mpfr_clear_flags ();
+  inex = mpfr_div_2si (z, x, 1, MPFR_RNDU);
+  flags = __gmpfr_flags;
+
+  if (inex <= 0 || flags != MPFR_FLAGS_INEXACT || ! mpfr_equal_p (y, z))
+    {
+      printf ("Error in large(");
+      if (e == MPFR_EMAX_MAX)
+        printf ("MPFR_EMAX_MAX");
+      else if (e == emax)
+        printf ("default emax");
+      else if (e <= LONG_MAX)
+        printf ("%ld", (long) e);
+      else
+        printf (">LONG_MAX");
+      printf (") for mpfr_div_2si\n");
+      printf ("Expected inex > 0, flags = %u,\n         y = ",
+              (unsigned int) MPFR_FLAGS_INEXACT);
+      mpfr_dump (y);
+      printf ("Got      inex = %d, flags = %u,\n         y = ",
+              inex, flags);
+      mpfr_dump (z);
+      exit (1);
+    }
+
+  mpfr_clear_flags ();
+  inex = mpfr_div_2ui (z, x, 1, MPFR_RNDU);
+  flags = __gmpfr_flags;
+
+  if (inex <= 0 || flags != MPFR_FLAGS_INEXACT || ! mpfr_equal_p (y, z))
+    {
+      printf ("Error in large(");
+      if (e == MPFR_EMAX_MAX)
+        printf ("MPFR_EMAX_MAX");
+      else if (e == emax)
+        printf ("default emax");
+      else if (e <= LONG_MAX)
+        printf ("%ld", (long) e);
+      else
+        printf (">LONG_MAX");
+      printf (") for mpfr_div_2ui\n");
+      printf ("Expected inex > 0, flags = %u,\n         y = ",
+              (unsigned int) MPFR_FLAGS_INEXACT);
+      mpfr_dump (y);
+      printf ("Got      inex = %d, flags = %u,\n         y = ",
+              inex, flags);
+      mpfr_dump (z);
+      exit (1);
+    }
+
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
+  set_emax (emax);
+}
+
+static void
+large0 (void)
+{
+  large (256);
+  if (mpfr_get_emax () != MPFR_EMAX_MAX)
+    large (mpfr_get_emax ());
+  large (MPFR_EMAX_MAX);
 }
 
 int
@@ -221,6 +330,7 @@ main (int argc, char *argv[])
   mpfr_clears (w, z, (mpfr_ptr) 0);
 
   underflow0 ();
+  large0 ();
 
   tests_end_mpfr ();
   return 0;

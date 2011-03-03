@@ -163,6 +163,8 @@ mpfr_gamma (mpfr_ptr gamma, mpfr_srcptr x, mpfr_rnd_t rnd_mode)
   if (MPFR_EXP(x) + 2 <= -2 * (mpfr_exp_t) MAX(MPFR_PREC(x), MPFR_PREC(gamma)))
     {
       int positive = MPFR_IS_POS (x);
+
+      MPFR_SAVE_EXPO_MARK (expo);
       inex = mpfr_ui_div (gamma, 1, x, rnd_mode);
       if (inex == 0) /* x is a power of two */
         {
@@ -187,7 +189,11 @@ mpfr_gamma (mpfr_ptr gamma, mpfr_srcptr x, mpfr_rnd_t rnd_mode)
                 inex = -1;
             }
         }
-      return inex;
+      MPFR_SAVE_EXPO_FREE (expo);
+      /* Note: an overflow is possible with an infinite result;
+         in this case, the overflow flag will automatically be
+         restored by mpfr_check_range. */
+      return mpfr_check_range (gamma, inex, rnd_mode);
     }
 
   is_integer = mpfr_integer_p (x);
@@ -225,12 +231,15 @@ mpfr_gamma (mpfr_ptr gamma, mpfr_srcptr x, mpfr_rnd_t rnd_mode)
          to return a mpz_t or mpfr_t. */
     }
 
+  MPFR_SAVE_EXPO_MARK (expo);
+
   /* check for overflow: according to (6.1.37) in Abramowitz & Stegun,
      gamma(x) >= exp(-x) * x^(x-1/2) * sqrt(2*Pi)
               >= 2 * (x/e)^x / x for x >= 1 */
   if (compared > 0)
     {
       mpfr_t yp;
+      mpfr_exp_t expxp;
       MPFR_BLOCK_DECL (flags);
 
       /* 1/e rounded down to 53 bits */
@@ -246,15 +255,16 @@ mpfr_gamma (mpfr_ptr gamma, mpfr_srcptr x, mpfr_rnd_t rnd_mode)
       mpfr_mul (xp, xp, yp, MPFR_RNDZ); /* x^(x-2) / e^x */
       mpfr_mul (xp, xp, x, MPFR_RNDZ); /* lower bound on x^(x-1) / e^x */
       MPFR_BLOCK (flags, mpfr_mul_2ui (xp, xp, 1, MPFR_RNDZ));
+      expxp = MPFR_GET_EXP (xp);
       mpfr_clear (xp);
       mpfr_clear (yp);
-      return MPFR_OVERFLOW (flags) ? mpfr_overflow (gamma, rnd_mode, 1)
-        : mpfr_gamma_aux (gamma, x, rnd_mode);
+      MPFR_SAVE_EXPO_FREE (expo);
+      return MPFR_OVERFLOW (flags) || expxp > __gmpfr_emax ?
+        mpfr_overflow (gamma, rnd_mode, 1) :
+        mpfr_gamma_aux (gamma, x, rnd_mode);
     }
 
   /* now compared < 0 */
-
-  MPFR_SAVE_EXPO_MARK (expo);
 
   /* check for underflow: for x < 1,
      gamma(x) = Pi*(x-1)/sin(Pi*(2-x))/gamma(2-x).

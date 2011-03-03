@@ -637,10 +637,12 @@ typedef unsigned long int  mpfr_uexp_t;
 typedef long int mpfr_eexp_t;
 # define mpfr_get_exp_t(x,r) mpfr_get_si((x),(r))
 # define mpfr_set_exp_t(x,e,r) mpfr_set_si((x),(e),(r))
+# define MPFR_EXP_FSPEC "l"
 #elif defined (_MPFR_H_HAVE_INTMAX_T)
 typedef intmax_t mpfr_eexp_t;
 # define mpfr_get_exp_t(x,r) mpfr_get_sj((x),(r))
 # define mpfr_set_exp_t(x,e,r) mpfr_set_sj((x),(e),(r))
+# define MPFR_EXP_FSPEC "j"
 #else
 # error "Cannot define mpfr_get_exp_t and mpfr_set_exp_t"
 #endif
@@ -1305,6 +1307,26 @@ typedef struct {
 #define MPFR_CAN_ROUND(b,err,prec,rnd)                                       \
  (!MPFR_IS_SINGULAR (b) && mpfr_round_p (MPFR_MANT (b), MPFR_LIMB_SIZE (b),  \
                                          (err), (prec) + ((rnd)==MPFR_RNDN)))
+
+/* Copy the sign and the significand, and handle the exponent in exp. */
+#define MPFR_SETRAW(inexact,dest,src,exp,rnd)                           \
+  if (MPFR_UNLIKELY (dest != src))                                      \
+    {                                                                   \
+      MPFR_SET_SIGN (dest, MPFR_SIGN (src));                            \
+      if (MPFR_LIKELY (MPFR_PREC (dest) == MPFR_PREC (src)))            \
+        {                                                               \
+          MPN_COPY (MPFR_MANT (dest), MPFR_MANT (src),                  \
+                    (MPFR_PREC (src) + GMP_NUMB_BITS-1)/GMP_NUMB_BITS); \
+          inexact = 0;                                                  \
+        }                                                               \
+      else                                                              \
+        {                                                               \
+          MPFR_RNDRAW (inexact, dest, MPFR_MANT (src), MPFR_PREC (src), \
+                       rnd, MPFR_SIGN (src), exp++);                    \
+        }                                                               \
+    }                                                                   \
+  else                                                                  \
+    inexact = 0;
 
 /* TODO: fix this description (see round_near_x.c). */
 /* Assuming that the function has a Taylor expansion which looks like:
