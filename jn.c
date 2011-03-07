@@ -192,8 +192,10 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
       MPFR_GROUP_REPREC_3 (g, prec, y, s, t);
       mpfr_pow_ui (t, z, absn, MPFR_RNDN); /* z^|n| */
       mpfr_mul (y, z, z, MPFR_RNDN);       /* z^2 */
+      mpfr_clear_erangeflag ();
       zz = mpfr_get_ui (y, MPFR_RNDU);
-      MPFR_ASSERTN (zz <= ULONG_MAX);
+      /* FIXME: The error analysis is incorrect in case of range error. */
+      MPFR_ASSERTN (! mpfr_erangeflag_p ()); /* since mpfr_clear_erangeflag */
       mpfr_div_2ui (y, y, 2, MPFR_RNDN);   /* z^2/4 */
       mpfr_fac_ui (s, absn, MPFR_RNDN);    /* |n|! */
       mpfr_div (t, t, s, MPFR_RNDN);
@@ -208,6 +210,9 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
         {
           mpfr_mul (t, t, y, MPFR_RNDN);
           mpfr_neg (t, t, MPFR_RNDN);
+          /* Mathematically: absn <= LONG_MAX + 1 <= (ULONG_MAX + 1) / 2,
+             and in practice, k is not very large, so that one should have
+             k + absn <= ULONG_MAX. */
           MPFR_ASSERTN (absn <= ULONG_MAX - k);
           if (k + absn <= ULONG_MAX / k)
             mpfr_div_ui (t, t, k * (k + absn), MPFR_RNDN);
@@ -224,8 +229,9 @@ mpfr_jn (mpfr_ptr res, long n, mpfr_srcptr z, mpfr_rnd_t r)
           exps = MPFR_IS_ZERO (s) ? MPFR_EMIN_MIN : MPFR_GET_EXP (s);
           if (exps > expT)
             expT = exps;
+          /* Above it has been checked that k + absn <= ULONG_MAX. */
           if (MPFR_GET_EXP (t) + (mpfr_exp_t) prec <= exps &&
-              zz / (2 * k) < k + n)
+              zz / (2 * k) < k + absn)
             break;
         }
       /* the error is bounded by (4k^2+21/2k+7) ulp(s)*2^(expT-exps)
