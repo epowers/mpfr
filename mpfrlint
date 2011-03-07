@@ -5,7 +5,9 @@
 grep '^# *include *<math\.h>' *.c
 
 grep -E 'mpfr_(underflow|overflow|nanflag|inexflag|erangeflag)_p' *.{c,h} | \
-  grep -v '^exceptions.c:' | grep -v '^mpfr-impl.h:#define mpfr_.*_p()' | \
+  grep -v 'mpfr_clear_' | \
+  grep -v '^exceptions.c:' | \
+  grep -v '^mpfr-impl.h:#define mpfr_.*_p()' | \
   grep -v '^mpfr.h:__MPFR_DECLSPEC '
 
 grep -E 'if +(test|\[).* == ' acinclude.m4 configure.in
