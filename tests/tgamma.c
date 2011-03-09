@@ -25,6 +25,9 @@ http://www.gnu.org/licenses/ or write to the Free Software Foundation, Inc.,
 
 #include "mpfr-test.h"
 
+/* Note: there could be an incorrect test about suspicious overflow
+   (MPFR_SUSPICIOUS_OVERFLOW) for x = 2^(-emax) = 0.5 * 2^(emin+1) in
+   RNDZ or RNDD, but this case is never tested in the generic tests. */
 #define TEST_FUNCTION mpfr_gamma
 #define RAND_FUNCTION(x) mpfr_random2(x, MPFR_LIMB_SIZE (x), 1, RANDS)
 #include "tgeneric.c"
@@ -503,6 +506,8 @@ exprange (void)
   if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
     {
       printf ("Error in exprange (test1)\n");
+      printf ("x = ");
+      mpfr_dump (x);
       printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
       mpfr_dump (y);
       printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
@@ -524,6 +529,8 @@ exprange (void)
   if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
     {
       printf ("Error in exprange (test2)\n");
+      printf ("x = ");
+      mpfr_dump (x);
       printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
       mpfr_dump (y);
       printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
@@ -544,6 +551,8 @@ exprange (void)
   if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
     {
       printf ("Error in exprange (test3)\n");
+      printf ("x = ");
+      mpfr_dump (x);
       printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
       mpfr_dump (y);
       printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
@@ -565,6 +574,8 @@ exprange (void)
   if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
     {
       printf ("Error in exprange (test4)\n");
+      printf ("x = ");
+      mpfr_dump (x);
       printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
       mpfr_dump (y);
       printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
@@ -576,17 +587,20 @@ exprange (void)
   mpfr_set_emin (MPFR_EMIN_MIN);
   mpfr_set_emax (MPFR_EMAX_MAX);
   mpfr_set_ui (x, 0, MPFR_RNDN);
-  mpfr_nextabove (x);
+  mpfr_nextabove (x);  /* x = 2^(emin - 1) */
   mpfr_set_inf (y, 1);
   inex1 = 1;
   flags1 = MPFR_FLAGS_INEXACT | MPFR_FLAGS_OVERFLOW;
   mpfr_clear_flags ();
+  /* MPFR_RNDU: overflow, infinity since 1/x = 2^(emax + 1) */
   inex2 = mpfr_gamma (z, x, MPFR_RNDU);
   flags2 = __gmpfr_flags;
   MPFR_ASSERTN (mpfr_inexflag_p ());
   if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
     {
       printf ("Error in exprange (test5)\n");
+      printf ("x = ");
+      mpfr_dump (x);
       printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
       mpfr_dump (y);
       printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
@@ -594,12 +608,69 @@ exprange (void)
       exit (1);
     }
   mpfr_clear_flags ();
+  /* MPFR_RNDN: overflow, infinity since 1/x = 2^(emax + 1) */
   inex2 = mpfr_gamma (z, x, MPFR_RNDN);
   flags2 = __gmpfr_flags;
   MPFR_ASSERTN (mpfr_inexflag_p ());
   if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
     {
       printf ("Error in exprange (test6)\n");
+      printf ("x = ");
+      mpfr_dump (x);
+      printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
+      mpfr_dump (y);
+      printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
+      mpfr_dump (z);
+      exit (1);
+    }
+  mpfr_nextbelow (y);
+  inex1 = -1;
+  mpfr_clear_flags ();
+  /* MPFR_RNDD: overflow, maxnum since 1/x = 2^(emax + 1) */
+  inex2 = mpfr_gamma (z, x, MPFR_RNDD);
+  flags2 = __gmpfr_flags;
+  MPFR_ASSERTN (mpfr_inexflag_p ());
+  if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
+    {
+      printf ("Error in exprange (test7)\n");
+      printf ("x = ");
+      mpfr_dump (x);
+      printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
+      mpfr_dump (y);
+      printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
+      mpfr_dump (z);
+      exit (1);
+    }
+  mpfr_mul_2ui (x, x, 1, MPFR_RNDN);  /* x = 2^emin */
+  mpfr_set_inf (y, 1);
+  inex1 = 1;
+  flags1 = MPFR_FLAGS_INEXACT | MPFR_FLAGS_OVERFLOW;
+  mpfr_clear_flags ();
+  /* MPFR_RNDU: overflow, infinity since 1/x = 2^emax */
+  inex2 = mpfr_gamma (z, x, MPFR_RNDU);
+  flags2 = __gmpfr_flags;
+  MPFR_ASSERTN (mpfr_inexflag_p ());
+  if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
+    {
+      printf ("Error in exprange (test8)\n");
+      printf ("x = ");
+      mpfr_dump (x);
+      printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
+      mpfr_dump (y);
+      printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
+      mpfr_dump (z);
+      exit (1);
+    }
+  mpfr_clear_flags ();
+  /* MPFR_RNDN: overflow, infinity since 1/x = 2^emax */
+  inex2 = mpfr_gamma (z, x, MPFR_RNDN);
+  flags2 = __gmpfr_flags;
+  MPFR_ASSERTN (mpfr_inexflag_p ());
+  if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
+    {
+      printf ("Error in exprange (test9)\n");
+      printf ("x = ");
+      mpfr_dump (x);
       printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
       mpfr_dump (y);
       printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
@@ -610,12 +681,15 @@ exprange (void)
   inex1 = -1;
   flags1 = MPFR_FLAGS_INEXACT;
   mpfr_clear_flags ();
+  /* MPFR_RNDD: no overflow, maxnum since 1/x = 2^emax and euler > 0 */
   inex2 = mpfr_gamma (z, x, MPFR_RNDD);
   flags2 = __gmpfr_flags;
   MPFR_ASSERTN (mpfr_inexflag_p ());
   if (inex1 != inex2 || flags1 != flags2 || ! mpfr_equal_p (y, z))
     {
-      printf ("Error in exprange (test7)\n");
+      printf ("Error in exprange (test10)\n");
+      printf ("x = ");
+      mpfr_dump (x);
       printf ("Expected inex1 = %d, flags1 = %u, ", SIGN (inex1), flags1);
       mpfr_dump (y);
       printf ("Got      inex2 = %d, flags2 = %u, ", SIGN (inex2), flags2);
@@ -628,6 +702,112 @@ exprange (void)
   mpfr_clears (x, y, z, (mpfr_ptr) 0);
 }
 
+static int
+tiny_aux (int stop, mpfr_exp_t e)
+{
+  mpfr_t x, y, z;
+  int r, s, spm, inex, err = 0;
+  int expected_dir[2][5] = { { 1, -1, 1, -1, 1 }, { 1, 1, 1, -1, -1 } };
+  mpfr_exp_t saved_emax;
+
+  saved_emax = mpfr_get_emax ();
+
+  mpfr_init2 (x, 32);
+  mpfr_inits2 (8, y, z, (mpfr_ptr) 0);
+
+  mpfr_set_ui_2exp (x, 1, e, MPFR_RNDN);
+  spm = 1;
+  for (s = 0; s < 2; s++)
+    {
+      RND_LOOP(r)
+        {
+          mpfr_rnd_t rr = (mpfr_rnd_t) r;
+          mpfr_exp_t exponent, emax;
+
+          /* Exponent of the rounded value in unbounded exponent range. */
+          exponent = expected_dir[s][r] < 0 && s == 0 ? - e : 1 - e;
+
+          for (emax = exponent - 1; emax <= exponent; emax++)
+            {
+              unsigned int flags, expected_flags = MPFR_FLAGS_INEXACT;
+              int overflow, expected_inex = expected_dir[s][r];
+
+              if (emax > MPFR_EMAX_MAX)
+                break;
+              mpfr_set_emax (emax);
+
+              mpfr_clear_flags ();
+              inex = mpfr_gamma (y, x, rr);
+              flags = __gmpfr_flags;
+              mpfr_clear_flags ();
+              mpfr_set_si_2exp (z, spm, - e, MPFR_RNDU);
+              overflow = mpfr_overflow_p ();
+              /* z is 1/x - euler rounded toward +inf */
+
+              if (overflow && rr == MPFR_RNDN && s == 1)
+                expected_inex = -1;
+
+              if (expected_inex < 0)
+                mpfr_nextbelow (z); /* 1/x - euler rounded toward -inf */
+
+              if (exponent > emax)
+                expected_flags |= MPFR_FLAGS_OVERFLOW;
+
+              if (!(mpfr_equal_p (y, z) && flags == expected_flags
+                    && SAME_SIGN (inex, expected_inex)))
+                {
+                  printf ("Error in tiny for s = %d, r = %s, emax = %"
+                          MPFR_EXP_FSPEC "d%s\n  on ",
+                          s, mpfr_print_rnd_mode (rr), emax,
+                          exponent > emax ? " (overflow)" : "");
+                  mpfr_dump (x);
+                  printf ("  expected inex = %2d, ", expected_inex);
+                  mpfr_dump (z);
+                  printf ("  got      inex = %2d, ", SIGN (inex));
+                  mpfr_dump (y);
+                  printf ("  expected flags = %u, got %u\n",
+                          expected_flags, flags);
+                  if (stop)
+                    exit (1);
+                  err = 1;
+                }
+            }
+        }
+      mpfr_neg (x, x, MPFR_RNDN);
+      spm = - spm;
+    }
+
+  mpfr_clears (x, y, z, (mpfr_ptr) 0);
+  mpfr_set_emax (saved_emax);
+  return err;
+}
+
+static void
+tiny (int stop)
+{
+  mpfr_exp_t emin;
+  int err = 0;
+
+  emin = mpfr_get_emin ();
+
+  /* Note: in r7499, exponent -17 will select the generic code (in
+     tiny_aux, x has precision 32), while the other exponent values
+     will select special code for tiny values. */
+  err |= tiny_aux (stop, -17);
+  err |= tiny_aux (stop, -999);
+  err |= tiny_aux (stop, mpfr_get_emin ());
+
+  if (emin != MPFR_EMIN_MIN)
+    {
+      mpfr_set_emin (MPFR_EMIN_MIN);
+      err |= tiny_aux (stop, MPFR_EMIN_MIN);
+      mpfr_set_emin (emin);
+    }
+
+  if (err)
+    exit (1);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -636,6 +816,7 @@ main (int argc, char *argv[])
   special ();
   special_overflow ();
   exprange ();
+  tiny (argc == 1);
   test_generic (2, 100, 2);
   gamma_integer ();
   test20071231 ();
