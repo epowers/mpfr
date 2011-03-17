@@ -21,7 +21,7 @@ http://www.gnu.org/licenses/ or write to the Free Software Foundation, Inc.,
 ##############################################################################
 
 Changes from version 3.0.0 to version 3.0.1:
-- Bug fixes.
+- Bug fixes (see <http://www.mpfr.org/mpfr-3.0.0/#fixed> or ChangeLog file).
   Note: The mpfr_subnormalize implementation up to MPFR 3.0.0 did not change
   the flags. In particular, it did not follow the generic rule concerning
   the inexact flag (and no special behavior was specified). The case of the
