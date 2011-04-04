@@ -1,4 +1,48 @@
 ------------------------------------------------------------------------
+r7613 | vlefevre | 2011-04-04 10:09:12 +0000 (Mon, 04 Apr 2011) | 1 line
+Changed paths:
+   M /branches/3.0/VERSION
+   M /branches/3.0/configure.in
+   M /branches/3.0/mpfr.h
+   M /branches/3.0/mpfr.texi
+   M /branches/3.0/version.c
+
+Updated version to 3.0.1.
+------------------------------------------------------------------------
+r7612 | vlefevre | 2011-04-04 10:08:23 +0000 (Mon, 04 Apr 2011) | 1 line
+Changed paths:
+   M /branches/3.0/mpfr.texi
+
+[mpfr.texi] Updated the month.
+------------------------------------------------------------------------
+r7608 | vlefevre | 2011-03-29 12:02:15 +0000 (Tue, 29 Mar 2011) | 6 lines
+Changed paths:
+   M /branches/3.0/pow.c
+   M /branches/3.0/tests/reuse.c
+
+[pow.c] Fixed a bug in mpfr_pow_general when an argument is reused
+(e.g. mpfr_pow(x,x,y,rnd) or mpfr_pow(y,x,y,rnd)) and the result is
+negative, thus when x is negative and y is a huge odd integer ("huge"
+because not-too-large integers are currently handled by mpfr_pow_z).
+[tests/reuse.c] Added testcase.
+[merged changesets r7605-7607 from the trunk]
+------------------------------------------------------------------------
+r7593 | vlefevre | 2011-03-21 02:51:06 +0000 (Mon, 21 Mar 2011) | 4 lines
+Changed paths:
+   M /branches/3.0/pow_z.c
+   M /branches/3.0/tests/tpow.c
+
+[pow_z.c] Fixed a bug that occurs in extremely reduced exponent range
+(more precisely, if 1 is out of range, i.e. emin > 1).
+(Merged changeset r7592 from the trunk)
+[tests/tpow.c] Added testcase. (Merged changeset r7591 from the trunk)
+------------------------------------------------------------------------
+r7586 | vlefevre | 2011-03-17 16:00:16 +0000 (Thu, 17 Mar 2011) | 1 line
+Changed paths:
+   M /branches/3.0/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r7585 | vlefevre | 2011-03-17 15:56:01 +0000 (Thu, 17 Mar 2011) | 1 line
 Changed paths:
    M /branches/3.0/VERSION
