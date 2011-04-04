@@ -77,7 +77,7 @@ libmpfr_la_LIBADD = @LIBOBJS@
 #        2.3.x    2:x:1
 #        2.4.x    3:x:2
 #        3.0.x    4:x:0
-libmpfr_la_LDFLAGS = -version-info 4:1:0
+libmpfr_la_LDFLAGS = -version-info 4:2:0
 
 info_TEXINFOS = mpfr.texi
 
