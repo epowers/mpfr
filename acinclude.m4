@@ -241,7 +241,7 @@ fi
 
 dnl Check if the chars '0' to '9' are consecutive values
 AC_MSG_CHECKING([if charset has consecutive values])
-AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 char *number = "0123456789";
 char *lower  = "abcdefghijklmnopqrstuvwxyz";
 char *upper  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -254,10 +254,10 @@ char *upper  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
    if ( (*p)+1 != *(p+1) ) return 1;
  for (p = (unsigned char*) upper, i = 0; i < 25; i++)
    if ( (*p)+1 != *(p+1) ) return 1;
-]]), [AC_MSG_RESULT(yes)],[
+]])], [AC_MSG_RESULT(yes)],[
  AC_MSG_RESULT(no)
  AC_DEFINE(MPFR_NO_CONSECUTIVE_CHARSET,1,[Charset is not consecutive])
-], [AC_MSG_RESULT(can not test)])
+], [AC_MSG_RESULT(cannot test)])
 
 dnl Must be checked with the LIBM
 dnl but we don't want to add the LIBM to MPFR dependency.
@@ -349,14 +349,15 @@ AC_CACHE_CHECK([for TLS support], mpfr_cv_working_tls, [
 saved_CPPFLAGS="$CPPFLAGS"
 # The -I$srcdir is necessary when objdir is different from srcdir.
 CPPFLAGS="$CPPFLAGS -I$srcdir"
-AC_RUN_IFELSE([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #define MPFR_USE_THREAD_SAFE 1
 #include "mpfr-thread.h"
 MPFR_THREAD_ATTR int x = 17;
 int main() {
   return x != 17;
 }
-  ], [mpfr_cv_working_tls="yes"],
+  ]])],
+     [mpfr_cv_working_tls="yes"],
      [AC_MSG_RESULT(no)
       AC_MSG_ERROR([please configure with --disable-thread-safe])],
      [mpfr_cv_working_tls="cannot test, assume yes"])
@@ -827,7 +828,7 @@ fi
 MPFR_FUNC_GMP_PRINTF_SPEC([hhd], [char], [
 #include <gmp.h>
          ],,
-         [AC_DEFINE([NPRINTF_HH], 1, [gmp_printf cannot use 'hh' length modifier])])
+         [AC_DEFINE([NPRINTF_HH], 1, [gmp_printf cannot use `hh' length modifier])])
 
 MPFR_FUNC_GMP_PRINTF_SPEC([lld], [long long int], [
 #include <gmp.h>
