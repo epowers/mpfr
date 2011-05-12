@@ -78,13 +78,7 @@ http://www.gnu.org/licenses/ or write to the Free Software Foundation, Inc.,
 #error "mpfr_prec_t size not supported"
 #endif
 
-#if (__GMP_MP_SIZE_T_INT == 1)
 #define MPFR_EXP_FORMAT_SPEC "i"
-#elif (__GMP_MP_SIZE_T_INT == 0)
-#define MPFR_EXP_FORMAT_SPEC "li"
-#else
-#error "mpfr_exp_t size not supported"
-#endif
 
 /* Output for special values defined in the C99 standard */
 #define MPFR_NAN_STRING_LC "nan"
