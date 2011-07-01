@@ -68,14 +68,18 @@ do
   fi
 done
 
-texisvnd=`LC_ALL=C TZ=UTC svn info mpfr.texi 2> /dev/null | sed -n 's/Last Changed Date:.*, [0-9]* \([A-Z][a-z][a-z] [0-9][0-9][0-9][0-9]\)).*/\1/p'`
-if [ $? -eq 0 ] && [ -n "$texisvnd" ]; then
-  texidate=`sed -n 's/@set UPDATED-MONTH \([A-Z][a-z][a-z]\).*\( [0-9][0-9][0-9][0-9]\)/\1\2/p' mpfr.texi`
-  [ "$texidate" = "$texisvnd" ] || cat <<EOF
+if [ -d .svn ] && \
+   [ "r$(LC_ALL=C svn info mpfr.texi 2> /dev/null |
+        sed -n 's/^Last Changed Rev: //p')" != r7732 ]; then
+  texisvnd=`LC_ALL=C TZ=UTC svn info mpfr.texi 2> /dev/null | sed -n 's/^Last Changed Date:.*, [0-9]* \([A-Z][a-z][a-z] [0-9][0-9][0-9][0-9]\)).*/\1/p'`
+  if [ $? -eq 0 ] && [ -n "$texisvnd" ]; then
+    texidate=`sed -n 's/@set UPDATED-MONTH \([A-Z][a-z][a-z]\).*\( [0-9][0-9][0-9][0-9]\)/\1\2/p' mpfr.texi`
+    [ "$texidate" = "$texisvnd" ] || cat <<EOF
 mpfr.texi's UPDATED-MONTH seems to be incorrect:
   mpfr.texi's UPDATED-MONTH: $texidate
   Last Changed Date in WC:   $texisvnd
 EOF
+  fi
 fi
 
 acv1="`sed -n 's/.*autoconf \([0-9.]\+\) (at least).*/\1/p' README.dev`"
