@@ -3,7 +3,7 @@
 @setfilename mpfr.info
 @documentencoding UTF-8
 @set VERSION 3.1.0-dev
-@set UPDATED-MONTH July 2011
+@set UPDATED-MONTH August 2011
 @settitle GNU MPFR @value{VERSION}
 @synindex tp fn
 @iftex
@@ -720,6 +720,7 @@ rounded to (10.0)=2 with a precision of two bits, and not to (11.0)=3.
 This rule avoids the @dfn{drift} phenomenon mentioned by Knuth in volume 2
 of The Art of Computer Programming (Section 4.2.2).
 
+@anchor{ternary value}@cindex Ternary value
 Most MPFR functions take as first argument the destination variable, as
 second and following arguments the input variables, as last argument a
 rounding mode, and have a return value of type @code{int}, called the
@@ -1219,9 +1220,13 @@ Contrary to @code{mpfr_strtofr}, @code{mpfr_set_str} requires the
 @c @code{@@NaN@@}, @code{@@Inf@@}, @code{+@@Inf@@} and @code{-@@Inf@@},
 @c all case insensitive, without leading whitespace and possibly followed by
 @c other characters, are accepted too (it may change).
-This function returns 0 if the entire string up to the final null character
-is a valid number in base @var{base}; otherwise it returns @minus{}1, and
-@var{rop} may have changed.
+
+The meaning of the return value differs from other MPFR functions:
+it is 0 if the entire string up to the final null character
+is a valid number in base @var{base}; otherwise it is @minus{}1, and
+@var{rop} may have changed (users interested in the @ref{ternary value}
+should use @code{mpfr_strtofr} instead).
+
 Note: it is preferable to use @code{mpfr_set_str} if one wants to distinguish
 between an infinite @var{rop} value coming from an infinite @var{s} or from
 an overflow.
@@ -1429,11 +1434,17 @@ set, @var{rop} is set to 0, and 0 is returned.
 @deftypefun int mpfr_get_f (mpf_t @var{rop}, mpfr_t @var{op}, mpfr_rnd_t @var{rnd})
 Convert @var{op} to a @code{mpf_t}, after rounding it with respect to
 @var{rnd}.
-@c Since we say it in the "API Compatibility" section, no need to say it here:
-@c Return the usual ternary value. Notice that the meaning of the returned value
-@c has changed since version 3.0.
-The @emph{erange} flag is set if @var{op} is NaN or Inf, which do not exist in
-MPF.
+The @emph{erange} flag is set if @var{op} is NaN or an infinity, which
+do not exist in MPF.  If @var{op} is NaN, then @var{rop} is undefined.
+If @var{op} is an +Inf (resp.@: @minus{}Inf), then @var{rop} is set to
+the maximum (resp.@: minimum) value in the precision of the MPF number;
+if a future MPF version supports infinities, this behavior will be
+considered incorrect and will change (portable programs should assume
+that @var{rop} is set either to this finite number or to an infinite
+number).
+Note that since MPFR currently has the same exponent type as MPF (but
+not with the same radix), the range of values is much larger in MPF
+than in MPFR, so that an overflow or underflow is not possible.
 @end deftypefun
 
 @deftypefun {char *} mpfr_get_str (char *@var{str}, mpfr_exp_t *@var{expptr}, int @var{b}, size_t @var{n}, mpfr_t @var{op}, mpfr_rnd_t @var{rnd})
@@ -1769,8 +1780,7 @@ compared), zero otherwise.
 @section Special Functions
 
 All those functions, except explicitly stated (for example
-@code{mpfr_sin_cos}), return a ternary value as defined in Section
-``Rounding Modes'', i.e., zero for an
+@code{mpfr_sin_cos}), return a @ref{ternary value}, i.e., zero for an
 exact return value, a positive value for a return value larger than the
 exact result, and a negative value otherwise.
 
@@ -2570,8 +2580,8 @@ If @var{rnd1} is @code{MPFR_RNDN}, then the sign of the error is
 unknown, but its absolute value is the same, so that the possible range
 is twice as large as with a directed rounding for @var{rnd1}.
 
-Note: if one wants to also determine the correct ternary value when rounding
-@var{b} to precision @var{prec} with rounding mode @var{rnd},
+Note: if one wants to also determine the correct @ref{ternary value} when
+rounding @var{b} to precision @var{prec} with rounding mode @var{rnd},
 a useful trick is the following:
 @verbatim
 if (mpfr_can_round (b, err, MPFR_RNDN, MPFR_RNDZ, prec + (rnd == MPFR_RNDN)))
@@ -2816,7 +2826,7 @@ or @code{mpfr_set_emin(mpfr_get_emin_min())} may not be portable.
 @deftypefun int mpfr_check_range (mpfr_t @var{x}, int @var{t}, mpfr_rnd_t @var{rnd})
 This function assumes that @var{x} is the correctly-rounded value of some
 real value @var{y} in the direction @var{rnd} and some extended exponent
-range, and that @var{t} is the corresponding ternary value.
+range, and that @var{t} is the corresponding @ref{ternary value}.
 For example, one performed @code{t = mpfr_log (x, u, rnd)}, and @var{y} is the
 exact logarithm of @var{u}.
 Thus @var{t} is negative if @var{x} is smaller than @var{y},
@@ -2842,7 +2852,7 @@ been set due to internal computations.
 @deftypefun int mpfr_subnormalize (mpfr_t @var{x}, int @var{t}, mpfr_rnd_t @var{rnd})
 This function rounds @var{x} emulating subnormal number arithmetic:
 if @var{x} is outside the subnormal exponent range, it just propagates the
-ternary value @var{t}; otherwise, it rounds @var{x} to precision
+@ref{ternary value} @var{t}; otherwise, it rounds @var{x} to precision
 @code{EXP(x)-emin+1} according to rounding mode @var{rnd} and previous
 ternary value @var{t}, avoiding double rounding problems.
 More precisely in the subnormal domain, denoting by @var{e} the value of

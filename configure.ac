@@ -390,6 +390,12 @@ dnl
 dnl Setup GMP detection (continued)
 dnl
 
+dnl Check minimal GMP version
+dnl We only guarantee that with a *functional* and recent enough GMP version,
+dnl MPFR will compile; we do not guarantee that GMP will compile.
+dnl In particular fat builds are broken in GMP 4.3.2 and GMP 5.0.0
+dnl (at least on 64-bit Core 2 under Linux),
+dnl see http://gmplib.org/list-archives/gmp-bugs/2011-August/002345.html.
 AC_MSG_CHECKING(for recent GMP)
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 #include "gmp.h"
@@ -501,7 +507,8 @@ dnl WANT_GMP_INTERNALS is defined. Only the GMP public API should be used
 dnl by default, in particular by binary distributions. Moreover the check
 dnl below may yield an incorrect result as libtool isn't used in configure
 dnl (see above).
-AC_CHECK_FUNCS([__gmpn_rootrem])
+dnl Same for __gmpn_sbpi1_divappr_q.
+AC_CHECK_FUNCS([__gmpn_rootrem __gmpn_sbpi1_divappr_q])
 
 dnl End of tests which need to link with GMP.
 fi
