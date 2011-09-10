@@ -1,4 +1,93 @@
 ------------------------------------------------------------------------
+r7841 | vlefevre | 2011-09-10 21:24:05 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Updated the month.
+------------------------------------------------------------------------
+r7840 | vlefevre | 2011-09-10 21:23:08 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1/INSTALL
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.0-rc1.
+------------------------------------------------------------------------
+r7839 | vlefevre | 2011-09-10 21:21:59 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   A /branches/3.1 (from /trunk:7838)
+
+Recreated 3.1 branch from the trunk.
+------------------------------------------------------------------------
+r7836 | vlefevre | 2011-09-10 21:15:45 +0000 (Sat, 10 Sep 2011) | 2 lines
+Changed paths:
+   M /trunk/tests/trec_sqrt.c
+
+[tests/trec_sqrt.c] Fixed bug introduced in r7711 (build failure
+with a C++ compiler).
+------------------------------------------------------------------------
+r7835 | vlefevre | 2011-09-10 20:13:19 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /trunk
+   M /trunk/NEWS
+   M /trunk/doc/mpfr.texi
+
+Removed now useless svn:mergeinfo properties.
+------------------------------------------------------------------------
+r7832 | vlefevre | 2011-09-10 20:04:07 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /trunk/TODO
+
+[TODO] Replaced "configure.in" by "configure.ac".
+------------------------------------------------------------------------
+r7831 | vlefevre | 2011-09-10 20:02:56 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /trunk/doc/README.dev
+
+[doc/README.dev] Removed obsolete paragraph about AM_MAINTAINER_MODE.
+------------------------------------------------------------------------
+r7826 | vlefevre | 2011-09-10 19:08:42 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /trunk/tools/mpfrlint
+
+[tools/mpfrlint] Correction after r7825.
+------------------------------------------------------------------------
+r7825 | vlefevre | 2011-09-10 19:07:39 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /trunk/tools/mpfrlint
+
+[tools/mpfrlint] Run tools/ck-mparam.
+------------------------------------------------------------------------
+r7824 | vlefevre | 2011-09-10 19:04:57 +0000 (Sat, 10 Sep 2011) | 2 lines
+Changed paths:
+   A /trunk/tools/ck-mparam
+
+Added tools/ck-mparam sh script to check the mparam.h files
+(gcc is needed).
+------------------------------------------------------------------------
+r7823 | zimmerma | 2011-09-10 07:15:46 +0000 (Sat, 10 Sep 2011) | 2 lines
+Changed paths:
+   M /trunk/src/amd/k8/mparam.h
+
+[src/amd/k8/mparam.h] removed spurious end of comment
+
+------------------------------------------------------------------------
+r7821 | vlefevre | 2011-09-09 17:19:39 +0000 (Fri, 09 Sep 2011) | 2 lines
+Changed paths:
+   M /trunk/doc/README.dev
+
+[doc/README.dev] For the valgrind example, use the same arguments
+as in gnulib's valgrind-tests.m4 file.
+------------------------------------------------------------------------
+r7818 | vlefevre | 2011-09-09 13:48:33 +0000 (Fri, 09 Sep 2011) | 1 line
+Changed paths:
+   M /trunk/ChangeLog
+
+ChangeLog update with "LC_ALL=en_US.UTF8 TZ=UTC svn log -rHEAD:0 -v".
+------------------------------------------------------------------------
 r7817 | vlefevre | 2011-09-09 13:32:55 +0000 (Fri, 09 Sep 2011) | 5 lines
 Changed paths:
    M /trunk/Makefile.am
