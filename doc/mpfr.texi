@@ -566,16 +566,16 @@ users of C++ compilers under some platforms may need to define
 @file{mpfr.h} has been included; of course, it is possible to do that
 on the command line, e.g., with @code{-DMPFR_USE_INTMAX_T}.
 
-Note: If @code{mpfr.h} and/or @code{gmp.h} (used by @code{mpfr.h})
+Note: If @file{mpfr.h} and/or @file{gmp.h} (used by @file{mpfr.h})
 are included several times (possibly from another header file),
 @code{<stdio.h>} and/or @code{<stdarg.h>} (or @code{<varargs.h>})
 should be included @strong{before the first inclusion} of
-@code{mpfr.h} or @code{gmp.h}.  Alternatively, you can define
+@file{mpfr.h} or @file{gmp.h}.  Alternatively, you can define
 @code{MPFR_USE_FILE} (for MPFR I/O functions) and/or
 @code{MPFR_USE_VA_LIST} (for MPFR functions with @code{va_list}
-parameters) anywhere before the last inclusion of @code{mpfr.h}.
+parameters) anywhere before the last inclusion of @file{mpfr.h}.
 As a consequence, if your file is a public header that includes
-@code{mpfr.h}, you need to use the latter method.
+@file{mpfr.h}, you need to use the latter method.
 
 When calling a MPFR macro, it is not allowed to have previously defined
 a macro with the same name as some keywords (currently @code{do},
@@ -2783,6 +2783,11 @@ is MPFR was built with the @code{--enable-decimal-float} configure option),
 return zero otherwise.
 @end deftypefun
 
+@deftypefun {const char *} mpfr_buildopt_tune_case (void)
+Return a string saying which thresholds file has been used at compile time.
+This file is normally selected from the processor type.
+@end deftypefun
+
 @node Exception Related Functions, Compatibility with MPF, Miscellaneous Functions, MPFR Interface
 @comment  node-name,  next,  previous,  up
 @cindex Exception related functions
@@ -3268,6 +3273,10 @@ MPFR version.
 
 @item @code{mpfr_buildopt_decimal_p} and @code{mpfr_buildopt_tls_p} in MPFR 3.0.
 
+@item @code{mpfr_buildopt_tune_case} in MPFR 3.1.
+
+@item @code{mpfr_clear_divby0} in MPFR 3.1 (new division-by-zero exception).
+
 @item @code{mpfr_copysign} in MPFR 2.3.
 Note: MPFR 2.2 had a @code{mpfr_copysign} function that was available,
 but not documented,
@@ -3288,6 +3297,8 @@ use @code{mpfr_custom_get_mantissa}.
 
 @item @code{mpfr_digamma} in MPFR 3.0.
 
+@item @code{mpfr_divby0_p} in MPFR 3.1 (new division-by-zero exception).
+
 @item @code{mpfr_div_d} in MPFR 2.4.
 
 @item @code{mpfr_fmod} in MPFR 2.4.
@@ -3295,6 +3306,8 @@ use @code{mpfr_custom_get_mantissa}.
 @item @code{mpfr_fms} in MPFR 2.3.
 
 @item @code{mpfr_fprintf} in MPFR 2.4.
+
+@item @code{mpfr_frexp} in MPFR 3.1.
 
 @item @code{mpfr_get_flt} in MPFR 3.0.
 
@@ -3308,6 +3321,8 @@ This function was named @code{mpfr_get_z_exp} in previous versions;
 @end example
 Thus code that needs to work with both MPFR 2.x and MPFR 3.x should
 use @code{mpfr_get_z_exp}.
+
+@item @code{mpfr_grandom} in MPFR 3.1.
 
 @item @code{mpfr_j0}, @code{mpfr_j1} and @code{mpfr_jn} in MPFR 2.3.
 
@@ -3328,6 +3343,8 @@ use @code{mpfr_get_z_exp}.
 @item @code{mpfr_regular_p} in MPFR 3.0.
 
 @item @code{mpfr_remainder} and @code{mpfr_remquo} in MPFR 2.3.
+
+@item @code{mpfr_set_divby0} in MPFR 3.1 (new division-by-zero exception).
 
 @item @code{mpfr_set_flt} in MPFR 3.0.
 
@@ -3351,6 +3368,8 @@ use @code{mpfr_get_z_exp}.
       @code{mpfr_vsprintf} and @code{mpfr_vsnprintf} in MPFR 2.4.
 
 @item @code{mpfr_y0}, @code{mpfr_y1} and @code{mpfr_yn} in MPFR 2.3.
+
+@item @code{mpfr_z_sub} in MPFR 3.1.
 
 @end itemize
 
@@ -3483,6 +3502,13 @@ such as defining @code{intmax_t} and @code{uintmax_t} in the global
 namespace, though this is not clean.
 
 @end itemize
+
+The division-by-zero exception is new in MPFR 3.1. However it should
+not introduce incompatible changes for programs that strictly follow
+the MPFR API since the exception can only be seen via new functions.
+
+As of MPFR 3.1, the @file{mpfr.h} header can be included several times,
+while still supporting optional functions (@pxref{Headers and Libraries}).
 
 @node Contributors, References, API Compatibility, Top
 @comment  node-name,  next,  previous,  up
