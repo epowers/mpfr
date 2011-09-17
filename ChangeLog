@@ -1,4 +1,38 @@
 ------------------------------------------------------------------------
+r7853 | vlefevre | 2011-09-14 21:38:49 +0000 (Wed, 14 Sep 2011) | 4 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/mpfr-impl.h
+
+[src/mpfr-impl.h] Define LONGLONG_STANDALONE before including
+mpfr-longlong.h so that udiv_qrnnd_preinv is defined (this is
+useful at least on IA64 when compiling without gmp-impl.h).
+Thanks to Patrick Pélissier for the fix.
+------------------------------------------------------------------------
+r7851 | vlefevre | 2011-09-11 09:21:52 +0000 (Sun, 11 Sep 2011) | 3 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/NEWS
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Updated "API Compatibility" section. Documented
+  function mpfr_buildopt_tune_case. Minor consistency changes.
+[NEWS] Function mpfr_buildopt_tune_case is new in MPFR 3.1.
+------------------------------------------------------------------------
+r7844 | vlefevre | 2011-09-11 07:49:03 +0000 (Sun, 11 Sep 2011) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] MPFR_RNDA was introduced in MPFR 3.0.0 and should
+no longer be considered experimental.
+------------------------------------------------------------------------
+r7842 | vlefevre | 2011-09-10 21:25:45 +0000 (Sat, 10 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r7841 | vlefevre | 2011-09-10 21:24:05 +0000 (Sat, 10 Sep 2011) | 1 line
 Changed paths:
    M /branches/3.1/doc/mpfr.texi
