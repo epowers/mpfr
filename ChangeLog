@@ -1,4 +1,64 @@
 ------------------------------------------------------------------------
+r7872 | vlefevre | 2011-09-20 07:37:01 +0000 (Tue, 20 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.0-rc2.
+------------------------------------------------------------------------
+r7871 | vlefevre | 2011-09-20 07:35:18 +0000 (Tue, 20 Sep 2011) | 18 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/NEWS
+   M /branches/3.1/TODO
+   M /branches/3.1/doc/README.dev
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/examples/version.c
+   M /branches/3.1/src/agm.c
+   M /branches/3.1/src/buildopt.c
+   M /branches/3.1/src/gmp_op.c
+   M /branches/3.1/src/mpfr-gmp.h
+   M /branches/3.1/src/mpfr-impl.h
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/tests/tbuildopt.c
+   M /branches/3.1/tests/tgmpop.c
+
+Merged r7857 through r7870 from the trunk:
+  * [src/mpfr-gmp.h] Fixed a prototype (mpfr_limb_ptr isn't available
+    yet) and added missing prototype for __gmpn_sbpi1_divappr_q.
+  * [src/mpfr-impl.h] Define new macros MPFR_EXT_EMIN and MPFR_EXT_EMAX.
+  * [src/agm.c] Replaced __gmpfr_emin and __gmpfr_emax by MPFR_EXT_EMIN
+    and MPFR_EXT_EMAX respectively (this should be a bit faster with TLS
+    and also is a workaround to a bug occurring with TLS and GCC 4.3.2
+    on a Linux/Sparc machine, gcc54.fsffrance.org).
+  * [tests/tgmpop.c] Check for erange flag in mpfr_cmp_[f,q,z].
+  * [src/gmp_op.c] Handle the special cases in mpfr_cmp_q and mpfr_cmp_f
+    (fixing the problem with the erange flag in particular).
+  * [src/buildopt.c,src/mpfr.h,tests/tbuildopt.c,doc/mpfr.texi,NEWS]
+    Added mpfr_buildopt_gmpinternals_p function.
+  * [examples/version.c] Output mpfr_buildopt_gmpinternals_p() and
+    mpfr_buildopt_tune_case() values with MPFR 3.1 or later.
+  * [doc/README.dev] Updated "To make a release". Document how to
+    specify the minimum exponent or the maximum exponent.
+  * [TODO] Added an item about the minimum and maximum exponents.
+------------------------------------------------------------------------
+r7857 | vlefevre | 2011-09-19 08:22:17 +0000 (Mon, 19 Sep 2011) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Correction: "5 exception types" → "6 exception types"
+(thanks to Case Vanhorsen for the report).
+------------------------------------------------------------------------
+r7854 | vlefevre | 2011-09-17 11:58:18 +0000 (Sat, 17 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r7853 | vlefevre | 2011-09-14 21:38:49 +0000 (Wed, 14 Sep 2011) | 4 lines
 Changed paths:
    M /branches/3.1
