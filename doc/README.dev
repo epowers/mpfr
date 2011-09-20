@@ -174,10 +174,10 @@ To make a release (for the MPFR team):
      and without GMP's --disable-alloca configure option (or compile GMP
      with --enable-alloca=debug and MPFR with --with-gmp-build to be
      able to get the memory leak errors), with and without -DXDEBUG in
-     $CFLAGS, with and without gmp internal files, with and without
-     GMP built as a shared library, with and without srcdir equal to
-     objdir (../mpfr/configure --srcdir=/users/spaces/pelissip/mpfr/),
-     with and without --enable-logging.
+     $CFLAGS, with and without gmp internal files (--enable-gmp-internals),
+     with and without GMP built as a shared library, with objdir equal to
+     and different from srcdir (e.g. ../mpfr-source/configure after making
+     mpfr-source read-only), with and without --enable-logging.
 
      Try different gcc versions with different options: with and without
      "-std=c99 -O3 -D_XOPEN_SOURCE=500", with and without "-ansi" (which
@@ -194,6 +194,7 @@ To make a release (for the MPFR team):
 
      Check that make and make check pass with a C++ compiler, for example:
      ./configure CC=g++ (MPFR 2.3.2 did not).
+     Also test --enable-gmp-internals with it.
 
      Try different compilers, e.g., icc, opencc (x86_64 machines),
      tcc <http://bellard.org/tcc/>, llvm-gcc, clang.
@@ -795,6 +796,35 @@ Use mpfr_prec_t and mpfr_rnd_t instead of the old types mp_prec_t and
 mp_rnd_t. Similarly, use mpfr_exp_t instead of GMP's mp_exp_t type
 (unless you really want mp_exp_t, e.g. for conversions with mpf; but
 you should not assume that mpfr_exp_t and mp_exp_t are identical).
+
+===========================================================================
+
+How to specify (for reading) the minimum exponent or the maximum exponent
+in the MPFR source depends on the context.
+
+1. The most portable form is mpfr_get_emin() and mpfr_get_emax(). In
+   the MPFR source, this is equivalent to __gmpfr_emin and __gmpfr_emax
+   respectively (macros are defined in mpfr-impl.h; the only difference
+   is that the macros do not evaluate to a lvalue).
+
+2. If the exponent range has been extended, you can use the constants
+   MPFR_EXT_EMIN and MPFR_EXT_EMAX instead. This will be faster if TLS
+   is enabled. It also avoids a bug on some Linux/Sparc machines with
+   some GCC versions and TLS, but this shouldn't be the primary concern,
+   as this might be the other way round on some other machines. This is
+   the most common context.
+   Note: If you really want to specify the current minimum or maximum
+   exponent, do not use MPFR_EMIN_MIN or MPFR_EMAX_MAX, even though
+   they have the same value. This may prevent some form of testing in
+   the future.
+
+3. If you want the minimum and maximum possible exponent values supported
+   by MPFR, use MPFR_EMIN_MIN and MPFR_EMAX_MAX respectively.
+
+4. If you want the minimum and maximum values supported by the mpfr_exp_t
+   type (i.e. the limits of this type), use MPFR_EXP_MIN and MPFR_EXP_MAX
+   respectively. This may be useful for intermediate computations on the
+   exponents.
 
 ===========================================================================
 
