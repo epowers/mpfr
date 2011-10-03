@@ -1,4 +1,89 @@
 ------------------------------------------------------------------------
+r7896 | vlefevre | 2011-10-03 08:10:45 +0000 (Mon, 03 Oct 2011) | 1 line
+Changed paths:
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.0.
+------------------------------------------------------------------------
+r7895 | vlefevre | 2011-10-03 08:09:19 +0000 (Mon, 03 Oct 2011) | 1 line
+Changed paths:
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Updated the month.
+------------------------------------------------------------------------
+r7893 | vlefevre | 2011-09-29 22:25:41 +0000 (Thu, 29 Sep 2011) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] added reference and comment for eint
+(Merged changeset r7892 from the trunk.)
+------------------------------------------------------------------------
+r7890 | vlefevre | 2011-09-25 00:17:05 +0000 (Sun, 25 Sep 2011) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Rephrased mpfr_frexp description.
+(Merged changeset r7889 from the trunk.)
+------------------------------------------------------------------------
+r7887 | vlefevre | 2011-09-24 10:01:07 +0000 (Sat, 24 Sep 2011) | 5 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/NEWS
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/log1p.c
+   M /branches/3.1/tests/tagm.c
+   M /branches/3.1/tests/tgeneric.c
+
+Renamed "division-by-zero" to "divide-by-zero" (term used by the
+ISO C99 standard, the IEEE 754-2008 standard using divideByZero,
+and the old IEEE 754-1985 standard using both "divide by zero"
+and "division by zero").
+(Merged changeset r7886 from the trunk.)
+------------------------------------------------------------------------
+r7885 | vlefevre | 2011-09-24 09:40:03 +0000 (Sat, 24 Sep 2011) | 3 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/gmp_op.c
+   M /branches/3.1/tests/tgmpop.c
+
+[tests/tgmpop.c] Improved division-by-zero tests.
+[src/gmp_op.c] Forgot to update the flags in some functions.
+(Merged changesets r7882 and r7883 from the trunk.)
+------------------------------------------------------------------------
+r7884 | vlefevre | 2011-09-24 09:39:02 +0000 (Sat, 24 Sep 2011) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/faq.xsl
+
+[doc/faq.xsl] Added a comment about the MPFR logo.
+(Merged changeset r7881 from the trunk.)
+------------------------------------------------------------------------
+r7880 | vlefevre | 2011-09-22 10:38:10 +0000 (Thu, 22 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Improved mpfr_frexp description.
+------------------------------------------------------------------------
+r7878 | vlefevre | 2011-09-22 10:09:40 +0000 (Thu, 22 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Corrected typo in the mpfr_frexp description.
+------------------------------------------------------------------------
+r7874 | vlefevre | 2011-09-20 08:50:37 +0000 (Tue, 20 Sep 2011) | 1 line
+Changed paths:
+   M /branches/3.1/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r7872 | vlefevre | 2011-09-20 07:37:01 +0000 (Tue, 20 Sep 2011) | 1 line
 Changed paths:
    M /branches/3.1/VERSION
