@@ -31,7 +31,7 @@ http://www.gnu.org/licenses/ or write to the Free Software Foundation, Inc.,
 #define MPFR_TUNE_CASE "src/x86_64/pentium4/mparam.h"
 #include "x86_64/pentium4/mparam.h"
 
-#elif defined (__tune_core2__) && defined (__x86_64) /* 64-bit Core 2 */
+#elif (defined (__tune_core2__) || defined (__tune_nocona__)) && defined (__x86_64) /* 64-bit Core 2 or Xeon */
 #define MPFR_TUNE_CASE "src/x86_64/core2/mparam.h"
 #include "x86_64/core2/mparam.h"
 
