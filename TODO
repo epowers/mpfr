@@ -89,7 +89,7 @@ Table of contents:
 
 - implement mpfr_q_sub, mpfr_z_div, mpfr_q_div?
 - implement functions for random distributions, see for example
-  http://websympa.loria.fr/wwsympa/arc/mpfr/2010-01/msg00034.html
+  https://sympa.inria.fr/sympa/arc/mpfr/2010-01/msg00034.html
   (suggested by Charles Karney <ckarney@Sarnoff.com>, 18 Jan 2010):
    * a Bernoulli distribution with prob p/q (exact)
    * a general discrete distribution (i with prob w[i]/sum(w[i]) (Walker
@@ -222,7 +222,7 @@ Table of contents:
 - [maybe useful for SAGE] implement companion frac_* functions to the rint_*
   functions. For example mpfr_frac_floor(x) = x - floor(x). (The current
   mpfr_frac function corresponds to mpfr_rint_trunc.)
-- scaled erfc (http://websympa.loria.fr/wwsympa/arc/mpfr/2009-05/msg00054.html)
+- scaled erfc (https://sympa.inria.fr/sympa/arc/mpfr/2009-05/msg00054.html)
 - asec, acsc, acot, asech, acsch and acoth (mail from Björn Terelius on mpfr
   list, 18 June 2009)
 
@@ -274,7 +274,7 @@ Table of contents:
   unnecessary computations by calling the auxiliary cos function instead of
   the full cos function). This will require a native code for sin, for
   example using the reduction sin(3x)=3sin(x)-4sin(x)^3.
-  See http://websympa.loria.fr/wwsympa/arc/mpfr/2007-08/msg00001.html and
+  See https://sympa.inria.fr/sympa/arc/mpfr/2007-08/msg00001.html and
   the following messages.
 - improve generic.c to work for number of terms <> 2^k
 - rewrite mpfr_greater_p... as native code.
