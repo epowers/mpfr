@@ -877,6 +877,175 @@ tiny (int stop)
     exit (1);
 }
 
+/* Test mpfr_gamma in precision p1 by comparing it with exp(lgamma(x))
+   computing with a working precision p2. Assume that x is not an
+   integer <= 2. */
+static void
+exp_lgamma (mpfr_t x, mpfr_prec_t p1, mpfr_prec_t p2)
+{
+  mpfr_t yd, yu, zd, zu;
+  int inexd, inexu, sign;
+  int underflow = -1, overflow = -1;  /* -1: we don't know */
+  int got_underflow, got_overflow;
+
+  if (mpfr_integer_p (x) && mpfr_cmp_si (x, 2) <= 0)
+    {
+      printf ("Warning! x is an integer <= 2 in exp_lgamma: ");
+      mpfr_out_str (stdout, 10, 0, x, MPFR_RNDN); putchar ('\n');
+      return;
+    }
+  mpfr_inits2 (p2, yd, yu, (mpfr_ptr) 0);
+  inexd = mpfr_lgamma (yd, &sign, x, MPFR_RNDD);
+  mpfr_set (yu, yd, MPFR_RNDN);  /* exact */
+  if (inexd)
+    mpfr_nextabove (yu);
+  mpfr_clear_flags ();
+  mpfr_exp (yd, yd, MPFR_RNDD);
+  if (! mpfr_underflow_p ())
+    underflow = 0;
+  if (mpfr_overflow_p ())
+    overflow = 1;
+  mpfr_clear_flags ();
+  mpfr_exp (yu, yu, MPFR_RNDU);
+  if (mpfr_underflow_p ())
+    underflow = 1;
+  if (! mpfr_overflow_p ())
+    overflow = 0;
+  if (sign < 0)
+    {
+      mpfr_neg (yd, yd, MPFR_RNDN);  /* exact */
+      mpfr_neg (yu, yu, MPFR_RNDN);  /* exact */
+      mpfr_swap (yd, yu);
+    }
+  /* yd < Gamma(x) < yu (strict inequalities since x != 1 and x != 2) */
+  mpfr_inits2 (p1, zd, zu, (mpfr_ptr) 0);
+  mpfr_clear_flags ();
+  inexd = mpfr_gamma (zd, x, MPFR_RNDD);  /* zd <= Gamma(x) < yu */
+  got_underflow = underflow == -1 ? -1 : !! mpfr_underflow_p ();
+  got_overflow = overflow == -1 ? -1 : !! mpfr_overflow_p ();
+  if (! mpfr_less_p (zd, yu) || inexd > 0 ||
+      got_underflow != underflow ||
+      got_overflow != overflow)
+    {
+      printf ("Error in exp_lgamma on x = ");
+      mpfr_out_str (stdout, 16, 0, x, MPFR_RNDN); putchar ('\n');
+      printf ("yu = ");
+      mpfr_dump (yu);
+      printf ("zd = ");
+      mpfr_dump (zd);
+      printf ("got inexd = %d, expected <= 0\n", inexd);
+      printf ("got underflow = %d, expected %d\n", got_underflow, underflow);
+      printf ("got overflow = %d, expected %d\n", got_overflow, overflow);
+      exit (1);
+    }
+  mpfr_clear_flags ();
+  inexu = mpfr_gamma (zu, x, MPFR_RNDU);  /* zu >= Gamma(x) > yd */
+  got_underflow = underflow == -1 ? -1 : !! mpfr_underflow_p ();
+  got_overflow = overflow == -1 ? -1 : !! mpfr_overflow_p ();
+  if (! mpfr_greater_p (zu, yd) || inexu < 0 ||
+      got_underflow != underflow ||
+      got_overflow != overflow)
+    {
+      printf ("Error in exp_lgamma on x = ");
+      mpfr_out_str (stdout, 16, 0, x, MPFR_RNDN); putchar ('\n');
+      printf ("yd = ");
+      mpfr_dump (yd);
+      printf ("zu = ");
+      mpfr_dump (zu);
+      printf ("got inexu = %d, expected >= 0\n", inexu);
+      printf ("got underflow = %d, expected %d\n", got_underflow, underflow);
+      printf ("got overflow = %d, expected %d\n", got_overflow, overflow);
+      exit (1);
+    }
+  if (mpfr_equal_p (zd, zu))
+    {
+      if (inexd != 0 || inexu != 0)
+        {
+          printf ("Error in exp_lgamma on x = ");
+          mpfr_out_str (stdout, 16, 0, x, MPFR_RNDN); putchar ('\n');
+          printf ("zd = zu, thus exact, but inexd = %d and inexu = %d\n",
+                  inexd, inexu);
+          exit (1);
+        }
+      MPFR_ASSERTN (got_underflow == 0);
+      MPFR_ASSERTN (got_overflow == 0);
+    }
+  else if (inexd == 0 || inexu == 0)
+    {
+      printf ("Error in exp_lgamma on x = ");
+          mpfr_out_str (stdout, 16, 0, x, MPFR_RNDN); putchar ('\n');
+          printf ("zd != zu, thus inexact, but inexd = %d and inexu = %d\n",
+                  inexd, inexu);
+          exit (1);
+    }
+  mpfr_clears (yd, yu, zd, zu, (mpfr_ptr) 0);
+}
+
+static void
+exp_lgamma_tests (void)
+{
+  mpfr_t x;
+  mpfr_exp_t emin, emax;
+  int i;
+
+  emin = mpfr_get_emin ();
+  emax = mpfr_get_emax ();
+  set_emin (MPFR_EMIN_MIN);
+  set_emax (MPFR_EMAX_MAX);
+
+  mpfr_init2 (x, 96);
+  for (i = 3; i <= 8; i++)
+    {
+      mpfr_set_ui (x, i, MPFR_RNDN);
+      exp_lgamma (x, 53, 64);
+      mpfr_nextbelow (x);
+      exp_lgamma (x, 53, 64);
+      mpfr_nextabove (x);
+      mpfr_nextabove (x);
+      exp_lgamma (x, 53, 64);
+    }
+  mpfr_set_str (x, "1.7", 10, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  mpfr_set_str (x, "-4.6308260837372266e+07", 10, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  mpfr_set_str (x, "-90.6308260837372266e+15", 10, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  /* The following test gives a large positive result < +Inf */
+  mpfr_set_str (x, "1.2b13fc45a92dea1@14", 16, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  /* Idem for a large negative result > -Inf */
+  mpfr_set_str (x, "-1.2b13fc45a92de81@14", 16, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  /* The following two tests trigger an endless loop in r8186
+     on 64-bit machines (64-bit exponent). The second one (due
+     to undetected overflow) is a direct consequence of the
+     first one, due to the call of Gamma(2-x) if x < 1. */
+  mpfr_set_str (x, "1.2b13fc45a92dec8@14", 16, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  mpfr_set_str (x, "-1.2b13fc45a92dea8@14", 16, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  /* Similar tests (overflow threshold) for 32-bit machines. */
+  mpfr_set_str (x, "2ab68d8.657542f855111c61", 16, MPFR_RNDN);
+  exp_lgamma (x, 12, 64);
+  mpfr_set_str (x, "-2ab68d6.657542f855111c61", 16, MPFR_RNDN);
+  exp_lgamma (x, 12, 64);
+  /* The following test is an overflow on 32-bit and 64-bit machines.
+     Revision r8189 fails on 64-bit machines as the flag is unset. */
+  mpfr_set_str (x, "1.2b13fc45a92ded8@14", 16, MPFR_RNDN);
+  exp_lgamma (x, 53, 64);
+  /* On the following tests, with r8196, one gets an underflow on
+     32-bit machines, while a normal result is expected (see FIXME
+     in gamma.c:382). */
+  mpfr_set_str (x, "-2ab68d6.657542f855111c6104", 16, MPFR_RNDN);
+  exp_lgamma (x, 12, 64);  /* failure on 32-bit machines */
+  mpfr_set_str (x, "-12b13fc45a92deb.1c6c5bc964", 16, MPFR_RNDN);
+  exp_lgamma (x, 12, 64);  /* failure on 64-bit machines */
+  mpfr_clear (x);
+
+  set_emin (emin);
+  set_emax (emax);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -891,6 +1060,7 @@ main (int argc, char *argv[])
   test20071231 ();
   test20100709 ();
   test20120426 ();
+  exp_lgamma_tests ();
 
   data_check ("data/gamma", mpfr_gamma, "mpfr_gamma");
 
