@@ -1,4 +1,110 @@
 ------------------------------------------------------------------------
+r8257 | vlefevre | 2012-06-26 14:51:13 +0000 (Tue, 26 Jun 2012) | 1 line
+Changed paths:
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Updated the month.
+------------------------------------------------------------------------
+r8256 | vlefevre | 2012-06-26 14:50:17 +0000 (Tue, 26 Jun 2012) | 2 lines
+Changed paths:
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/Makefile.am
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.1-rc1 and updated libmpfr_la_LDFLAGS in
+src/Makefile.am for the next release.
+------------------------------------------------------------------------
+r8255 | vlefevre | 2012-06-26 14:41:27 +0000 (Tue, 26 Jun 2012) | 1 line
+Changed paths:
+   M /branches/3.1/NEWS
+
+[NEWS] Update for GNU MPFR 3.1.1.
+------------------------------------------------------------------------
+r8254 | vlefevre | 2012-06-26 14:03:44 +0000 (Tue, 26 Jun 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/tests/tinternals.c
+
+[tests/tinternals.c] mpfr_set_prec_raw missing tests (thanks to Patrick).
+(merged changeset r8253 from the trunk)
+------------------------------------------------------------------------
+r8252 | vlefevre | 2012-06-26 13:57:32 +0000 (Tue, 26 Jun 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/tests/tset_si.c
+
+[tests/tset_si.c] Also test the mpfr_set_ui function (instead of macro).
+(merged changeset r8251 from the trunk)
+------------------------------------------------------------------------
+r8220 | vlefevre | 2012-06-21 23:03:44 +0000 (Thu, 21 Jun 2012) | 3 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/tests/tset_ld.c
+
+[tests/tset_ld.c] For _GMP_IEEE_FLOATS, use #if instead of #ifdef
+since mpfr-impl.h defines it to 0 if it was undefined.
+(merged changeset r8219 from the trunk)
+------------------------------------------------------------------------
+r8205 | vlefevre | 2012-05-09 00:07:18 +0000 (Wed, 09 May 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/configure.ac
+   M /branches/3.1/tests/Makefile.am
+
+Patch from Nitin A Kamble for automake 1.12
+(merged changeset r8204 from the trunk)
+------------------------------------------------------------------------
+r8202 | vlefevre | 2012-05-07 18:13:13 +0000 (Mon, 07 May 2012) | 5 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/AUTHORS
+   M /branches/3.1/INSTALL
+   M /branches/3.1/doc/mpfr.texi
+
+[AUTHORS,INSTALL,doc/mpfr.texi] Updated the e-mail address of the
+MPFR mailing-list to match the List-* headers written by the new
+mailing-list server (the old one still works, but may lead to bad
+interaction with MUA's that attempt to honor the List-Post header
+when replying to the list(s)).
+------------------------------------------------------------------------
+r8200 | vlefevre | 2012-05-07 17:58:04 +0000 (Mon, 07 May 2012) | 6 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/gamma.c
+   M /branches/3.1/src/lngamma.c
+   M /branches/3.1/tests/tgamma.c
+
+[src/lngamma.c] Added mpfr_explgamma internal function to handle
+  overflows/underflows (intermediate or not) in mpfr_gamma. Added
+  general overflow detection.
+[src/gamma.c] Added general underflow detection.
+[tests/tgamma.c] Added testcases for 32-bit and 64-bit machines.
+(merged changesets r8174,8179,8182-8183,8185-8189,8191-8199 from the trunk)
+------------------------------------------------------------------------
+r8184 | vlefevre | 2012-05-03 14:44:57 +0000 (Thu, 03 May 2012) | 1 line
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/gamma.c
+
+[src/gamma.c] Reverted changeset r8180, which seems incorrect.
+------------------------------------------------------------------------
+r8180 | vlefevre | 2012-05-03 13:46:22 +0000 (Thu, 03 May 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/gamma.c
+
+[gamma.c] tentative fix for the underflow problem
+(merged changesets r8174,8179 from the trunk)
+------------------------------------------------------------------------
+r8178 | vlefevre | 2012-05-03 13:26:40 +0000 (Thu, 03 May 2012) | 1 line
+Changed paths:
+   M /branches/3.1/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r8176 | vlefevre | 2012-05-03 13:08:51 +0000 (Thu, 03 May 2012) | 2 lines
 Changed paths:
    M /branches/3.1
