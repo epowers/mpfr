@@ -582,7 +582,7 @@ a macro with the same name as some keywords (currently @code{do},
 @code{while} and @code{sizeof}).
 
 You can avoid the use of MPFR macros encapsulating functions by defining
-the @samp{MPFR_USE_NO_MACRO} macro before @file{mpfr.h} is included.  In
+the @code{MPFR_USE_NO_MACRO} macro before @file{mpfr.h} is included.  In
 general this should not be necessary, but this can be useful when debugging
 user code: with some macros, the compiler may emit spurious warnings with
 some warning options, and macros can prevent some prototype checking.
@@ -1182,7 +1182,9 @@ The @code{mpfr_set_decimal64} function is built only with the configure
 option @samp{--enable-decimal-float}, which also requires
 @samp{--with-gmp-build}, and when the compiler or
 system provides the @samp{_Decimal64} data type
-(recent versions of GCC support this data type).
+(recent versions of GCC support this data type);
+to use @code{mpfr_set_decimal64}, one should define the macro
+@code{MPFR_WANT_DECIMAL_FLOATS} before including @file{mpfr.h}.
 @c GCC 4.2.0 required to be configured with --enable-decimal-float
 @c but GCC 4.4.3 seems to have decimal support by default
 @code{mpfr_set_q} might fail if the numerator (or the
