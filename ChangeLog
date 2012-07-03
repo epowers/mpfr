@@ -1,4 +1,98 @@
 ------------------------------------------------------------------------
+r8307 | vlefevre | 2012-07-03 14:19:10 +0000 (Tue, 03 Jul 2012) | 1 line
+Changed paths:
+   M /branches/3.1/NEWS
+
+[NEWS] Added test coverage for MPFR 3.1.1.
+------------------------------------------------------------------------
+r8306 | vlefevre | 2012-07-03 14:17:16 +0000 (Tue, 03 Jul 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/tools/coverage
+
+[tools/coverage] Some changes from the trunk (r8263,8275,8277,8305),
+in particular detailed coverage.
+------------------------------------------------------------------------
+r8303 | vlefevre | 2012-07-03 13:52:02 +0000 (Tue, 03 Jul 2012) | 1 line
+Changed paths:
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Updated the month.
+------------------------------------------------------------------------
+r8301 | vlefevre | 2012-07-03 13:49:45 +0000 (Tue, 03 Jul 2012) | 1 line
+Changed paths:
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.1.
+------------------------------------------------------------------------
+r8300 | vlefevre | 2012-07-03 13:47:34 +0000 (Tue, 03 Jul 2012) | 4 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/tests/td_div.c
+   M /branches/3.1/tests/tests.c
+   M /branches/3.1/tests/tget_d.c
+
+[tests/tests.c] Improved an error message.
+[tests/{td_div.c,tget_d.c}] Disable tests with a division by 0 if
+  MPFR_ERRDIVZERO is defined.
+(merged changesets r8298-8299 from the trunk)
+------------------------------------------------------------------------
+r8290 | vlefevre | 2012-06-27 12:00:38 +0000 (Wed, 27 Jun 2012) | 1 line
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+
+[mpfr.texi] added support by ERC grant of Andreas
+------------------------------------------------------------------------
+r8288 | vlefevre | 2012-06-27 09:15:26 +0000 (Wed, 27 Jun 2012) | 1 line
+Changed paths:
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Document MPFR_WANT_DECIMAL_FLOATS.
+------------------------------------------------------------------------
+r8284 | vlefevre | 2012-06-27 08:37:21 +0000 (Wed, 27 Jun 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/tests/tgrandom.c
+
+[tests/tgrandom.c] Replaced GMP_RNDN by MPFR_RNDN.
+(merged changeset r8283 from the trunk)
+------------------------------------------------------------------------
+r8282 | vlefevre | 2012-06-27 08:33:41 +0000 (Wed, 27 Jun 2012) | 1 line
+Changed paths:
+   M /branches/3.1/NEWS
+
+[NEWS] Update.
+------------------------------------------------------------------------
+r8281 | vlefevre | 2012-06-27 08:23:11 +0000 (Wed, 27 Jun 2012) | 4 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/tests/tgrandom.c
+
+[doc/mpfr.texi] Completed spec of mpfr_grandom.
+[tests/tgrandom.c] Improved a test and added a new one for
+  mpfr_grandom(x, NULL, ...).
+(merged changesets r8279-8280 from the trunk)
+------------------------------------------------------------------------
+r8278 | vlefevre | 2012-06-27 08:10:45 +0000 (Wed, 27 Jun 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/NEWS
+
+[NEWS] Update: test coverage.
+(merged changeset r8276 from the trunk)
+------------------------------------------------------------------------
+r8259 | vlefevre | 2012-06-26 15:02:18 +0000 (Tue, 26 Jun 2012) | 1 line
+Changed paths:
+   M /branches/3.1/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r8257 | vlefevre | 2012-06-26 14:51:13 +0000 (Tue, 26 Jun 2012) | 1 line
 Changed paths:
    M /branches/3.1/doc/mpfr.texi
