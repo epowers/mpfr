@@ -191,6 +191,8 @@ check_get_d_2exp_inf_nan (void)
   long exp;
   mpfr_t var;
 
+#if !defined(MPFR_ERRDIVZERO)
+
   mpfr_init2 (var, MPFR_PREC_MIN);
 
   mpfr_set_nan (var);
@@ -241,6 +243,8 @@ check_get_d_2exp_inf_nan (void)
     }
 
   mpfr_clear (var);
+
+#endif
 }
 
 int
