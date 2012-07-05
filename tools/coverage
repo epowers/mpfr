@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# to compute the coverage of mpfr-x.y.z, just copy this script
-# into mpfr-x.y.z/tools and run it
+# To compute the coverage of mpfr-x.y.z, just copy this script
+# into mpfr-x.y.z/tools and run it.
+
+# Note: the exact results will depend on the platform, the configure
+# options, and the build-time and run-time environments (in particular,
+# they will depend on the #if and getenv tests in the src and tests
+# directories).
 
 # Set up the right directoy
 cd $(dirname $0)/..
