@@ -1,4 +1,606 @@
 ------------------------------------------------------------------------
+r8470 | vlefevre | 2013-03-08 11:59:32 +0000 (Fri, 08 Mar 2013) | 2 lines
+Changed paths:
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/Makefile.am
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.2-rc1 and updated libmpfr_la_LDFLAGS in
+src/Makefile.am for the next release.
+------------------------------------------------------------------------
+r8468 | vlefevre | 2013-03-08 11:44:47 +0000 (Fri, 08 Mar 2013) | 1 line
+Changed paths:
+   M /branches/3.1/NEWS
+
+[NEWS] Update for GNU MPFR 3.1.2.
+------------------------------------------------------------------------
+r8466 | vlefevre | 2013-03-08 00:34:36 +0000 (Fri, 08 Mar 2013) | 1 line
+Changed paths:
+   M /branches/3.1/doc/mpfr.texi
+
+[doc/mpfr.texi] Updated the month.
+------------------------------------------------------------------------
+r8465 | vlefevre | 2013-03-08 00:33:22 +0000 (Fri, 08 Mar 2013) | 5 lines
+Changed paths:
+   M /branches/3.1/BUGS
+   M /branches/3.1/INSTALL
+   M /branches/3.1/Makefile.am
+   M /branches/3.1/NEWS
+   M /branches/3.1/README
+   M /branches/3.1/TODO
+   M /branches/3.1/acinclude.m4
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/FAQ.html
+   M /branches/3.1/doc/Makefile.am
+   M /branches/3.1/doc/README.dev
+   M /branches/3.1/doc/faq.xsl
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/examples/divworst.c
+   M /branches/3.1/examples/rndo-add.c
+   M /branches/3.1/examples/sample.c
+   M /branches/3.1/examples/version.c
+   M /branches/3.1/src/Makefile.am
+   M /branches/3.1/src/abort_prec_max.c
+   M /branches/3.1/src/acos.c
+   M /branches/3.1/src/acosh.c
+   M /branches/3.1/src/add.c
+   M /branches/3.1/src/add1.c
+   M /branches/3.1/src/add1sp.c
+   M /branches/3.1/src/add_d.c
+   M /branches/3.1/src/add_ui.c
+   M /branches/3.1/src/agm.c
+   M /branches/3.1/src/ai.c
+   M /branches/3.1/src/amd/amdfam10/mparam.h
+   M /branches/3.1/src/amd/athlon/mparam.h
+   M /branches/3.1/src/amd/k8/mparam.h
+   M /branches/3.1/src/arm/mparam.h
+   M /branches/3.1/src/asin.c
+   M /branches/3.1/src/asinh.c
+   M /branches/3.1/src/atan.c
+   M /branches/3.1/src/atan2.c
+   M /branches/3.1/src/atanh.c
+   M /branches/3.1/src/bernoulli.c
+   M /branches/3.1/src/buildopt.c
+   M /branches/3.1/src/cache.c
+   M /branches/3.1/src/cbrt.c
+   M /branches/3.1/src/check.c
+   M /branches/3.1/src/clear.c
+   M /branches/3.1/src/clears.c
+   M /branches/3.1/src/cmp.c
+   M /branches/3.1/src/cmp2.c
+   M /branches/3.1/src/cmp_abs.c
+   M /branches/3.1/src/cmp_d.c
+   M /branches/3.1/src/cmp_ld.c
+   M /branches/3.1/src/cmp_si.c
+   M /branches/3.1/src/cmp_ui.c
+   M /branches/3.1/src/comparisons.c
+   M /branches/3.1/src/const_catalan.c
+   M /branches/3.1/src/const_euler.c
+   M /branches/3.1/src/const_log2.c
+   M /branches/3.1/src/const_pi.c
+   M /branches/3.1/src/constant.c
+   M /branches/3.1/src/copysign.c
+   M /branches/3.1/src/cos.c
+   M /branches/3.1/src/cosh.c
+   M /branches/3.1/src/cot.c
+   M /branches/3.1/src/coth.c
+   M /branches/3.1/src/csc.c
+   M /branches/3.1/src/csch.c
+   M /branches/3.1/src/d_div.c
+   M /branches/3.1/src/d_sub.c
+   M /branches/3.1/src/digamma.c
+   M /branches/3.1/src/dim.c
+   M /branches/3.1/src/div.c
+   M /branches/3.1/src/div_2exp.c
+   M /branches/3.1/src/div_2si.c
+   M /branches/3.1/src/div_2ui.c
+   M /branches/3.1/src/div_d.c
+   M /branches/3.1/src/div_ui.c
+   M /branches/3.1/src/dump.c
+   M /branches/3.1/src/eint.c
+   M /branches/3.1/src/eq.c
+   M /branches/3.1/src/erf.c
+   M /branches/3.1/src/erfc.c
+   M /branches/3.1/src/exceptions.c
+   M /branches/3.1/src/exp.c
+   M /branches/3.1/src/exp10.c
+   M /branches/3.1/src/exp2.c
+   M /branches/3.1/src/exp3.c
+   M /branches/3.1/src/exp_2.c
+   M /branches/3.1/src/expm1.c
+   M /branches/3.1/src/extract.c
+   M /branches/3.1/src/factorial.c
+   M /branches/3.1/src/fits_intmax.c
+   M /branches/3.1/src/fits_s.h
+   M /branches/3.1/src/fits_sint.c
+   M /branches/3.1/src/fits_slong.c
+   M /branches/3.1/src/fits_sshort.c
+   M /branches/3.1/src/fits_u.h
+   M /branches/3.1/src/fits_uint.c
+   M /branches/3.1/src/fits_uintmax.c
+   M /branches/3.1/src/fits_ulong.c
+   M /branches/3.1/src/fits_ushort.c
+   M /branches/3.1/src/fma.c
+   M /branches/3.1/src/fms.c
+   M /branches/3.1/src/frac.c
+   M /branches/3.1/src/free_cache.c
+   M /branches/3.1/src/frexp.c
+   M /branches/3.1/src/gamma.c
+   M /branches/3.1/src/gammaonethird.c
+   M /branches/3.1/src/gen_inverse.h
+   M /branches/3.1/src/generic/mparam.h
+   M /branches/3.1/src/get_d.c
+   M /branches/3.1/src/get_d64.c
+   M /branches/3.1/src/get_exp.c
+   M /branches/3.1/src/get_f.c
+   M /branches/3.1/src/get_flt.c
+   M /branches/3.1/src/get_ld.c
+   M /branches/3.1/src/get_si.c
+   M /branches/3.1/src/get_sj.c
+   M /branches/3.1/src/get_str.c
+   M /branches/3.1/src/get_ui.c
+   M /branches/3.1/src/get_uj.c
+   M /branches/3.1/src/get_z.c
+   M /branches/3.1/src/get_z_exp.c
+   M /branches/3.1/src/gmp_op.c
+   M /branches/3.1/src/grandom.c
+   M /branches/3.1/src/hppa/mparam.h
+   M /branches/3.1/src/hypot.c
+   M /branches/3.1/src/ia64/mparam.h
+   M /branches/3.1/src/ieee_floats.h
+   M /branches/3.1/src/init.c
+   M /branches/3.1/src/init2.c
+   M /branches/3.1/src/inits.c
+   M /branches/3.1/src/inits2.c
+   M /branches/3.1/src/inp_str.c
+   M /branches/3.1/src/int_ceil_log2.c
+   M /branches/3.1/src/isinf.c
+   M /branches/3.1/src/isinteger.c
+   M /branches/3.1/src/isnan.c
+   M /branches/3.1/src/isnum.c
+   M /branches/3.1/src/isqrt.c
+   M /branches/3.1/src/isregular.c
+   M /branches/3.1/src/iszero.c
+   M /branches/3.1/src/jn.c
+   M /branches/3.1/src/jyn_asympt.c
+   M /branches/3.1/src/li2.c
+   M /branches/3.1/src/lngamma.c
+   M /branches/3.1/src/log.c
+   M /branches/3.1/src/log10.c
+   M /branches/3.1/src/log1p.c
+   M /branches/3.1/src/log2.c
+   M /branches/3.1/src/logging.c
+   M /branches/3.1/src/min_prec.c
+   M /branches/3.1/src/minmax.c
+   M /branches/3.1/src/modf.c
+   M /branches/3.1/src/mp_clz_tab.c
+   M /branches/3.1/src/mparam_h.in
+   M /branches/3.1/src/mpf2mpfr.h
+   M /branches/3.1/src/mpfr-gmp.c
+   M /branches/3.1/src/mpfr-gmp.h
+   M /branches/3.1/src/mpfr-impl.h
+   M /branches/3.1/src/mpfr-intmax.h
+   M /branches/3.1/src/mpfr-longlong.h
+   M /branches/3.1/src/mpfr-thread.h
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/mpn_exp.c
+   M /branches/3.1/src/mul.c
+   M /branches/3.1/src/mul_2exp.c
+   M /branches/3.1/src/mul_2si.c
+   M /branches/3.1/src/mul_2ui.c
+   M /branches/3.1/src/mul_d.c
+   M /branches/3.1/src/mul_ui.c
+   M /branches/3.1/src/mulders.c
+   M /branches/3.1/src/neg.c
+   M /branches/3.1/src/next.c
+   M /branches/3.1/src/out_raw.c
+   M /branches/3.1/src/out_str.c
+   M /branches/3.1/src/pow.c
+   M /branches/3.1/src/pow_si.c
+   M /branches/3.1/src/pow_ui.c
+   M /branches/3.1/src/pow_z.c
+   M /branches/3.1/src/powerof2.c
+   M /branches/3.1/src/powerpc32/mparam.h
+   M /branches/3.1/src/powerpc64/mparam.h
+   M /branches/3.1/src/print_raw.c
+   M /branches/3.1/src/print_rnd_mode.c
+   M /branches/3.1/src/printf.c
+   M /branches/3.1/src/rec_sqrt.c
+   M /branches/3.1/src/reldiff.c
+   M /branches/3.1/src/rem1.c
+   M /branches/3.1/src/rint.c
+   M /branches/3.1/src/root.c
+   M /branches/3.1/src/round_near_x.c
+   M /branches/3.1/src/round_p.c
+   M /branches/3.1/src/round_prec.c
+   M /branches/3.1/src/round_raw_generic.c
+   M /branches/3.1/src/scale2.c
+   M /branches/3.1/src/sec.c
+   M /branches/3.1/src/sech.c
+   M /branches/3.1/src/set.c
+   M /branches/3.1/src/set_d.c
+   M /branches/3.1/src/set_d64.c
+   M /branches/3.1/src/set_dfl_prec.c
+   M /branches/3.1/src/set_exp.c
+   M /branches/3.1/src/set_f.c
+   M /branches/3.1/src/set_flt.c
+   M /branches/3.1/src/set_inf.c
+   M /branches/3.1/src/set_ld.c
+   M /branches/3.1/src/set_nan.c
+   M /branches/3.1/src/set_prc_raw.c
+   M /branches/3.1/src/set_prec.c
+   M /branches/3.1/src/set_q.c
+   M /branches/3.1/src/set_rnd.c
+   M /branches/3.1/src/set_si.c
+   M /branches/3.1/src/set_si_2exp.c
+   M /branches/3.1/src/set_sj.c
+   M /branches/3.1/src/set_str.c
+   M /branches/3.1/src/set_str_raw.c
+   M /branches/3.1/src/set_ui.c
+   M /branches/3.1/src/set_ui_2exp.c
+   M /branches/3.1/src/set_uj.c
+   M /branches/3.1/src/set_z.c
+   M /branches/3.1/src/set_z_exp.c
+   M /branches/3.1/src/set_zero.c
+   M /branches/3.1/src/setmax.c
+   M /branches/3.1/src/setmin.c
+   M /branches/3.1/src/setsign.c
+   M /branches/3.1/src/sgn.c
+   M /branches/3.1/src/si_op.c
+   M /branches/3.1/src/signbit.c
+   M /branches/3.1/src/sin.c
+   M /branches/3.1/src/sin_cos.c
+   M /branches/3.1/src/sinh.c
+   M /branches/3.1/src/sinh_cosh.c
+   M /branches/3.1/src/sparc64/mparam.h
+   M /branches/3.1/src/sqr.c
+   M /branches/3.1/src/sqrt.c
+   M /branches/3.1/src/sqrt_ui.c
+   M /branches/3.1/src/stack_interface.c
+   M /branches/3.1/src/strtofr.c
+   M /branches/3.1/src/sub.c
+   M /branches/3.1/src/sub1.c
+   M /branches/3.1/src/sub1sp.c
+   M /branches/3.1/src/sub_d.c
+   M /branches/3.1/src/sub_ui.c
+   M /branches/3.1/src/subnormal.c
+   M /branches/3.1/src/sum.c
+   M /branches/3.1/src/swap.c
+   M /branches/3.1/src/tan.c
+   M /branches/3.1/src/tanh.c
+   M /branches/3.1/src/uceil_exp2.c
+   M /branches/3.1/src/uceil_log2.c
+   M /branches/3.1/src/ufloor_log2.c
+   M /branches/3.1/src/ui_div.c
+   M /branches/3.1/src/ui_pow.c
+   M /branches/3.1/src/ui_pow_ui.c
+   M /branches/3.1/src/ui_sub.c
+   M /branches/3.1/src/urandom.c
+   M /branches/3.1/src/urandomb.c
+   M /branches/3.1/src/vasprintf.c
+   M /branches/3.1/src/version.c
+   M /branches/3.1/src/volatile.c
+   M /branches/3.1/src/x86/core2/mparam.h
+   M /branches/3.1/src/x86/mparam.h
+   M /branches/3.1/src/x86_64/core2/mparam.h
+   M /branches/3.1/src/x86_64/pentium4/mparam.h
+   M /branches/3.1/src/yn.c
+   M /branches/3.1/src/zeta.c
+   M /branches/3.1/src/zeta_ui.c
+   M /branches/3.1/tests/Makefile.am
+   M /branches/3.1/tests/cmp_str.c
+   M /branches/3.1/tests/data/digamma
+   M /branches/3.1/tests/data/li2
+   M /branches/3.1/tests/memory.c
+   M /branches/3.1/tests/mpf_compat.c
+   M /branches/3.1/tests/mpf_compat.h
+   M /branches/3.1/tests/mpfr-test.h
+   M /branches/3.1/tests/mpfr_compat.c
+   M /branches/3.1/tests/random2.c
+   M /branches/3.1/tests/reuse.c
+   M /branches/3.1/tests/rnd_mode.c
+   M /branches/3.1/tests/tabs.c
+   M /branches/3.1/tests/tacos.c
+   M /branches/3.1/tests/tacosh.c
+   M /branches/3.1/tests/tadd.c
+   M /branches/3.1/tests/tadd1sp.c
+   M /branches/3.1/tests/tadd_d.c
+   M /branches/3.1/tests/tadd_ui.c
+   M /branches/3.1/tests/tagm.c
+   M /branches/3.1/tests/tai.c
+   M /branches/3.1/tests/tasin.c
+   M /branches/3.1/tests/tasinh.c
+   M /branches/3.1/tests/tatan.c
+   M /branches/3.1/tests/tatanh.c
+   M /branches/3.1/tests/taway.c
+   M /branches/3.1/tests/tbuildopt.c
+   M /branches/3.1/tests/tcan_round.c
+   M /branches/3.1/tests/tcbrt.c
+   M /branches/3.1/tests/tcheck.c
+   M /branches/3.1/tests/tcmp.c
+   M /branches/3.1/tests/tcmp2.c
+   M /branches/3.1/tests/tcmp_d.c
+   M /branches/3.1/tests/tcmp_ld.c
+   M /branches/3.1/tests/tcmp_ui.c
+   M /branches/3.1/tests/tcmpabs.c
+   M /branches/3.1/tests/tcomparisons.c
+   M /branches/3.1/tests/tconst_catalan.c
+   M /branches/3.1/tests/tconst_euler.c
+   M /branches/3.1/tests/tconst_log2.c
+   M /branches/3.1/tests/tconst_pi.c
+   M /branches/3.1/tests/tcopysign.c
+   M /branches/3.1/tests/tcos.c
+   M /branches/3.1/tests/tcosh.c
+   M /branches/3.1/tests/tcot.c
+   M /branches/3.1/tests/tcoth.c
+   M /branches/3.1/tests/tcsc.c
+   M /branches/3.1/tests/tcsch.c
+   M /branches/3.1/tests/td_div.c
+   M /branches/3.1/tests/td_sub.c
+   M /branches/3.1/tests/tdigamma.c
+   M /branches/3.1/tests/tdim.c
+   M /branches/3.1/tests/tdiv.c
+   M /branches/3.1/tests/tdiv_d.c
+   M /branches/3.1/tests/tdiv_ui.c
+   M /branches/3.1/tests/teint.c
+   M /branches/3.1/tests/teq.c
+   M /branches/3.1/tests/terf.c
+   M /branches/3.1/tests/tests.c
+   M /branches/3.1/tests/texceptions.c
+   M /branches/3.1/tests/texp.c
+   M /branches/3.1/tests/texp10.c
+   M /branches/3.1/tests/texp2.c
+   M /branches/3.1/tests/texpm1.c
+   M /branches/3.1/tests/tfactorial.c
+   M /branches/3.1/tests/tfits.c
+   M /branches/3.1/tests/tfma.c
+   M /branches/3.1/tests/tfmod.c
+   M /branches/3.1/tests/tfms.c
+   M /branches/3.1/tests/tfprintf.c
+   M /branches/3.1/tests/tfrac.c
+   M /branches/3.1/tests/tfrexp.c
+   M /branches/3.1/tests/tgamma.c
+   M /branches/3.1/tests/tgeneric.c
+   M /branches/3.1/tests/tgeneric_ui.c
+   M /branches/3.1/tests/tget_d.c
+   M /branches/3.1/tests/tget_d_2exp.c
+   M /branches/3.1/tests/tget_f.c
+   M /branches/3.1/tests/tget_flt.c
+   M /branches/3.1/tests/tget_ld_2exp.c
+   M /branches/3.1/tests/tget_set_d64.c
+   M /branches/3.1/tests/tget_sj.c
+   M /branches/3.1/tests/tget_str.c
+   M /branches/3.1/tests/tget_z.c
+   M /branches/3.1/tests/tgmpop.c
+   M /branches/3.1/tests/tgrandom.c
+   M /branches/3.1/tests/thyperbolic.c
+   M /branches/3.1/tests/thypot.c
+   M /branches/3.1/tests/tinits.c
+   M /branches/3.1/tests/tinp_str.c
+   M /branches/3.1/tests/tinternals.c
+   M /branches/3.1/tests/tisnan.c
+   M /branches/3.1/tests/tisqrt.c
+   M /branches/3.1/tests/tj0.c
+   M /branches/3.1/tests/tj1.c
+   M /branches/3.1/tests/tjn.c
+   M /branches/3.1/tests/tl2b.c
+   M /branches/3.1/tests/tlgamma.c
+   M /branches/3.1/tests/tli2.c
+   M /branches/3.1/tests/tlngamma.c
+   M /branches/3.1/tests/tlog.c
+   M /branches/3.1/tests/tlog10.c
+   M /branches/3.1/tests/tlog1p.c
+   M /branches/3.1/tests/tlog2.c
+   M /branches/3.1/tests/tmin_prec.c
+   M /branches/3.1/tests/tminmax.c
+   M /branches/3.1/tests/tmodf.c
+   M /branches/3.1/tests/tmul.c
+   M /branches/3.1/tests/tmul_2exp.c
+   M /branches/3.1/tests/tmul_d.c
+   M /branches/3.1/tests/tmul_ui.c
+   M /branches/3.1/tests/tnext.c
+   M /branches/3.1/tests/tout_str.c
+   M /branches/3.1/tests/toutimpl.c
+   M /branches/3.1/tests/tpow.c
+   M /branches/3.1/tests/tpow3.c
+   M /branches/3.1/tests/tpow_all.c
+   M /branches/3.1/tests/tpow_z.c
+   M /branches/3.1/tests/tprintf.c
+   M /branches/3.1/tests/trandom.c
+   M /branches/3.1/tests/trec_sqrt.c
+   M /branches/3.1/tests/tremquo.c
+   M /branches/3.1/tests/trint.c
+   M /branches/3.1/tests/troot.c
+   M /branches/3.1/tests/tround_prec.c
+   M /branches/3.1/tests/tsec.c
+   M /branches/3.1/tests/tsech.c
+   M /branches/3.1/tests/tset.c
+   M /branches/3.1/tests/tset_d.c
+   M /branches/3.1/tests/tset_exp.c
+   M /branches/3.1/tests/tset_f.c
+   M /branches/3.1/tests/tset_ld.c
+   M /branches/3.1/tests/tset_q.c
+   M /branches/3.1/tests/tset_si.c
+   M /branches/3.1/tests/tset_sj.c
+   M /branches/3.1/tests/tset_str.c
+   M /branches/3.1/tests/tset_z.c
+   M /branches/3.1/tests/tset_z_exp.c
+   M /branches/3.1/tests/tsgn.c
+   M /branches/3.1/tests/tsi_op.c
+   M /branches/3.1/tests/tsin.c
+   M /branches/3.1/tests/tsin_cos.c
+   M /branches/3.1/tests/tsinh.c
+   M /branches/3.1/tests/tsinh_cosh.c
+   M /branches/3.1/tests/tsprintf.c
+   M /branches/3.1/tests/tsqr.c
+   M /branches/3.1/tests/tsqrt.c
+   M /branches/3.1/tests/tsqrt_ui.c
+   M /branches/3.1/tests/tstckintc.c
+   M /branches/3.1/tests/tstdint.c
+   M /branches/3.1/tests/tstrtofr.c
+   M /branches/3.1/tests/tsub.c
+   M /branches/3.1/tests/tsub1sp.c
+   M /branches/3.1/tests/tsub_d.c
+   M /branches/3.1/tests/tsub_ui.c
+   M /branches/3.1/tests/tsubnormal.c
+   M /branches/3.1/tests/tsum.c
+   M /branches/3.1/tests/tswap.c
+   M /branches/3.1/tests/ttan.c
+   M /branches/3.1/tests/ttanh.c
+   M /branches/3.1/tests/ttrunc.c
+   M /branches/3.1/tests/tui_div.c
+   M /branches/3.1/tests/tui_pow.c
+   M /branches/3.1/tests/tui_sub.c
+   M /branches/3.1/tests/turandom.c
+   M /branches/3.1/tests/tvalist.c
+   M /branches/3.1/tests/tversion.c
+   M /branches/3.1/tests/ty0.c
+   M /branches/3.1/tests/ty1.c
+   M /branches/3.1/tests/tyn.c
+   M /branches/3.1/tests/tzeta.c
+   M /branches/3.1/tests/tzeta_ui.c
+   M /branches/3.1/tools/ck-copyright-notice
+   M /branches/3.1/tools/ck-mparam
+   M /branches/3.1/tools/ck-version-info
+   M /branches/3.1/tools/get_patches.sh
+   M /branches/3.1/tune/Makefile.am
+   M /branches/3.1/tune/bidimensional_sample.c
+   M /branches/3.1/tune/speed.c
+   M /branches/3.1/tune/tuneup.c
+
+Copyright notice update: added 2013 with
+  perl -pi -e 's/2012 Free Software/2012, 2013 Free Software/' **/*(^/)
+under zsh, reverting the ChangeLog file (the m4 and tools/mbench
+directories were not modified).
+Removed 2012 from the example in the doc/README.dev file.
+------------------------------------------------------------------------
+r8464 | vlefevre | 2013-03-08 00:28:01 +0000 (Fri, 08 Mar 2013) | 3 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/examples/ReadMe
+   M /branches/3.1/examples/divworst.c
+   M /branches/3.1/examples/rndo-add.c
+   M /branches/3.1/examples/sample.c
+   M /branches/3.1/examples/version.c
+
+[examples] Replaced the old rounding mode macros (GMP_RNDN, etc.) by the
+new ones (MPFR_RNDN, etc.) in the *.c files; updated ReadMe file.
+(merged changeset r8461 from the trunk)
+------------------------------------------------------------------------
+r8463 | vlefevre | 2013-03-08 00:26:52 +0000 (Fri, 08 Mar 2013) | 5 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/faq.xsl
+   M /branches/3.1/doc/update-faq
+
+[doc] Slightly modified faq.xsl to avoid libxslt bug 377440, and
+moved the addition of special CSS comments for XML compatibility
+from update-faq to faq.xsl file. Removed the now useless
+s/GMP_RND/MPFR_RND/ rewriting in update-faq.
+(merged changesets r8458,8460 from the trunk)
+------------------------------------------------------------------------
+r8454 | vlefevre | 2013-02-22 12:11:37 +0000 (Fri, 22 Feb 2013) | 3 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/get_f.c
+   M /branches/3.1/src/mpfr-gmp.h
+   M /branches/3.1/tests/tadd.c
+   M /branches/3.1/tests/tgeneric.c
+
+Compatibility with GMP 5.1.0 and later when gmp-impl.h is included,
+i.e. with --with-gmp-build (thanks to Rob for the fix); clean-up.
+(merged changeset r8439 from the trunk)
+------------------------------------------------------------------------
+r8399 | vlefevre | 2012-08-29 13:54:55 +0000 (Wed, 29 Aug 2012) | 8 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/strtofr.c
+   M /branches/3.1/tests/tstrtofr.c
+
+[src/strtofr.c] Fixed bug in mpfr_strtofr in case:
+  (1) the input string was used entirely
+  (2) the conversion was done by a division
+  (3) and the division was exact
+  In such a case the "reconstruction" of the ternary value was inexact.
+[tests/tstrtofr.c] Added various testcases (for this bug and for bugs
+  in intermediate revisions).
+(merged changesets r8371,8384,8389-8398 from the trunk)
+------------------------------------------------------------------------
+r8387 | vlefevre | 2012-08-28 15:06:27 +0000 (Tue, 28 Aug 2012) | 1 line
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/doc/FAQ.html
+
+[doc] Updated FAQ.html (changeset r8386 from the trunk).
+------------------------------------------------------------------------
+r8380 | vlefevre | 2012-08-16 09:12:57 +0000 (Thu, 16 Aug 2012) | 5 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/get_d64.c
+   M /branches/3.1/tests/tget_set_d64.c
+
+[src/get_d64.c] mpfr_get_decimal64 was buggy in MPFR_RNDN on some
+  values x such that 0.5e-398 < |x| < 1e-398 (smallest subnormal):
+  it was returning 0 instead of +/- 1e-398.
+[tests/tget_set_d64.c] Added testcases.
+(merged changesets r8370,8379 from the trunk)
+------------------------------------------------------------------------
+r8378 | vlefevre | 2012-08-15 23:41:21 +0000 (Wed, 15 Aug 2012) | 7 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/get_d64.c
+   M /branches/3.1/tests/tget_set_d64.c
+
+[src/get_d64.c] Fixed get_decimal64_max by simplifying it completely,
+and changed get_decimal64_min in the same way.
+Thanks to Rob (Sisyphus) for the idea.
+[tests/tget_set_d64.c] Added some tests for large numbers and overflow
+tests (they cover the two bad tests fixed in r8373 and trigger the bug
+in get_decimal64_max fixed here).
+(merged changesets r8375-8377 from the trunk)
+------------------------------------------------------------------------
+r8373 | vlefevre | 2012-08-14 10:37:10 +0000 (Tue, 14 Aug 2012) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/src/get_d64.c
+
+[src/get_d64.c] Fixed overflow cases.
+(merged changeset r8372 from the trunk)
+------------------------------------------------------------------------
+r8361 | vlefevre | 2012-07-26 14:21:40 +0000 (Thu, 26 Jul 2012) | 1 line
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/configure.ac
+
+[configure.ac] Replaced "sed" by "$SED" and "grep" by "$EGREP".
+------------------------------------------------------------------------
+r8330 | vlefevre | 2012-07-05 10:44:31 +0000 (Thu, 05 Jul 2012) | 2 lines
+Changed paths:
+   M /branches/3.1/tools/coverage
+
+[tools/coverage] Added a comment about the non-reproducibility of the
+coverage results.
+------------------------------------------------------------------------
+r8318 | vlefevre | 2012-07-04 09:30:08 +0000 (Wed, 04 Jul 2012) | 1 line
+Changed paths:
+   M /branches/3.1/INSTALL
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.2-dev.
+------------------------------------------------------------------------
+r8309 | vlefevre | 2012-07-03 14:23:23 +0000 (Tue, 03 Jul 2012) | 1 line
+Changed paths:
+   M /branches/3.1/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r8307 | vlefevre | 2012-07-03 14:19:10 +0000 (Tue, 03 Jul 2012) | 1 line
 Changed paths:
    M /branches/3.1/NEWS
