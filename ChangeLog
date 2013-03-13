@@ -1,4 +1,53 @@
 ------------------------------------------------------------------------
+r8482 | vlefevre | 2013-03-13 15:29:32 +0000 (Wed, 13 Mar 2013) | 1 line
+Changed paths:
+   M /branches/3.1/VERSION
+   M /branches/3.1/configure.ac
+   M /branches/3.1/doc/mpfr.texi
+   M /branches/3.1/src/mpfr.h
+   M /branches/3.1/src/version.c
+
+Updated version to 3.1.2.
+------------------------------------------------------------------------
+r8480 | vlefevre | 2013-03-13 01:00:16 +0000 (Wed, 13 Mar 2013) | 2 lines
+Changed paths:
+   M /branches/3.1
+   M /branches/3.1/configure.ac
+
+[configure.ac] Corrected comment on clock_gettime.
+(merged changeset r8446 from the trunk)
+------------------------------------------------------------------------
+r8479 | zimmerma | 2013-03-12 09:37:20 +0000 (Tue, 12 Mar 2013) | 4 lines
+Changed paths:
+   M /branches/3.1/configure.ac
+   M /branches/3.1/tune/Makefile.am
+
+(merged changeset 8443-8445 from the trunk)
+Tuning: reverted changeset r8444 and applied patch by Patrick Pélissier
+for GMP 5.1.0 to link against librt conditionally.
+
+------------------------------------------------------------------------
+r8478 | vlefevre | 2013-03-12 02:20:01 +0000 (Tue, 12 Mar 2013) | 2 lines
+Changed paths:
+   M /branches/3.1/INSTALL
+
+[INSTALL] Added a paragraph about Cygwin and threading.
+(merged changeset r8477 from the trunk)
+------------------------------------------------------------------------
+r8476 | vlefevre | 2013-03-12 00:11:18 +0000 (Tue, 12 Mar 2013) | 3 lines
+Changed paths:
+   M /branches/3.1/INSTALL
+
+[INSTALL] Improved information on patches.
+(merged changeset r8475 from the trunk, after temporarily reverted
+to 3.2.0-dev with tools/update-version for the merge)
+------------------------------------------------------------------------
+r8471 | vlefevre | 2013-03-08 12:06:54 +0000 (Fri, 08 Mar 2013) | 1 line
+Changed paths:
+   M /branches/3.1/ChangeLog
+
+ChangeLog update with "TZ=UTC svn log -rHEAD:0 -v" (in UTF-8 locales).
+------------------------------------------------------------------------
 r8470 | vlefevre | 2013-03-08 11:59:32 +0000 (Fri, 08 Mar 2013) | 2 lines
 Changed paths:
    M /branches/3.1/VERSION
