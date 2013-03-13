@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename mpfr.info
 @documentencoding UTF-8
-@set VERSION 3.1.2-rc1
+@set VERSION 3.1.2
 @set UPDATED-MONTH March 2013
 @settitle GNU MPFR @value{VERSION}
 @synindex tp fn
